@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUZLON · Deep Dive · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f5f2eb; --paper2: #ede9e0; --card: #ffffff; --rule: #d4cfc4;
+  --ink: #0d0d0d; --muted: #7a7060; --green: #1a5c38; --green-pale: #d4edd8;
+  --green-bright: #00c853; --amber: #b35a00; --amber-pale: #fdefd8;
+  --red: #8b1a1a; --red-pale: #fde0e0; --blue: #1a3a6b; --blue-pale: #dde5f5;
+  --serif: 'Fraunces', serif; --sans: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--paper); color: var(--ink); font-size: 14px; line-height: 1.6; }
+.disclaimer-banner { background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 10.5px; padding: 8px 24px; text-align: center; letter-spacing: 0.02em; }
+.disclaimer-banner a { color: var(--paper); text-decoration: underline; }
+.masthead { border-bottom: 1px solid var(--rule); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; background: var(--paper); }
+.logo-block { display: flex; align-items: baseline; gap: 10px; text-decoration: none; color: var(--ink); }
+.logo-pi { font-family: var(--serif); font-size: 30px; font-weight: 700; color: var(--green); line-height: 1; letter-spacing: -1.5px; }
+.logo-name { font-family: var(--serif); font-size: 14px; font-weight: 300; letter-spacing: 0.06em; text-transform: uppercase; }
+.report-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.report-type { color: var(--green); font-weight: 500; }
+.page { max-width: 900px; margin: 0 auto; }
+.report-head { padding: 36px 36px 28px; background: var(--card); border-bottom: 1px solid var(--rule); }
+.head-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+.pill { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+.pill.sw { background: var(--amber-pale); color: var(--amber); }
+.pill.stage-4 { background: var(--red-pale); color: var(--red); }
+.pill.neutral { background: var(--paper2); color: var(--muted); }
+.pill.warn { background: #fff8e6; color: var(--amber); border: 1px solid #f0c060; }
+.head-title { font-family: var(--serif); font-size: 38px; font-weight: 500; line-height: 1.15; letter-spacing: -0.5px; margin-bottom: 6px; }
+.head-subtitle { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 18px; }
+.head-tagline { font-size: 14px; color: #444; line-height: 1.7; max-width: 700px; }
+.content { padding: 0 36px 40px; }
+.section { padding: 32px 0; border-bottom: 1px solid var(--paper2); }
+.section:last-child { border-bottom: none; }
+.section-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
+.section-num { font-family: var(--mono); font-size: 11px; font-weight: 500; color: #fff; background: var(--ink); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; letter-spacing: 0.05em; }
+.section-title { font-family: var(--serif); font-size: 24px; font-weight: 500; letter-spacing: -0.3px; line-height: 1.2; }
+.thesis-box { background: var(--paper); border-left: 3px solid var(--amber); border-radius: 4px; padding: 22px 26px; }
+.th-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.th-call { font-family: var(--serif); font-size: 18px; font-weight: 300; line-height: 1.5; color: var(--ink); }
+.alert-box { background: var(--red-pale); border-left: 4px solid var(--red); border-radius: 6px; padding: 18px 22px; margin: 18px 0; }
+.alert-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-bottom: 8px; font-weight: 600; }
+.alert-text { font-size: 14px; line-height: 1.7; color: #3a0000; }
+.alert-text strong { color: var(--red); }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 22px 0; }
+.kpi-cell { background: var(--paper); border-radius: 8px; padding: 14px 16px; }
+.kpi-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.kpi-value { font-family: var(--serif); font-size: 22px; font-weight: 700; line-height: 1.1; }
+.kpi-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 4px; }
+.kpi-cell.green { background: var(--green-pale); }
+.kpi-cell.green .kpi-value { color: var(--green); }
+.kpi-cell.amber { background: var(--amber-pale); }
+.kpi-cell.amber .kpi-value { color: var(--amber); }
+.kpi-cell.red { background: var(--red-pale); }
+.kpi-cell.red .kpi-value { color: var(--red); }
+.pai-score-block { background: var(--card); border: 1px solid var(--rule); border-radius: 12px; padding: 28px; margin-bottom: 24px; }
+.pai-score-block.retrofit::before { content: 'Retro-scored from original report date'; display: block; font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed var(--rule); }
+.score-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
+.score-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.score-date { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.score-total { display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--paper2); }
+.score-num-big { font-family: var(--serif); font-size: 56px; font-weight: 700; color: var(--amber); line-height: 1; letter-spacing: -2px; }
+.score-denom { font-family: var(--mono); font-size: 16px; color: var(--muted); }
+.tier-badge { margin-left: auto; font-family: var(--mono); font-size: 10px; padding: 5px 14px; border-radius: 20px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; background: #2d6a4f; color: #fff; }
+.score-components { display: flex; flex-direction: column; gap: 14px; }
+.component { display: grid; grid-template-columns: 160px 1fr 56px; align-items: center; gap: 12px; }
+.component label { font-family: var(--mono); font-size: 10px; color: var(--ink); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+.component .bar { height: 8px; background: var(--paper2); border-radius: 4px; overflow: hidden; }
+.component .fill { height: 100%; border-radius: 4px; }
+.component .value { font-family: var(--mono); font-size: 12px; color: var(--ink); text-align: right; font-weight: 500; }
+.component-rationale { font-family: var(--sans); font-size: 12px; color: var(--muted); padding-left: 172px; margin-top: -8px; line-height: 1.6; }
+.layer-strip { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 18px; }
+.layer-chip { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
+.lc-strong { background: var(--green-pale); color: var(--green); }
+.lc-weak { background: var(--red-pale); color: var(--red); }
+.lc-moderate { background: var(--amber-pale); color: var(--amber); }
+.lc-fair { background: var(--paper2); color: var(--muted); }
+.lc-clean { background: var(--green-pale); color: var(--green); }
+.lc-stage4 { background: var(--red-pale); color: var(--red); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 18px 0; }
+.info-block { background: var(--paper); border-radius: 8px; padding: 18px 20px; }
+.ib-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.ib-content { font-size: 13px; line-height: 1.7; color: #333; }
+.ib-content strong { color: var(--ink); font-weight: 600; }
+.para { font-size: 14px; line-height: 1.75; color: #333; margin-bottom: 14px; }
+.para strong { color: var(--ink); font-weight: 600; }
+.para em { color: var(--amber); font-style: italic; }
+.peer-table { width: 100%; border-collapse: collapse; margin: 18px 0; background: var(--paper); border-radius: 8px; overflow: hidden; }
+.peer-table th { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); font-weight: 500; }
+.peer-table td { padding: 10px 12px; font-size: 12px; border-bottom: 1px solid var(--paper2); }
+.peer-table tbody tr:last-child td { border-bottom: none; }
+.peer-table .highlight { background: var(--amber-pale); }
+.peer-table .highlight td:first-child { font-weight: 600; }
+.tech-citation { background: var(--paper); border-radius: 6px; padding: 14px 18px; font-family: var(--sans); font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 18px; font-style: italic; }
+.tech-citation strong { color: var(--ink); font-style: normal; font-weight: 600; }
+.tt-summary { font-family: var(--mono); font-size: 13px; color: var(--ink); padding: 12px 16px; background: var(--red-pale); border-radius: 6px; margin-top: 10px; }
+.tt-summary strong { color: var(--red); font-weight: 600; }
+.risk-list { list-style: none; padding: 0; margin: 14px 0; }
+.risk-list li { background: var(--paper); border-left: 3px solid var(--red); border-radius: 4px; padding: 12px 18px; margin-bottom: 8px; font-size: 13px; line-height: 1.6; }
+.risk-list li strong { color: var(--red); font-weight: 600; display: block; margin-bottom: 3px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+.risk-list.watch li { border-left-color: var(--amber); }
+.risk-list.watch li strong { color: var(--amber); }
+.action-box { background: var(--ink); color: #fff; border-radius: 12px; padding: 28px; margin: 24px 0; }
+.action-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #999; margin-bottom: 16px; }
+.action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.action-cell { padding: 14px 16px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+.action-cell .ac-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-bottom: 6px; }
+.action-cell .ac-value { font-family: var(--mono); font-size: 18px; font-weight: 500; }
+.action-cell.entry .ac-value { color: var(--green-bright); }
+.action-cell.stop .ac-value { color: #ff6b6b; }
+.action-cell.target .ac-value { color: #6bb6ff; }
+.exits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
+.exits-block { padding: 16px 20px; background: rgba(255,255,255,0.03); border-radius: 8px; }
+.exits-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #999; margin-bottom: 10px; }
+.exits-block ul { list-style: none; padding: 0; margin: 0; }
+.exits-block li { font-family: var(--sans); font-size: 12px; color: #ccc; padding: 6px 0 6px 18px; line-height: 1.5; position: relative; }
+.exits-block li::before { content: '−'; position: absolute; left: 0; color: #888; font-family: var(--mono); }
+.sources { padding: 24px 36px; background: var(--paper); border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 10px; color: var(--muted); line-height: 1.8; letter-spacing: 0.02em; }
+.sources strong { color: var(--ink); display: block; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: 500; }
+.report-foot { padding: 24px 36px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; background: var(--paper); }
+.summary-link { font-family: var(--mono); font-size: 11px; color: var(--blue); text-decoration: none; padding: 8px 14px; background: var(--blue-pale); border-radius: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+.foot-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.04em; }
+@media (max-width: 700px) {
+  .report-head { padding: 24px 20px; } .head-title { font-size: 28px; }
+  .content { padding: 0 20px 30px; } .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; } .action-grid { grid-template-columns: repeat(2, 1fr); }
+  .exits-grid { grid-template-columns: 1fr; } .component { grid-template-columns: 110px 1fr 50px; }
+  .component-rationale { padding-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="disclaimer-banner">
+  ⚠️ Personal research only. Not SEBI-registered investment advice. Not a buy/sell recommendation. <a href="/#disclaimer">Full disclaimer</a>
+</div>
+
+<header class="masthead">
+  <a href="/" class="logo-block">
+    <span class="logo-pi">π</span>
+    <span class="logo-name">Passive Aggressive Investing</span>
+  </a>
+  <div class="report-meta">
+    <span class="report-type">Deep Dive</span> · April 2026
+  </div>
+</header>
+
+<div class="page">
+
+<div class="report-head">
+  <div class="head-pills">
+    <span class="pill sw">Speculative Watch</span>
+    <span class="pill stage-4">Stage 4 — Entry Blocked</span>
+    <span class="pill neutral">Renewable Energy</span>
+    <span class="pill warn">⚠ C4 = 0 · Await 50-DMA Cross</span>
+  </div>
+  <h1 class="head-title">Suzlon Energy</h1>
+  <div class="head-subtitle">NSE: SUZLON · Wind Turbine OEM · Mid-Cap · RPO + 500 GW mandate</div>
+  <p class="head-tagline">
+    India's largest wind turbine OEM, operating in a sector where government policy compels capacity addition (RPO mandate + 500 GW by 2030). Strong L1, large upside if Stage 2 confirms. Two unresolved problems: promoter stake diluted from 25% to 11.7% (permanent L2 people penalty), and Stage 4 technical confirmed at scoring. Speculative Watch, not Buy Zone — the framework classifies this correctly.
+  </p>
+</div>
+
+<div class="content">
+
+  <!-- SECTION 00 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">00</span>
+      <span class="section-title">Why Suzlon — The Speculative Thesis</span>
+    </div>
+
+    <div class="alert-box">
+      <div class="alert-label">⚠ Stage 4 — No New Entry Until 50-DMA Cross</div>
+      <div class="alert-text">
+        C4 = 0. Stage 4 confirmed. Entry trigger: <strong>close above 50-DMA on volume &gt;1.5x average.</strong> This is a cheat entry (not a full Stage 2 confirmation), appropriate for Speculative Watch. Hard stop at ₹40 — maintain without exception.
+      </div>
+    </div>
+
+    <div class="thesis-box">
+      <div class="th-label">The Speculative Case</div>
+      <div class="th-call">
+        India must add 500 GW of renewable capacity by 2030. Suzlon is the largest domestic wind turbine OEM and the only company that can execute at scale within India. The RPO mandate compels DISCOMs to buy renewable power — this creates a non-discretionary demand floor. If the 500 GW target is even 60% met, the wind segment alone implies 150+ GW of new wind capacity. That is Suzlon's market. The business quality has improved materially since the ₹12,000 Cr debt crisis: debt eliminated, margins recovering. The promoter stake at 11.7% is the unresolved concern.
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-cell green">
+        <div class="kpi-label">Debt Status</div>
+        <div class="kpi-value">Resolved</div>
+        <div class="kpi-sub">₹12,000 Cr → near zero</div>
+      </div>
+      <div class="kpi-cell green">
+        <div class="kpi-label">India Wind OEM</div>
+        <div class="kpi-value">#1</div>
+        <div class="kpi-sub">By installed capacity</div>
+      </div>
+      <div class="kpi-cell amber">
+        <div class="kpi-label">Promoter Stake</div>
+        <div class="kpi-value">11.7%</div>
+        <div class="kpi-sub">Down from ~25%</div>
+      </div>
+      <div class="kpi-cell red">
+        <div class="kpi-label">C4 Technical</div>
+        <div class="kpi-value">0/20</div>
+        <div class="kpi-sub">Stage 4 — hard gate</div>
+      </div>
+      <div class="kpi-cell">
+        <div class="kpi-label">Entry Trigger</div>
+        <div class="kpi-value">₹44–47</div>
+        <div class="kpi-sub">50-DMA cross on vol</div>
+      </div>
+      <div class="kpi-cell red">
+        <div class="kpi-label">Hard Stop</div>
+        <div class="kpi-value">₹40</div>
+        <div class="kpi-sub">No exceptions</div>
+      </div>
+      <div class="kpi-cell green">
+        <div class="kpi-label">12M Target</div>
+        <div class="kpi-value">₹100</div>
+        <div class="kpi-sub">+133% from ₹43 entry</div>
+      </div>
+      <div class="kpi-cell green">
+        <div class="kpi-label">RPO Target</div>
+        <div class="kpi-value">500 GW</div>
+        <div class="kpi-sub">By FY2030</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 01 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <span class="section-title">PAI Score &amp; NAV Framework Scorecard</span>
+    </div>
+
+    <div class="pai-score-block retrofit">
+      <div class="score-header">
+        <span class="score-label">PAI Priority Score</span>
+        <span class="score-date">Original report: Mar 2026 · Retro-scored Apr 25 2026</span>
+      </div>
+      <div class="score-total">
+        <span class="score-num-big">62</span>
+        <span class="score-denom">/ 100</span>
+        <span class="tier-badge">Standard — Speculative Watch</span>
+      </div>
+      <div class="score-components">
+        <div class="component">
+          <label>C1 Regulatory</label>
+          <div class="bar"><div class="fill" style="width:100%; background:var(--green);"></div></div>
+          <span class="value">25/25</span>
+        </div>
+        <div class="component-rationale">L1 Strong. RPO mandate (Renewable Purchase Obligation) compels DISCOMs to source a fixed % of power from renewables. 500 GW by 2030 target + PM-KUSUM solar/wind hybrid schemes. Government policy makes Suzlon's market non-discretionary.</div>
+
+        <div class="component">
+          <label>C2 Network</label>
+          <div class="bar"><div class="fill" style="width:56%; background:var(--amber);"></div></div>
+          <span class="value">14/25</span>
+        </div>
+        <div class="component-rationale">C2A 7/10 — wind turbine OEM, capacity-constrained but market leader. C2B 4/8 — no named global PE/DFI; FII moderate but not Tier-1. C2C 3/7 — promoter 11.7% is anomalously low for an OEM, permanent people penalty. Governance: technically clean but low C2 overall.</div>
+
+        <div class="component">
+          <label>C3 Valuation + Upside</label>
+          <div class="bar"><div class="fill" style="width:77%; background:#2d6a4f;"></div></div>
+          <span class="value">23/30</span>
+        </div>
+        <div class="component-rationale">Fair valuation at current earnings. 12M target ₹100 from ₹43 entry = +133% — very large upside if thesis plays out. C3_val 8/15 (fair, not cheap). C3_upside 15/15 (target implies &gt;50% upside from scoring CMP).</div>
+
+        <div class="component">
+          <label>C4 Technical</label>
+          <div class="bar"><div class="fill" style="width:0%; background:var(--red);"></div></div>
+          <span class="value">0/20</span>
+        </div>
+        <div class="component-rationale">Stage 4 confirmed. Trend Template 0/8 at time of scoring. Hard zero. Entry only on 50-DMA close above on volume &gt;1.5x average. This gate must clear before any new position.</div>
+      </div>
+    </div>
+
+    <div class="layer-strip">
+      <span class="layer-chip lc-strong">L1 Regulatory: Strong (RPO mandate)</span>
+      <span class="layer-chip lc-moderate">L2 Commercial: Moderate</span>
+      <span class="layer-chip lc-weak">L2 People: Weak (11.7% promoter)</span>
+      <span class="layer-chip lc-fair">L3 Valuation: Fair</span>
+      <span class="layer-chip lc-clean">Governance: Clean</span>
+      <span class="layer-chip lc-stage4">C4: Stage 4 — Blocked</span>
+    </div>
+
+    <div class="two-col">
+      <div class="info-block">
+        <div class="ib-label">The Promoter Problem</div>
+        <div class="ib-content">
+          <strong>Tulsi Tanti family stake: 11.7%, down from ~25%.</strong> The dilution occurred during the ₹12,000 Cr debt resolution (2015–2019). While the debt is resolved and the business restructured, the promoter's reduced stake reflects a permanent impairment of skin-in-game. For a capital-intensive OEM where execution quality depends on founder conviction, 11.7% is anomalously low. This permanently limits C2C to 3/7 regardless of other positives.
+        </div>
+      </div>
+      <div class="info-block">
+        <div class="ib-label">The Speculative Watch Classification</div>
+        <div class="ib-content">
+          <strong>Speculative Watch means the thesis exists but the conditions for deployment are not met.</strong> Suzlon has a real structural tailwind (L1 Strong), a genuinely large upside if targets play out, but two unresolved concerns: Stage 4 technical and weak promoter alignment. The score of 62 correctly reflects this ambiguity — it is above the 55 Standard threshold but below 75 (Full Position). Framework says: watch, prepare, but do not deploy capital until the technical gate clears.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 02 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <span class="section-title">Valuation — Fair at Current, Large Upside If Target Plays Out</span>
+    </div>
+    <p class="para">
+      At scoring CMP ₹42.83, Suzlon is not cheap on a trailing P/E basis — earnings are recovering post-debt resolution but not yet at their full-capacity run rate. The valuation case is prospective: if India adds 150 GW of wind capacity over 2025–2030 (30% of the 500 GW target), and Suzlon maintains its dominant market share of 30–35%, the implied turbine orders run at <em>15–20 GW per year</em>.
+    </p>
+    <p class="para">
+      At a conservative ₹5 Cr per MW installed revenue, that is <strong>₹75,000–100,000 Cr in annual revenue potential</strong> at full ramp. Current revenue run rate is a small fraction of this. The 12M target of ₹100 (from ₹43 entry = +133%) is the market beginning to price this ramp in — it is not a fundamental target based on current earnings but on a 2–3 year forward earnings trajectory.
+    </p>
+    <p class="para">
+      This is why Suzlon is classified as Speculative Watch and not Buy Zone. The target is legitimate but it requires a multi-year ramp that has significant execution, policy, and competitive risks. The score of 62 correctly reflects this — the regulatory tailwind is exceptional (L1 Strong, C1 25/25) but the fundamental valuation today is fair, not cheap.
+    </p>
+  </div>
+
+  <!-- SECTION 03 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <span class="section-title">Technical Setup — Stage 4, Awaiting 50-DMA Cross</span>
+    </div>
+
+    <div class="tech-citation">
+      Technical analysis follows the SEPA methodology described in <strong>Trade Like a Stock Market Wizard</strong> by Mark Minervini (McGraw-Hill, 2013). Stage 4 identification and the 50-DMA cross cheat entry are applied as defined in that work.
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-cell">
+        <div class="kpi-label">Owner Entry</div>
+        <div class="kpi-value">₹42.83</div>
+        <div class="kpi-sub">Entered before trigger</div>
+      </div>
+      <div class="kpi-cell amber">
+        <div class="kpi-label">Entry Trigger</div>
+        <div class="kpi-value">₹44–47</div>
+        <div class="kpi-sub">50-DMA cross on vol</div>
+      </div>
+      <div class="kpi-cell red">
+        <div class="kpi-label">Hard Stop</div>
+        <div class="kpi-value">₹40</div>
+        <div class="kpi-sub">No exceptions</div>
+      </div>
+      <div class="kpi-cell green">
+        <div class="kpi-label">12M Target</div>
+        <div class="kpi-value">₹100</div>
+        <div class="kpi-sub">+133% from ₹43 entry</div>
+      </div>
+    </div>
+
+    <p class="para">
+      Suzlon was purchased at ₹42.83 before the 50-DMA cross trigger confirmed — an execution error. The correct entry is ₹44–47 after a confirmed close above the 50-DMA on volume above 1.5x the 20-day average. The position is small (100 shares) and the stop at ₹40 is maintained without exception.
+    </p>
+    <p class="para">
+      Suzlon uses a 50-DMA cross cheat entry (not a full golden cross like FIVESTARBUS) because the speculative nature of the thesis warrants a more aggressive entry gate — waiting for a full golden cross would likely mean missing 30–40% of the initial move once Stage 2 confirms.
+    </p>
+
+    <div class="tt-summary">
+      <strong>Stage 4 at scoring.</strong> Existing 100 shares @ ₹42.83 — held with hard stop ₹40. New entry trigger: close above 50-DMA on volume &gt;1.5x. Do not add below the 50-DMA under any circumstances.
+    </div>
+  </div>
+
+  <!-- SECTION 04 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <span class="section-title">Risks &amp; What Would Invalidate the Thesis</span>
+    </div>
+
+    <h3 style="font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--red); margin: 14px 0 10px;">Hard Invalidators (Exit Triggers)</h3>
+    <ul class="risk-list">
+      <li>
+        <strong>Stop ₹40 hit</strong>
+        Exit the entire position — 100 existing shares — without exception. No averaging down on a Speculative Watch below its stop.
+      </li>
+      <li>
+        <strong>500 GW target revised down or timeline extended beyond 2035</strong>
+        The entire upside thesis depends on the government's renewable capacity target remaining intact. A significant revision or policy rollback removes the non-discretionary demand floor that justifies the L1 Strong rating.
+      </li>
+      <li>
+        <strong>Promoter stake falls below 10%</strong>
+        Already anomalously low at 11.7%. Any further dilution signals that the promoter family is incrementally reducing exposure — a red flag for founder-led OEM businesses.
+      </li>
+    </ul>
+
+    <h3 style="font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); margin: 22px 0 10px;">Soft Watch Points (Re-evaluate, Don't Exit)</h3>
+    <ul class="risk-list watch">
+      <li>
+        <strong>Competition from Vestas, Siemens Gamesa re-entering India</strong>
+        Global wind OEMs left India during the cycle downturn. If they re-enter aggressively, Suzlon's 30–35% market share is at risk. Watch announcement of large international tenders.
+      </li>
+      <li>
+        <strong>Grid connectivity bottlenecks</strong>
+        The 500 GW target is constrained by transmission infrastructure, not just turbine supply. If evacuation infrastructure doesn't scale with generation capacity, new wind project commissioning slows — directly reducing Suzlon's order book conversion.
+      </li>
+    </ul>
+  </div>
+
+  <!-- SECTION 05 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">05</span>
+      <span class="section-title">Action Plan — Hold with Hard Stop</span>
+    </div>
+
+    <div class="action-box">
+      <div class="action-label">Levels to Track</div>
+      <div class="action-grid">
+        <div class="action-cell entry">
+          <div class="ac-label">New Entry Trigger</div>
+          <div class="ac-value">₹44–47</div>
+        </div>
+        <div class="action-cell stop">
+          <div class="ac-label">Hard Stop</div>
+          <div class="ac-value">₹40</div>
+        </div>
+        <div class="action-cell target">
+          <div class="ac-label">6M Target</div>
+          <div class="ac-value">₹65–70</div>
+        </div>
+        <div class="action-cell target">
+          <div class="ac-label">12M Target</div>
+          <div class="ac-value">₹100</div>
+        </div>
+      </div>
+      <div class="exits-grid">
+        <div class="exits-block">
+          <div class="exits-label">Hard Exits</div>
+          <ul>
+            <li>Stop ₹40 hit — exit all shares</li>
+            <li>500 GW target materially revised down</li>
+            <li>Promoter stake falls below 10%</li>
+          </ul>
+        </div>
+        <div class="exits-block">
+          <div class="exits-label">Add Signals</div>
+          <ul>
+            <li>Close above 50-DMA on volume &gt;1.5x</li>
+            <li>RPO compliance orders to DISCOMs enforced</li>
+            <li>Quarterly order book &gt;₹15,000 Cr announced</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 06 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">06</span>
+      <span class="section-title">Live Verification — Step 6</span>
+    </div>
+    <p class="para">Data verified at time of original scoring (March 2026). Technical re-verification required before any new entry.</p>
+    <table class="peer-table">
+      <thead>
+        <tr><th>Field</th><th>Report Value</th><th>Verified Source</th><th>Verified On</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Owner Entry</td><td>₹42.83</td><td>Trade confirmation</td><td>Mar 2026</td></tr>
+        <tr><td>Scoring CMP</td><td>~₹43</td><td>NSE / Yahoo Finance</td><td>Mar 2026</td></tr>
+        <tr><td>Promoter Holding</td><td>11.7%</td><td>BSE shareholding pattern</td><td>Q3 FY26</td></tr>
+        <tr><td>Technical Stage</td><td>Stage 4 (C4 = 0)</td><td>Yahoo Finance MAs</td><td>Mar 2026</td></tr>
+        <tr><td>Debt Status</td><td>Resolved</td><td>Company annual report</td><td>FY25</td></tr>
+      </tbody>
+    </table>
+    <p class="para" style="font-size:12px; color:var(--muted); font-style:italic; margin-top: 14px;">
+      Technical stage must be re-verified before acting. If 50-DMA cross has occurred since this report date, re-verify CMP and entry range before acting.
+    </p>
+  </div>
+
+</div>
+
+<div class="sources">
+  <strong>Sources</strong>
+  Company filings · BSE shareholding pattern (Q3 FY26) · Annual Report FY25 ·
+  screener.in · Yahoo Finance (price &amp; moving averages) ·
+  MNRE 500 GW target documentation · RPO mandate notification ·
+  PM-KUSUM scheme documents · Technical methodology: SEPA framework as described in
+  Trade Like a Stock Market Wizard by Mark Minervini, McGraw-Hill 2013.
+</div>
+
+<div class="report-foot">
+  <a href="/reports/summaries/suzlon_summary.html" class="summary-link">← View 1-Page Summary</a>
+  <div class="foot-meta">Published Mar 2026 · Last verified Apr 25 2026 · Author: PAI</div>
+</div>
+
+</div>
+</body>
+</html>

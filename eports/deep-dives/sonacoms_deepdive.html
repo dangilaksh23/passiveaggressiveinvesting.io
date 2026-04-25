@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SONACOMS · Deep Dive · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f5f2eb; --paper2: #ede9e0; --card: #ffffff; --rule: #d4cfc4;
+  --ink: #0d0d0d; --muted: #7a7060; --green: #1a5c38; --green-pale: #d4edd8;
+  --green-bright: #00c853; --amber: #b35a00; --amber-pale: #fdefd8;
+  --red: #8b1a1a; --red-pale: #fde0e0; --blue: #1a3a6b; --blue-pale: #dde5f5;
+  --serif: 'Fraunces', serif; --sans: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--paper); color: var(--ink); font-size: 14px; line-height: 1.6; }
+.disclaimer-banner { background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 10.5px; padding: 8px 24px; text-align: center; letter-spacing: 0.02em; }
+.disclaimer-banner a { color: var(--paper); text-decoration: underline; }
+.masthead { border-bottom: 1px solid var(--rule); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; background: var(--paper); }
+.logo-block { display: flex; align-items: baseline; gap: 10px; text-decoration: none; color: var(--ink); }
+.logo-pi { font-family: var(--serif); font-size: 30px; font-weight: 700; color: var(--green); line-height: 1; letter-spacing: -1.5px; }
+.logo-name { font-family: var(--serif); font-size: 14px; font-weight: 300; letter-spacing: 0.06em; text-transform: uppercase; }
+.report-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.report-type { color: var(--green); font-weight: 500; }
+.page { max-width: 900px; margin: 0 auto; }
+.report-head { padding: 36px 36px 28px; background: var(--card); border-bottom: 1px solid var(--rule); }
+.head-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+.pill { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+.pill.bz { background: var(--green-pale); color: var(--green); }
+.pill.stage-2 { background: var(--green-pale); color: var(--green); }
+.pill.neutral { background: var(--paper2); color: var(--muted); }
+.pill.warn { background: #fff8e6; color: var(--amber); border: 1px solid #f0c060; }
+.head-title { font-family: var(--serif); font-size: 38px; font-weight: 500; line-height: 1.15; letter-spacing: -0.5px; margin-bottom: 6px; }
+.head-subtitle { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 18px; }
+.head-tagline { font-size: 14px; color: #444; line-height: 1.7; max-width: 700px; }
+.content { padding: 0 36px 40px; }
+.section { padding: 32px 0; border-bottom: 1px solid var(--paper2); }
+.section:last-child { border-bottom: none; }
+.section-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
+.section-num { font-family: var(--mono); font-size: 11px; font-weight: 500; color: #fff; background: var(--ink); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; letter-spacing: 0.05em; }
+.section-title { font-family: var(--serif); font-size: 24px; font-weight: 500; letter-spacing: -0.3px; line-height: 1.2; }
+.thesis-box { background: var(--paper); border-left: 3px solid var(--green); border-radius: 4px; padding: 22px 26px; }
+.th-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.th-call { font-family: var(--serif); font-size: 18px; font-weight: 300; line-height: 1.5; color: var(--ink); }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 22px 0; }
+.kpi-cell { background: var(--paper); border-radius: 8px; padding: 14px 16px; }
+.kpi-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.kpi-value { font-family: var(--serif); font-size: 22px; font-weight: 700; line-height: 1.1; }
+.kpi-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 4px; }
+.kpi-cell.green { background: var(--green-pale); }
+.kpi-cell.green .kpi-value { color: var(--green); }
+.kpi-cell.amber { background: var(--amber-pale); }
+.kpi-cell.amber .kpi-value { color: var(--amber); }
+.pai-score-block { background: var(--card); border: 1px solid var(--rule); border-radius: 12px; padding: 28px; margin-bottom: 24px; }
+.pai-score-block.retrofit::before { content: 'Retro-scored from original report date'; display: block; font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed var(--rule); }
+.score-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
+.score-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.score-date { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.score-total { display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--paper2); }
+.score-num-big { font-family: var(--serif); font-size: 56px; font-weight: 700; color: var(--green); line-height: 1; letter-spacing: -2px; }
+.score-denom { font-family: var(--mono); font-size: 16px; color: var(--muted); }
+.tier-badge { margin-left: auto; font-family: var(--mono); font-size: 10px; padding: 5px 14px; border-radius: 20px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
+.tier-fp { background: var(--green); color: #fff; }
+.score-components { display: flex; flex-direction: column; gap: 14px; }
+.component { display: grid; grid-template-columns: 160px 1fr 56px; align-items: center; gap: 12px; }
+.component label { font-family: var(--mono); font-size: 10px; color: var(--ink); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+.component .bar { height: 8px; background: var(--paper2); border-radius: 4px; overflow: hidden; }
+.component .fill { height: 100%; background: var(--green); border-radius: 4px; }
+.component .value { font-family: var(--mono); font-size: 12px; color: var(--ink); text-align: right; font-weight: 500; }
+.component-rationale { font-family: var(--sans); font-size: 12px; color: var(--muted); padding-left: 172px; margin-top: -8px; line-height: 1.6; }
+.layer-strip { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 18px; }
+.layer-chip { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
+.lc-strong { background: var(--green-pale); color: var(--green); }
+.lc-moderate { background: var(--amber-pale); color: var(--amber); }
+.lc-cheap { background: var(--green-pale); color: var(--green); }
+.lc-fair { background: var(--paper2); color: var(--muted); }
+.lc-clean { background: var(--green-pale); color: var(--green); }
+.lc-watch { background: var(--amber-pale); color: var(--amber); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 18px 0; }
+.info-block { background: var(--paper); border-radius: 8px; padding: 18px 20px; }
+.ib-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.ib-content { font-size: 13px; line-height: 1.7; color: #333; }
+.ib-content strong { color: var(--ink); font-weight: 600; }
+.warn-strip { background: #fff8e6; border-left: 3px solid var(--amber); border-radius: 4px; padding: 14px 18px; display: flex; gap: 12px; margin: 18px 0; }
+.ws-icon { font-size: 20px; line-height: 1; flex-shrink: 0; color: var(--amber); }
+.ws-text { font-size: 13px; line-height: 1.6; color: #4a3a00; }
+.ws-text strong { color: var(--amber); }
+.para { font-size: 14px; line-height: 1.75; color: #333; margin-bottom: 14px; }
+.para strong { color: var(--ink); font-weight: 600; }
+.peer-table { width: 100%; border-collapse: collapse; margin: 18px 0; background: var(--paper); border-radius: 8px; overflow: hidden; }
+.peer-table th { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); font-weight: 500; }
+.peer-table td { padding: 10px 12px; font-size: 12px; border-bottom: 1px solid var(--paper2); }
+.peer-table tbody tr:last-child td { border-bottom: none; }
+.peer-table .highlight { background: var(--green-pale); }
+.peer-table .highlight td:first-child { font-weight: 600; }
+.tt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 18px 0; }
+.tt-row { display: flex; align-items: center; gap: 10px; padding: 9px 14px; background: var(--paper); border-radius: 6px; font-size: 12px; }
+.tt-check { font-size: 14px; flex-shrink: 0; }
+.tt-row.pass { border-left: 3px solid var(--green); }
+.tt-row.pass .tt-check { color: var(--green); }
+.tt-row.fail { border-left: 3px solid var(--red); }
+.tt-row.fail .tt-check { color: var(--red); }
+.tt-text { color: #333; line-height: 1.4; }
+.tt-text strong { color: var(--ink); }
+.tt-summary { font-family: var(--mono); font-size: 13px; color: var(--ink); padding: 12px 16px; background: var(--green-pale); border-radius: 6px; margin-top: 10px; }
+.tt-summary strong { color: var(--green); font-weight: 600; }
+.risk-list { list-style: none; padding: 0; margin: 14px 0; }
+.risk-list li { background: var(--paper); border-left: 3px solid var(--red); border-radius: 4px; padding: 12px 18px; margin-bottom: 8px; font-size: 13px; line-height: 1.6; }
+.risk-list li strong { color: var(--red); font-weight: 600; display: block; margin-bottom: 3px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+.risk-list.watch li { border-left-color: var(--amber); }
+.risk-list.watch li strong { color: var(--amber); }
+.action-box { background: var(--ink); color: #fff; border-radius: 12px; padding: 28px; margin: 24px 0; }
+.action-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #999; margin-bottom: 16px; }
+.action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.action-cell { padding: 14px 16px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+.action-cell .ac-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-bottom: 6px; }
+.action-cell .ac-value { font-family: var(--mono); font-size: 18px; font-weight: 500; }
+.action-cell.entry .ac-value { color: var(--green-bright); }
+.action-cell.stop .ac-value { color: #ff6b6b; }
+.action-cell.target .ac-value { color: #6bb6ff; }
+.exits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
+.exits-block { padding: 16px 20px; background: rgba(255,255,255,0.03); border-radius: 8px; }
+.exits-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #999; margin-bottom: 10px; }
+.exits-block ul { list-style: none; padding: 0; margin: 0; }
+.exits-block li { font-family: var(--sans); font-size: 12px; color: #ccc; padding: 6px 0 6px 18px; line-height: 1.5; position: relative; }
+.exits-block li::before { content: '−'; position: absolute; left: 0; color: #888; font-family: var(--mono); }
+.tech-citation { background: var(--paper); border-radius: 6px; padding: 14px 18px; font-family: var(--sans); font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 18px; font-style: italic; }
+.tech-citation strong { color: var(--ink); font-style: normal; font-weight: 600; }
+.sources { padding: 24px 36px; background: var(--paper); border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 10px; color: var(--muted); line-height: 1.8; letter-spacing: 0.02em; }
+.sources strong { color: var(--ink); display: block; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: 500; }
+.report-foot { padding: 24px 36px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; background: var(--paper); }
+.summary-link { font-family: var(--mono); font-size: 11px; color: var(--blue); text-decoration: none; padding: 8px 14px; background: var(--blue-pale); border-radius: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+.foot-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.04em; }
+.verify-table { width: 100%; border-collapse: collapse; margin: 18px 0; background: var(--paper); border-radius: 8px; overflow: hidden; }
+.verify-table th { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); font-weight: 500; }
+.verify-table td { padding: 10px 12px; font-size: 12px; border-bottom: 1px solid var(--paper2); }
+.verify-table tbody tr:last-child td { border-bottom: none; }
+.owned-strip { background: var(--blue-pale); border-left: 3px solid var(--blue); border-radius: 4px; padding: 14px 18px; display: flex; gap: 12px; margin: 18px 0; align-items: center; }
+.owned-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+.owned-text { font-family: var(--mono); font-size: 11px; color: var(--blue); letter-spacing: 0.06em; }
+@media (max-width: 700px) {
+  .report-head { padding: 24px 20px; } .head-title { font-size: 28px; }
+  .content { padding: 0 20px 30px; } .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; } .tt-grid { grid-template-columns: 1fr; }
+  .action-grid { grid-template-columns: repeat(2, 1fr); } .exits-grid { grid-template-columns: 1fr; }
+  .component { grid-template-columns: 110px 1fr 50px; } .component-rationale { padding-left: 0; }
+}
+</style>
+</head>
+<body>
+<div class="disclaimer-banner">
+  ⚠️ Personal research only. Not SEBI-registered investment advice. Not a buy/sell recommendation. <a href="/#disclaimer">Full disclaimer</a>
+</div>
+<header class="masthead">
+  <a href="/" class="logo-block">
+    <span class="logo-pi">π</span>
+    <span class="logo-name">Passive Aggressive Investing</span>
+  </a>
+  <div class="report-meta">
+    <span class="report-type">Deep Dive</span> · April 2026
+  </div>
+</header>
+<div class="page">
+  <div class="report-head">
+    <div class="head-pills">
+      <span class="pill bz">★ Buy Zone</span>
+      <span class="pill neutral">Automotive Metal Forming</span>
+      <span class="pill stage-2">Stage 2</span>
+      <span class="pill neutral">PLI-AUTO + BEV</span>
+      <span class="pill warn">Governance Watch</span>
+    </div>
+    <div class="head-title">Sona BLW Precision Forgings</div>
+    <div class="head-subtitle">SONACOMS · NSE · Auto Components · 38% BEV Revenue</div>
+    <div class="head-tagline">
+      The best EV hedge in Indian auto. 38% of revenue already from Battery Electric Vehicles — BMW, GM, Ford, Stellantis, Volvo as customers. 53.8% gross margin (exceptional for auto), D/E of 0.03x (near debt-free), and PLI-AUTO structural tailwind. Trend Template 7/8 — one criterion from perfect Stage 2 setup. Minor governance watch: CS resignation March 2026.
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- SECTION 00 -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">00</div>
+        <div class="section-title">Core Thesis & Key Metrics</div>
+      </div>
+
+      <div class="owned-strip">
+        <div class="owned-dot"></div>
+        <div class="owned-text">OWNED — Entry ₹500 · 60 shares · CMP ₹511–532 (at scoring)</div>
+      </div>
+
+      <div class="thesis-box">
+        <div class="th-label">Core Thesis</div>
+        <div class="th-call">Sona BLW is structurally positioned where no other Indian auto component company sits: 38% BEV revenue today (growing), MNC customers (BMW, GM, Ford, Volvo), 53.8% gross margin (software-like for a metal forging business), and D/E of 0.03x. The Blackstone partial exit absorbed cleanly — institutions bought the dip. At ~30x forward P/E with BEV revenue likely crossing 50% by FY28, the multiple expansion thesis is intact. Target ₹640 from ₹500 entry = 28% upside with a structurally growing BEV business behind it.</div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-cell green">
+          <div class="kpi-label">BEV Revenue %</div>
+          <div class="kpi-value">38%</div>
+          <div class="kpi-sub">Best EV hedge in auto sector</div>
+        </div>
+        <div class="kpi-cell green">
+          <div class="kpi-label">Gross Margin</div>
+          <div class="kpi-value">53.8%</div>
+          <div class="kpi-sub">Exceptional for metal forging</div>
+        </div>
+        <div class="kpi-cell green">
+          <div class="kpi-label">D/E Ratio</div>
+          <div class="kpi-value">0.03x</div>
+          <div class="kpi-sub">Near debt-free</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">P/E (Forward)</div>
+          <div class="kpi-value">~30x</div>
+          <div class="kpi-sub">Fair-cheap for BEV mix</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">52w High</div>
+          <div class="kpi-value">₹559</div>
+          <div class="kpi-sub">Within 25% at entry</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">52w Low</div>
+          <div class="kpi-value">₹380</div>
+          <div class="kpi-sub">+34% above low at ₹511</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">50-DMA</div>
+          <div class="kpi-value">₹504</div>
+          <div class="kpi-sub">Price at/above 50-DMA</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">200-DMA</div>
+          <div class="kpi-value">₹477</div>
+          <div class="kpi-sub">Rising — Stage 2 intact</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="info-block">
+          <div class="ib-label">Customer Quality</div>
+          <div class="ib-content">
+            <strong>BMW:</strong> Premium BEV drivetrains<br>
+            <strong>GM:</strong> US EV platform supplier<br>
+            <strong>Ford:</strong> Electric F-series<br>
+            <strong>Stellantis:</strong> Multi-brand EV<br>
+            <strong>Volvo:</strong> 100% EV by 2030 target<br>
+            <strong>Mix:</strong> Global MNCs — lowest customer risk
+          </div>
+        </div>
+        <div class="info-block">
+          <div class="ib-label">Governance Watch</div>
+          <div class="ib-content">
+            <strong>CS Resignation:</strong> March 2026 — minor flag, -2 governance penalty applied<br>
+            <strong>Promoter:</strong> ~33% post-Blackstone partial exit<br>
+            <strong>Blackstone exit:</strong> Absorbed cleanly — institutions bought<br>
+            <strong>Pledge:</strong> Zero<br>
+            <strong>SEBI:</strong> Clean — no issues
+          </div>
+        </div>
+      </div>
+
+      <div class="warn-strip">
+        <div class="ws-icon">⚠️</div>
+        <div class="ws-text"><strong>Governance Watch:</strong> Company Secretary (CS) resigned in March 2026. This is a minor flag that has been penalised (-2 in C2 score). No structural governance breakdown identified. Monitor next quarter for replacement and any associated disclosures. Blackstone partial exit in prior quarters was absorbed cleanly by institutional buying.</div>
+      </div>
+    </div>
+
+    <!-- SECTION 01 -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">01</div>
+        <div class="section-title">PAI Score & NAV Framework Scorecard</div>
+      </div>
+
+      <div class="pai-score-block retrofit">
+        <div class="score-header">
+          <div class="score-label">PAI Score — SONACOMS</div>
+          <div class="score-date">Scored: April 2026</div>
+        </div>
+        <div class="score-total">
+          <div class="score-num-big">77</div>
+          <div class="score-denom">/ 100</div>
+          <div class="tier-badge tier-fp">Full Position</div>
+        </div>
+        <div class="score-components">
+          <div class="component">
+            <label>C1 · Tailwind</label>
+            <div class="bar"><div class="fill" style="width:100%"></div></div>
+            <div class="value">25/25</div>
+          </div>
+          <div class="component-rationale">PLI-AUTO + 38% BEV structural tailwind. L1 Strong due to EV mix — only auto component company where the primary revenue driver is structural BEV adoption, not cyclical ICE demand.</div>
+          <div class="component">
+            <label>C2 · People & Moat</label>
+            <div class="bar"><div class="fill" style="width:80%"></div></div>
+            <div class="value">20/25</div>
+          </div>
+          <div class="component-rationale">C2A: 10 — global MNC customers BMW, GM, Ford, Stellantis, Volvo. C2B: 7 institutional quality. C2C: 5 post-Blackstone. Governance penalty: -2 for CS resignation March 2026. Total: 20.</div>
+          <div class="component">
+            <label>C3 · Valuation</label>
+            <div class="bar"><div class="fill" style="width:60%"></div></div>
+            <div class="value">18/30</div>
+          </div>
+          <div class="component-rationale">Fair-cheap at ~50x TTM but ~30x forward P/E. 28% upside ₹640 from ₹500. C3_val: 8/15 (fair, not cheap on TTM), C3_upside: 10/15 (solid upside). Penalised for TTM multiple.</div>
+          <div class="component">
+            <label>C4 · Technical</label>
+            <div class="bar"><div class="fill" style="width:70%"></div></div>
+            <div class="value">14/20</div>
+          </div>
+          <div class="component-rationale">Stage 2 confirmed. Trend Template 7/8 — one criterion from perfect. RS line not at new high. VCP structure near ₹559 ATH — strong setup.</div>
+        </div>
+      </div>
+
+      <div class="layer-strip">
+        <span class="layer-chip lc-strong">L1: Strong (PLI + BEV 38%)</span>
+        <span class="layer-chip lc-strong">L2: Global MNC OEMs</span>
+        <span class="layer-chip lc-fair">L3: Fair-Cheap (30x fwd)</span>
+        <span class="layer-chip lc-strong">L4: Stage 2 · TT 7/8</span>
+        <span class="layer-chip lc-watch">Governance: Watch (CS)</span>
+      </div>
+    </div>
+
+    <!-- SECTION 02 -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">02</div>
+        <div class="section-title">Valuation</div>
+      </div>
+
+      <div class="para">SONACOMS trades at ~50x TTM P/E but <strong>~30x forward P/E</strong> — the gap explained by rapid BEV revenue growth. As BEV revenue crosses 50% of mix (likely FY28), the company re-rates from "auto component" to "EV technology supplier" multiples. At that point, 40–50x forward P/E is defensible by peer (global BEV supplier) standards.</div>
+
+      <div class="para">The <strong>53.8% gross margin</strong> is the most important data point in this report. No traditional metal forging company achieves 53%+ gross margin. This reflects the precision technology content, IP, and proprietary design in Sona's products — not commodity machining. This warrants a premium to standard auto component peers.</div>
+
+      <div class="two-col">
+        <div class="info-block">
+          <div class="ib-label">Target Construction</div>
+          <div class="ib-content">
+            <strong>Entry:</strong> ₹480–510 (2 tranches)<br>
+            <strong>6M Target:</strong> ₹600 (+20% from ₹500)<br>
+            <strong>12M Target:</strong> ₹640 (+28% from ₹500)<br>
+            <strong>Stop:</strong> ₹475 — below 200-DMA for 3 consecutive days<br>
+            <strong>Basis:</strong> 35–40x forward P/E as BEV mix grows to 50%+
+          </div>
+        </div>
+        <div class="info-block">
+          <div class="ib-label">Why 53.8% Gross Margin Matters</div>
+          <div class="ib-content">
+            <strong>Industry average (auto EPC):</strong> 18–25%<br>
+            <strong>Sona BLW actual:</strong> 53.8%<br>
+            <strong>Implication:</strong> IP-intensive, design-led, not commodity<br>
+            <strong>Competitive moat:</strong> Customers cannot easily switch — 3–5 year design-in cycles<br>
+            <strong>Result:</strong> Premium multiple is justified
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 03 -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">03</div>
+        <div class="section-title">Technical Setup</div>
+      </div>
+
+      <div class="tech-citation">
+        Technical analysis framework: <strong>Mark Minervini's SEPA methodology</strong> — Stage Analysis + Trend Template (8 criteria) + VCP identification. All criteria evaluated at time of original scoring. CMP at scoring: ₹511–532.
+      </div>
+
+      <div class="para">SONACOMS passes <strong>7 of 8 Trend Template criteria</strong> — one criterion from a perfect Stage 2 setup. The only missing criterion is RS line not at a new high. All price/DMA relationships are intact and bullish. The Blackstone exit overhang has been absorbed, providing a cleaner technical picture going forward.</div>
+
+      <div class="tt-grid">
+        <div class="tt-row pass">
+          <div class="tt-check">✓</div>
+          <div class="tt-text"><strong>Price above 50-DMA:</strong> ₹511 vs 50-DMA ₹504 — confirmed</div>
+        </div>
+        <div class="tt-row pass">
+          <div class="tt-check">✓</div>
+          <div class="tt-text"><strong>Price above 200-DMA:</strong> ₹511 vs 200-DMA ₹477 — confirmed</div>
+        </div>
+        <div class="tt-row pass">
+          <div class="tt-check">✓</div>
+          <div class="tt-text"><strong>50-DMA above 200-DMA:</strong> ₹504 &gt; ₹477 — confirmed</div>
+        </div>
+        <div class="tt-row pass">
+          <div class="tt-check">✓</div>
+          <div class="tt-text"><strong>200-DMA rising:</strong> Rising from ₹380 52w low — confirmed</div>
+        </div>
+        <div class="tt-row pass">
+          <div class="tt-check">✓</div>
+          <div class="tt-text"><strong>Price &gt;30% above 52w low:</strong> ₹511 vs ₹380 = +34% — confirmed</div>
+        </div>
+        <div class="tt-row pass">
+          <div class="tt-check">✓</div>
+          <div class="tt-text"><strong>Within 25% of 52w high:</strong> ₹511 vs ₹559 = -9% — confirmed</div>
+        </div>
+        <div class="tt-row pass">
+          <div class="tt-check">✓</div>
+          <div class="tt-text"><strong>Volume confirmation:</strong> Volume on up days above average — confirmed</div>
+        </div>
+        <div class="tt-row fail">
+          <div class="tt-check">✗</div>
+          <div class="tt-text"><strong>RS line at new high:</strong> RS line not at new high — lagging broad index</div>
+        </div>
+      </div>
+
+      <div class="tt-summary">Trend Template: <strong>7/8 criteria met</strong> — Stage 2 confirmed. Near-perfect setup. Entry on pullback to ₹490–500 or breakout above ₹559 ATH on volume.
+      </div>
+    </div>
+
+    <!-- SECTION 04 -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">04</div>
+        <div class="section-title">Risks & Invalidation</div>
+      </div>
+
+      <ul class="risk-list">
+        <li>
+          <strong>Stop ₹475 — Below 200-DMA for 3 Days</strong>
+          200-DMA at ₹477 is the structural support line. Close below ₹475 for 3 consecutive days signals Stage 2 breakdown. Hard exit trigger — no averaging down.
+        </li>
+        <li>
+          <strong>CS Resignation Follow-Through</strong>
+          Company Secretary (CS) resigned March 2026. If the next quarter sees additional senior exits or a regulatory disclosure linked to the resignation, the governance penalty escalates from -2 to a full C2 reassessment.
+        </li>
+        <li>
+          <strong>Blackstone Further Exit</strong>
+          If Blackstone sells another tranche (&gt;5% in a quarter), supply/demand imbalance could suppress price below ₹475. Monitor BSE bulk deal reports monthly.
+        </li>
+      </ul>
+
+      <ul class="risk-list watch">
+        <li>
+          <strong>Global BEV Slowdown</strong>
+          US/EU BEV adoption headwinds (policy reversal, consumer demand softness) directly impact Sona's 38% BEV revenue. Q-o-Q BEV order book growth is the primary monitoring metric.
+        </li>
+        <li>
+          <strong>TTM Multiple at 50x</strong>
+          On a trailing basis, 50x P/E is expensive. Any earnings miss or guidance cut creates a 15–20% de-rating risk to ~40x TTM. Forward P/E at 30x only holds if FY27 earnings growth remains at 20%+.
+        </li>
+      </ul>
+    </div>
+
+    <!-- SECTION 05 -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">05</div>
+        <div class="section-title">Action Plan</div>
+      </div>
+
+      <div class="action-box">
+        <div class="action-label">Entry / Stop / Targets — Tier: Full Position</div>
+        <div class="action-grid">
+          <div class="action-cell entry">
+            <div class="ac-label">Entry Zone</div>
+            <div class="ac-value">₹480–510</div>
+          </div>
+          <div class="action-cell stop">
+            <div class="ac-label">Hard Stop</div>
+            <div class="ac-value">₹475</div>
+          </div>
+          <div class="action-cell target">
+            <div class="ac-label">6M Target</div>
+            <div class="ac-value">₹600</div>
+          </div>
+          <div class="action-cell target">
+            <div class="ac-label">12M Target</div>
+            <div class="ac-value">₹640</div>
+          </div>
+        </div>
+
+        <div class="exits-grid">
+          <div class="exits-block">
+            <div class="exits-label">Hard Exit Triggers</div>
+            <ul>
+              <li>Close below ₹475 for 3 consecutive days</li>
+              <li>Additional senior management exits post CS resignation</li>
+              <li>BEV revenue % declines for 2 consecutive quarters</li>
+              <li>Blackstone sells &gt;5% in a single quarter</li>
+            </ul>
+          </div>
+          <div class="exits-block">
+            <div class="exits-label">Partial Trim Triggers</div>
+            <ul>
+              <li>Price reaches ₹600 — reassess valuation</li>
+              <li>Price reaches ₹640 — reassess 12M thesis</li>
+              <li>FY27 earnings growth guidance below 15%</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 06 -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">06</div>
+        <div class="section-title">Live Verification</div>
+      </div>
+
+      <table class="verify-table">
+        <thead>
+          <tr>
+            <th>Checkpoint</th>
+            <th>Expected</th>
+            <th>Verified Value</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>BEV revenue %</td>
+            <td>&gt;30%</td>
+            <td>38%</td>
+            <td>✅ Pass</td>
+          </tr>
+          <tr>
+            <td>Gross margin</td>
+            <td>&gt;45%</td>
+            <td>53.8%</td>
+            <td>✅ Pass</td>
+          </tr>
+          <tr>
+            <td>D/E ratio</td>
+            <td>&lt;0.1x</td>
+            <td>0.03x</td>
+            <td>✅ Pass</td>
+          </tr>
+          <tr>
+            <td>Trend Template</td>
+            <td>6/8 minimum</td>
+            <td>7/8</td>
+            <td>✅ Pass</td>
+          </tr>
+          <tr>
+            <td>200-DMA rising</td>
+            <td>Rising</td>
+            <td>₹477 — rising</td>
+            <td>✅ Pass</td>
+          </tr>
+          <tr>
+            <td>CS resignation follow-through</td>
+            <td>No additional exits</td>
+            <td>Single CS resignation — monitoring</td>
+            <td>⚠️ Watch</td>
+          </tr>
+          <tr>
+            <td>Pledge</td>
+            <td>Zero</td>
+            <td>Zero confirmed</td>
+            <td>✅ Pass</td>
+          </tr>
+          <tr>
+            <td>Price above stop ₹475</td>
+            <td>Above ₹475</td>
+            <td>Entry ₹500, CMP ₹511–532</td>
+            <td>✅ Pass</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="sources">
+  <strong>Sources & Data</strong>
+  Sona BLW Q3 FY26 investor presentation · PLI-AUTO beneficiary notification · Screener.in financial data · BSE bulk deal data (Blackstone exit tranches) · NSE shareholding pattern · CS resignation BSE filing March 2026 · PAI NAV Framework scoring April 2026
+</div>
+
+<div class="report-foot">
+  <a href="../summaries/sonacoms_summary.html" class="summary-link">→ View Summary Card</a>
+  <div class="foot-meta">PAI · SONACOMS Deep Dive · April 2026 · Not investment advice</div>
+</div>
+
+</body>
+</html>

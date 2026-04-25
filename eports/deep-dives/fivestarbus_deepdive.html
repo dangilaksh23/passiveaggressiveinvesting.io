@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIVESTARBUS · Deep Dive · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f5f2eb; --paper2: #ede9e0; --card: #ffffff; --rule: #d4cfc4;
+  --ink: #0d0d0d; --muted: #7a7060; --green: #1a5c38; --green-pale: #d4edd8;
+  --green-bright: #00c853; --amber: #b35a00; --amber-pale: #fdefd8;
+  --red: #8b1a1a; --red-pale: #fde0e0; --blue: #1a3a6b; --blue-pale: #dde5f5;
+  --serif: 'Fraunces', serif; --sans: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--paper); color: var(--ink); font-size: 14px; line-height: 1.6; }
+.disclaimer-banner { background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 10.5px; padding: 8px 24px; text-align: center; letter-spacing: 0.02em; }
+.disclaimer-banner a { color: var(--paper); text-decoration: underline; }
+.masthead { border-bottom: 1px solid var(--rule); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; background: var(--paper); }
+.logo-block { display: flex; align-items: baseline; gap: 10px; text-decoration: none; color: var(--ink); }
+.logo-pi { font-family: var(--serif); font-size: 30px; font-weight: 700; color: var(--green); line-height: 1; letter-spacing: -1.5px; }
+.logo-name { font-family: var(--serif); font-size: 14px; font-weight: 300; letter-spacing: 0.06em; text-transform: uppercase; }
+.report-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.report-type { color: var(--green); font-weight: 500; }
+.page { max-width: 900px; margin: 0 auto; }
+.report-head { padding: 36px 36px 28px; background: var(--card); border-bottom: 1px solid var(--rule); }
+.head-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+.pill { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+.pill.bz { background: var(--green-pale); color: var(--green); }
+.pill.stage-4 { background: var(--red-pale); color: var(--red); }
+.pill.neutral { background: var(--paper2); color: var(--muted); }
+.pill.warn { background: #fff8e6; color: var(--amber); border: 1px solid #f0c060; }
+.head-title { font-family: var(--serif); font-size: 38px; font-weight: 500; line-height: 1.15; letter-spacing: -0.5px; margin-bottom: 6px; }
+.head-subtitle { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 18px; }
+.head-tagline { font-size: 14px; color: #444; line-height: 1.7; max-width: 700px; }
+.content { padding: 0 36px 40px; }
+.section { padding: 32px 0; border-bottom: 1px solid var(--paper2); }
+.section:last-child { border-bottom: none; }
+.section-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
+.section-num { font-family: var(--mono); font-size: 11px; font-weight: 500; color: #fff; background: var(--ink); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; letter-spacing: 0.05em; }
+.section-title { font-family: var(--serif); font-size: 24px; font-weight: 500; letter-spacing: -0.3px; line-height: 1.2; }
+.thesis-box { background: var(--paper); border-left: 3px solid var(--green); border-radius: 4px; padding: 22px 26px; }
+.th-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.th-call { font-family: var(--serif); font-size: 18px; font-weight: 300; line-height: 1.5; color: var(--ink); }
+.alert-box { background: var(--red-pale); border-left: 4px solid var(--red); border-radius: 6px; padding: 18px 22px; margin: 18px 0; }
+.alert-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-bottom: 8px; font-weight: 600; }
+.alert-text { font-size: 14px; line-height: 1.7; color: #3a0000; }
+.alert-text strong { color: var(--red); font-weight: 700; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 22px 0; }
+.kpi-cell { background: var(--paper); border-radius: 8px; padding: 14px 16px; }
+.kpi-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.kpi-value { font-family: var(--serif); font-size: 22px; font-weight: 700; line-height: 1.1; }
+.kpi-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 4px; }
+.kpi-cell.green { background: var(--green-pale); }
+.kpi-cell.green .kpi-value { color: var(--green); }
+.kpi-cell.red { background: var(--red-pale); }
+.kpi-cell.red .kpi-value { color: var(--red); }
+.pai-score-block { background: var(--card); border: 1px solid var(--rule); border-radius: 12px; padding: 28px; margin-bottom: 24px; }
+.pai-score-block.retrofit::before { content: 'Retro-scored from original report date'; display: block; font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed var(--rule); }
+.score-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
+.score-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.score-date { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.score-total { display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--paper2); }
+.score-num-big { font-family: var(--serif); font-size: 56px; font-weight: 700; color: var(--green); line-height: 1; letter-spacing: -2px; }
+.score-denom { font-family: var(--mono); font-size: 16px; color: var(--muted); }
+.tier-badge { margin-left: auto; font-family: var(--mono); font-size: 10px; padding: 5px 14px; border-radius: 20px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
+.tier-fp { background: var(--green); color: #fff; }
+.score-components { display: flex; flex-direction: column; gap: 14px; }
+.component { display: grid; grid-template-columns: 160px 1fr 56px; align-items: center; gap: 12px; }
+.component label { font-family: var(--mono); font-size: 10px; color: var(--ink); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+.component .bar { height: 8px; background: var(--paper2); border-radius: 4px; overflow: hidden; }
+.component .fill { height: 100%; border-radius: 4px; }
+.component .value { font-family: var(--mono); font-size: 12px; color: var(--ink); text-align: right; font-weight: 500; }
+.component-rationale { font-family: var(--sans); font-size: 12px; color: var(--muted); padding-left: 172px; margin-top: -8px; line-height: 1.6; }
+.layer-strip { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 18px; }
+.layer-chip { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
+.lc-strong { background: var(--green-pale); color: var(--green); }
+.lc-cheap { background: var(--green-pale); color: var(--green); }
+.lc-clean { background: var(--green-pale); color: var(--green); }
+.lc-stage4 { background: var(--red-pale); color: var(--red); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 18px 0; }
+.info-block { background: var(--paper); border-radius: 8px; padding: 18px 20px; }
+.ib-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.ib-content { font-size: 13px; line-height: 1.7; color: #333; }
+.ib-content strong { color: var(--ink); font-weight: 600; }
+.para { font-size: 14px; line-height: 1.75; color: #333; margin-bottom: 14px; }
+.para strong { color: var(--ink); font-weight: 600; }
+.para em { color: var(--green); font-style: italic; }
+.peer-table { width: 100%; border-collapse: collapse; margin: 18px 0; background: var(--paper); border-radius: 8px; overflow: hidden; }
+.peer-table th { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); font-weight: 500; }
+.peer-table td { padding: 10px 12px; font-size: 12px; border-bottom: 1px solid var(--paper2); }
+.peer-table tbody tr:last-child td { border-bottom: none; }
+.peer-table .highlight { background: var(--green-pale); }
+.peer-table .highlight td:first-child { font-weight: 600; }
+.tech-citation { background: var(--paper); border-radius: 6px; padding: 14px 18px; font-family: var(--sans); font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 18px; font-style: italic; }
+.tech-citation strong { color: var(--ink); font-style: normal; font-weight: 600; }
+.tt-summary { font-family: var(--mono); font-size: 13px; color: var(--ink); padding: 12px 16px; background: var(--red-pale); border-radius: 6px; margin-top: 10px; }
+.tt-summary strong { color: var(--red); font-weight: 600; }
+.risk-list { list-style: none; padding: 0; margin: 14px 0; }
+.risk-list li { background: var(--paper); border-left: 3px solid var(--red); border-radius: 4px; padding: 12px 18px; margin-bottom: 8px; font-size: 13px; line-height: 1.6; }
+.risk-list li strong { color: var(--red); font-weight: 600; display: block; margin-bottom: 3px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+.risk-list.watch li { border-left-color: var(--amber); }
+.risk-list.watch li strong { color: var(--amber); }
+.action-box { background: var(--ink); color: #fff; border-radius: 12px; padding: 28px; margin: 24px 0; }
+.action-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #999; margin-bottom: 16px; }
+.action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.action-cell { padding: 14px 16px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+.action-cell .ac-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-bottom: 6px; }
+.action-cell .ac-value { font-family: var(--mono); font-size: 18px; font-weight: 500; }
+.action-cell.entry .ac-value { color: var(--green-bright); }
+.action-cell.stop .ac-value { color: #ff6b6b; }
+.action-cell.target .ac-value { color: #6bb6ff; }
+.exits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
+.exits-block { padding: 16px 20px; background: rgba(255,255,255,0.03); border-radius: 8px; }
+.exits-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #999; margin-bottom: 10px; }
+.exits-block ul { list-style: none; padding: 0; margin: 0; }
+.exits-block li { font-family: var(--sans); font-size: 12px; color: #ccc; padding: 6px 0 6px 18px; line-height: 1.5; position: relative; }
+.exits-block li::before { content: '−'; position: absolute; left: 0; color: #888; font-family: var(--mono); }
+.sources { padding: 24px 36px; background: var(--paper); border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 10px; color: var(--muted); line-height: 1.8; letter-spacing: 0.02em; }
+.sources strong { color: var(--ink); display: block; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: 500; }
+.report-foot { padding: 24px 36px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; background: var(--paper); }
+.summary-link { font-family: var(--mono); font-size: 11px; color: var(--blue); text-decoration: none; padding: 8px 14px; background: var(--blue-pale); border-radius: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+.foot-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.04em; }
+@media (max-width: 700px) {
+  .report-head { padding: 24px 20px; } .head-title { font-size: 28px; }
+  .content { padding: 0 20px 30px; } .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; } .action-grid { grid-template-columns: repeat(2, 1fr); }
+  .exits-grid { grid-template-columns: 1fr; } .component { grid-template-columns: 110px 1fr 50px; }
+  .component-rationale { padding-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="disclaimer-banner">
+  ⚠️ Personal research only. Not SEBI-registered investment advice. Not a buy/sell recommendation. <a href="/#disclaimer">Full disclaimer</a>
+</div>
+
+<header class="masthead">
+  <a href="/" class="logo-block">
+    <span class="logo-pi">π</span>
+    <span class="logo-name">Passive Aggressive Investing</span>
+  </a>
+  <div class="report-meta">
+    <span class="report-type">Deep Dive</span> · April 2026
+  </div>
+</header>
+
+<div class="page">
+
+<div class="report-head">
+  <div class="head-pills">
+    <span class="pill bz">★ Buy Zone</span>
+    <span class="pill stage-4">Stage 4 — Entry Blocked</span>
+    <span class="pill neutral">NBFC — Underserved Lending</span>
+    <span class="pill warn">⚠ C4 = 0 · Await Golden Cross</span>
+  </div>
+  <h1 class="head-title">Five-Star Business Finance</h1>
+  <div class="head-subtitle">NSE: FIVESTARBUS · Underserved NBFC · Small-Cap · Sequoia + TPG + KKR</div>
+  <p class="head-tagline">
+    The best investor network in the entire universe — Sequoia, TPG, and KKR simultaneously in one Indian listed company. 58% FII holding. P/E 11.9x — cheapest quality NBFC in India. Score of 77 is legitimate. But C4 = 0: Stage 4 technical is a hard gate. Framework rule holds — no entry until the golden cross confirms.
+  </p>
+</div>
+
+<div class="content">
+
+  <!-- SECTION 00 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">00</span>
+      <span class="section-title">Why Five-Star — The Core Thesis</span>
+    </div>
+
+    <div class="alert-box">
+      <div class="alert-label">⚠ Technical Gate — Read Before Acting</div>
+      <div class="alert-text">
+        C4 = 0. Stage 4 confirmed at time of scoring. The framework rule is absolute: <strong>do not buy Stage 4 regardless of total score.</strong> Entry condition: 50-DMA must cross above 200-DMA (golden cross) before any new position. A score of 77 does not override this gate — it simply tells you this is a high-priority watch once the technical clears.
+      </div>
+    </div>
+
+    <div class="thesis-box">
+      <div class="th-label">The Call</div>
+      <div class="th-call">
+        Five-Star is the cheapest quality NBFC in India at 11.9x P/E. The NPA cycle is mechanical — 26% of the loan book entered a 24–36 month peak default window simultaneously. This is a timing problem, not a structural deterioration. Zero MFI exposure. Zero co-lending. Proprietary book only. Yield 24%+. When the NPA cycle clears, earnings re-accelerate. Sequoia, TPG, and KKR all saw this — that's why 58% of the float is FII-held. The thesis is sound. The entry timing is the only question.
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-cell green">
+        <div class="kpi-label">P/E Ratio</div>
+        <div class="kpi-value">11.9x</div>
+        <div class="kpi-sub">Cheapest quality NBFC</div>
+      </div>
+      <div class="kpi-cell green">
+        <div class="kpi-label">FII Holding</div>
+        <div class="kpi-value">58%</div>
+        <div class="kpi-sub">Exceptional institutional trust</div>
+      </div>
+      <div class="kpi-cell green">
+        <div class="kpi-label">Loan Yield</div>
+        <div class="kpi-value">24%+</div>
+        <div class="kpi-sub">Proprietary book only</div>
+      </div>
+      <div class="kpi-cell red">
+        <div class="kpi-label">C4 Technical</div>
+        <div class="kpi-value">0/20</div>
+        <div class="kpi-sub">Stage 4 — hard gate</div>
+      </div>
+      <div class="kpi-cell">
+        <div class="kpi-label">MFI Exposure</div>
+        <div class="kpi-value">Zero</div>
+        <div class="kpi-sub">Not MFI lending</div>
+      </div>
+      <div class="kpi-cell">
+        <div class="kpi-label">Co-lending</div>
+        <div class="kpi-value">Zero</div>
+        <div class="kpi-sub">Fully proprietary book</div>
+      </div>
+      <div class="kpi-cell green">
+        <div class="kpi-label">6M Target</div>
+        <div class="kpi-value">₹600</div>
+        <div class="kpi-sub">36% from ₹440 entry</div>
+      </div>
+      <div class="kpi-cell green">
+        <div class="kpi-label">12M Target</div>
+        <div class="kpi-value">₹640</div>
+        <div class="kpi-sub">47% from ₹440 entry</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 01 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <span class="section-title">PAI Score &amp; NAV Framework Scorecard</span>
+    </div>
+
+    <div class="pai-score-block retrofit">
+      <div class="score-header">
+        <span class="score-label">PAI Priority Score</span>
+        <span class="score-date">Original report: Mar 2026 · Retro-scored Apr 25 2026</span>
+      </div>
+      <div class="score-total">
+        <span class="score-num-big">77</span>
+        <span class="score-denom">/ 100</span>
+        <span class="tier-badge tier-fp">Full Position (when C4 clears)</span>
+      </div>
+      <div class="score-components">
+        <div class="component">
+          <label>C1 Regulatory</label>
+          <div class="bar"><div class="fill" style="width:100%; background:var(--green);"></div></div>
+          <span class="value">25/25</span>
+        </div>
+        <div class="component-rationale">L1 Strong. RBI Priority Sector Lending mandate compels capital flow to underserved borrowers. Five-Star is the direct beneficiary — the regulation mandates the exact lending category Five-Star specialises in.</div>
+
+        <div class="component">
+          <label>C2 Network</label>
+          <div class="bar"><div class="fill" style="width:88%; background:var(--green);"></div></div>
+          <span class="value">22/25</span>
+        </div>
+        <div class="component-rationale">C2A 8/10 — self-originated proprietary book, 24% yield, no co-lending dependency. C2B 8/8 — Sequoia + TPG + KKR simultaneously, 58% FII — highest investor network score in entire universe. C2C 6/7 — strong management track record. Governance: clean.</div>
+
+        <div class="component">
+          <label>C3 Valuation + Upside</label>
+          <div class="bar"><div class="fill" style="width:100%; background:var(--green);"></div></div>
+          <span class="value">30/30</span>
+        </div>
+        <div class="component-rationale">Cheap at 11.9x P/E — cheapest quality NBFC in India. 6M target ₹600 from ₹440 entry = 36% upside. Both C3_valuation (15/15) and C3_upside (15/15) score maximum. The NPA cycle is the reason for the discount, not the business model.</div>
+
+        <div class="component">
+          <label>C4 Technical</label>
+          <div class="bar"><div class="fill" style="width:0%; background:var(--red);"></div></div>
+          <span class="value">0/20</span>
+        </div>
+        <div class="component-rationale">Stage 4 — HARD ZERO. 50-DMA below 200-DMA at time of scoring. Framework rule: C4 = 0 means do not buy regardless of total score. Entry is blocked until golden cross confirms Stage 2 transition.</div>
+      </div>
+    </div>
+
+    <div class="layer-strip">
+      <span class="layer-chip lc-strong">L1 Regulatory: Strong (RBI PSL)</span>
+      <span class="layer-chip lc-strong">L2 Commercial: Strong</span>
+      <span class="layer-chip lc-strong">L2 Investor: Exceptional (Seq+TPG+KKR)</span>
+      <span class="layer-chip lc-cheap">L3 Valuation: Cheap (11.9x)</span>
+      <span class="layer-chip lc-clean">Governance: Clean</span>
+      <span class="layer-chip lc-stage4">C4: Stage 4 — Entry Blocked</span>
+    </div>
+
+    <div class="two-col">
+      <div class="info-block">
+        <div class="ib-label">Layer 2 — Investor Network (Exceptional)</div>
+        <div class="ib-content">
+          <strong>Sequoia Capital + TPG + KKR simultaneously.</strong> This combination in a single listed Indian company is extremely rare. These are not passive index funds — each is a named global PE with deep due diligence processes and active board engagement. 58% FII holding confirms institutional conviction across the globe. This is the strongest C2B score (8/8) in the entire PAI universe.
+        </div>
+      </div>
+      <div class="info-block">
+        <div class="ib-label">The NPA Cycle — Mechanical, Not Structural</div>
+        <div class="ib-content">
+          <strong>26% of the loan book entered a 24–36 month peak default window.</strong> Underserved lending typically sees peak defaults in months 24–36 of loan origination. When a cohort of loans originates at the same time (e.g., post-COVID recovery), the NPA peak hits simultaneously. This is a mechanical timing event, not evidence that the borrower quality has structurally deteriorated. Zero MFI exposure means the sector NPA contagion does not apply.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 02 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <span class="section-title">Valuation — 11.9x P/E for a Quality Franchise</span>
+    </div>
+    <p class="para">
+      <strong>11.9x P/E is the cheapest quality NBFC in India by a wide margin.</strong> The discount exists because the NPA headline frightens retail investors. That fear is creating a pricing anomaly: the market is pricing Five-Star as if the NPA rise is structural when it is mechanical. Three of the world's most sophisticated PE investors — Sequoia, TPG, and KKR — disagree. They have maintained their stakes through the NPA cycle, which is the strongest possible signal that informed capital sees a recovery.
+    </p>
+    <p class="para">
+      The business model is differentiated. Five-Star lends only from its own book at 24%+ yields to underserved micro-entrepreneurs and small businesses. No MFI channel risk. No co-lending partnerships that create contingent liability. No geographic concentration in one state. When the NPA peak passes and the cohort of peak-default loans self-cures or gets written off, the P&L normalises and the P/E expansion follows.
+    </p>
+
+    <table class="peer-table">
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>P/E</th>
+          <th>Loan Yield</th>
+          <th>Model</th>
+          <th>PE Investors</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight">
+          <td>Five-Star Business Finance</td>
+          <td>11.9x</td>
+          <td>24%+</td>
+          <td>Proprietary only</td>
+          <td>Seq + TPG + KKR</td>
+        </tr>
+        <tr>
+          <td>Aptus Value Housing</td>
+          <td>~18x</td>
+          <td>~16%</td>
+          <td>Housing loans</td>
+          <td>None named</td>
+        </tr>
+        <tr>
+          <td>Aavas Financiers</td>
+          <td>~22x</td>
+          <td>~14%</td>
+          <td>Affordable housing</td>
+          <td>Warburg Pincus</td>
+        </tr>
+        <tr>
+          <td>Spandana Sphoorty</td>
+          <td>~8x</td>
+          <td>~26%</td>
+          <td>MFI (structural risk)</td>
+          <td>None named</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="para">
+      Compared to MFI lenders (lower P/E but structural risk), Five-Star deserves a premium. Compared to housing NBFCs (higher P/E, lower yield), Five-Star is 35–50% cheaper. The 11.9x multiple is the NPA discount. Once NPA normalises, 18–22x forward P/E is defensible — implying 50–85% upside from current levels.
+    </p>
+  </div>
+
+  <!-- SECTION 03 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <span class="section-title">Technical Setup — Stage 4, Awaiting Golden Cross</span>
+    </div>
+
+    <div class="tech-citation">
+      Technical analysis follows the SEPA methodology described in <strong>Trade Like a Stock Market Wizard</strong> by Mark Minervini (McGraw-Hill, 2013). Stage definitions and the golden cross entry rule are applied as defined in that work, adapted for Indian market data.
+    </div>
+
+    <p class="para">
+      At time of scoring (March 2026), Five-Star was in <strong>Stage 4</strong> — price below both the 50-DMA and 200-DMA, with the 50-DMA below the 200-DMA (death cross). The Trend Template score was 0/8. The framework rule is absolute: do not buy Stage 4 regardless of any other signal, including a high fundamental score.
+    </p>
+    <p class="para">
+      <strong>The golden cross is the entry trigger.</strong> When the 50-DMA crosses above the 200-DMA, it marks the transition from Stage 4 to Stage 1→2. At that point, re-run the full score — C4 would jump from 0 to 6 (Stage 1→2 transition) and the total score moves to 83+. Full entry is valid at ₹460–480 on or after the golden cross date.
+    </p>
+    <p class="para">
+      The cheat entry at ₹44–47 noted in the Suzlon report is a different framework — Five-Star uses a golden cross trigger, not a 50-DMA close, because Stage 4 NBFCs are prone to value traps where the fundamental thesis is correct but the price continues falling for longer than expected.
+    </p>
+
+    <div class="tt-summary">
+      <strong>Stage 4 at scoring.</strong> Entry blocked. Golden cross (50-DMA above 200-DMA) = trigger to re-score and consider entry at ₹460–480. Stop once entered: ₹445.
+    </div>
+  </div>
+
+  <!-- SECTION 04 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <span class="section-title">Risks &amp; What Would Invalidate the Thesis</span>
+    </div>
+
+    <h3 style="font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--red); margin: 14px 0 10px;">Hard Invalidators (Exit Triggers)</h3>
+    <ul class="risk-list">
+      <li>
+        <strong>Stage 2 does not confirm within 3 months of scoring</strong>
+        If the golden cross does not form within 3 months, re-evaluate whether the NPA cycle is structural rather than mechanical. A prolonged Stage 4 despite strong fundamentals suggests the market is pricing in a scenario not visible in public data.
+      </li>
+      <li>
+        <strong>NPA rises structurally above 3%</strong>
+        Current NPA elevated due to the mechanical 24–36 month cohort peak. If NPA continues rising after the cohort window closes (post-Q3 FY27), it signals borrower quality deterioration — the thesis premise fails.
+      </li>
+      <li>
+        <strong>Sequoia, TPG, or KKR reduces holding by more than 5%</strong>
+        A named institutional exit is the strongest negative signal available. Any of the three reducing a meaningful stake must trigger an immediate re-evaluation of the thesis.
+      </li>
+    </ul>
+
+    <h3 style="font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); margin: 22px 0 10px;">Soft Watch Points (Re-evaluate, Don't Exit)</h3>
+    <ul class="risk-list watch">
+      <li>
+        <strong>Quarterly NPA trend</strong>
+        Monitor each quarter. NPA should peak and then decline. If it peaks later than Q1 FY27, the thesis is delayed but not broken. If it does not peak by Q2 FY27, escalate to hard invalidator.
+      </li>
+      <li>
+        <strong>Geographic concentration</strong>
+        Five-Star is concentrated in South India. Any state-level economic disruption, drought, or policy change in Tamil Nadu, Andhra Pradesh, or Karnataka could amplify NPA beyond the mechanical cohort effect.
+      </li>
+    </ul>
+  </div>
+
+  <!-- SECTION 05 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">05</span>
+      <span class="section-title">Action Plan — Entry, Stop, Targets</span>
+    </div>
+
+    <div class="action-box">
+      <div class="action-label">Levels to Track — Entry Only After Golden Cross</div>
+      <div class="action-grid">
+        <div class="action-cell entry">
+          <div class="ac-label">Entry (post golden ×)</div>
+          <div class="ac-value">₹460–480</div>
+        </div>
+        <div class="action-cell stop">
+          <div class="ac-label">Stop Loss</div>
+          <div class="ac-value">₹445</div>
+        </div>
+        <div class="action-cell target">
+          <div class="ac-label">6M Target</div>
+          <div class="ac-value">₹600</div>
+        </div>
+        <div class="action-cell target">
+          <div class="ac-label">12M Target</div>
+          <div class="ac-value">₹640</div>
+        </div>
+      </div>
+      <div class="exits-grid">
+        <div class="exits-block">
+          <div class="exits-label">Hard Exits</div>
+          <ul>
+            <li>Stop ₹445 hit</li>
+            <li>NPA structurally above 3% for 2 consecutive quarters</li>
+            <li>Named PE (Seq/TPG/KKR) reduces stake &gt;5%</li>
+            <li>Golden cross not formed within 3 months of scoring</li>
+          </ul>
+        </div>
+        <div class="exits-block">
+          <div class="exits-label">Add Signals</div>
+          <ul>
+            <li>Golden cross confirmed on volume &gt;1.5x average</li>
+            <li>NPA starts declining for 2 consecutive quarters</li>
+            <li>Quarterly EPS beats consensus by &gt;15%</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 06 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">06</span>
+      <span class="section-title">Live Verification — Step 6</span>
+    </div>
+    <p class="para">Price and holding data verified at time of report assembly. NPA and financials from latest BSE filing.</p>
+    <table class="peer-table">
+      <thead>
+        <tr><th>Field</th><th>Report Value</th><th>Verified Source</th><th>Verified On</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Scoring CMP</td><td>~₹470</td><td>NSE / Yahoo Finance</td><td>Mar 2026</td></tr>
+        <tr><td>P/E</td><td>11.9x</td><td>screener.in</td><td>Mar 2026</td></tr>
+        <tr><td>FII Holding</td><td>58%</td><td>BSE shareholding pattern</td><td>Q3 FY26</td></tr>
+        <tr><td>Loan Yield</td><td>24%+</td><td>Company investor presentation</td><td>Q3 FY26</td></tr>
+        <tr><td>MFI Exposure</td><td>Nil</td><td>Company annual report</td><td>FY25</td></tr>
+        <tr><td>Technical Stage</td><td>Stage 4 (C4 = 0)</td><td>Yahoo Finance MAs</td><td>Mar 2026</td></tr>
+      </tbody>
+    </table>
+    <p class="para" style="font-size:12px; color:var(--muted); font-style:italic; margin-top: 14px;">
+      Technical stage must be re-verified before any entry. If golden cross has formed since this report date, re-run the full score before acting.
+    </p>
+  </div>
+
+</div>
+
+<div class="sources">
+  <strong>Sources</strong>
+  Company filings · BSE quarterly results (Q3 FY26) · Annual Report FY25 ·
+  screener.in · tickertape.in · Yahoo Finance (price &amp; moving averages) ·
+  NSE shareholding pattern archive · RBI Priority Sector Lending guidelines ·
+  Technical methodology: SEPA framework as described in Trade Like a Stock Market Wizard by Mark Minervini, McGraw-Hill 2013.
+</div>
+
+<div class="report-foot">
+  <a href="/reports/summaries/fivestarbus_summary.html" class="summary-link">← View 1-Page Summary</a>
+  <div class="foot-meta">Published Mar 2026 · Last verified Apr 25 2026 · Author: PAI</div>
+</div>
+
+</div>
+</body>
+</html>
