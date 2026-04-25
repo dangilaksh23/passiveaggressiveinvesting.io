@@ -304,7 +304,8 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
   </nav>
 </header>
 
-<!-- HERO -->
+<!-- HERO (only on Dashboard tab) -->
+<div id="heroWrap">
 <div class="hero">
   <div class="hero-left">
     <div class="hero-eyebrow">Personal Research · The PAI Score is Proprietary</div>
@@ -374,6 +375,7 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
     </div>
   </div>
 </div>
+</div><!-- end heroWrap -->
 
 <!-- MAIN -->
 <div class="main">
@@ -538,6 +540,7 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
         <th>Quadrant</th>
         <th>PAI Score</th>
         <th>Band</th>
+        <th>Date Scored</th>
         <th>Scoring CMP</th>
         <th>CMP</th>
         <th>Return</th>
@@ -563,6 +566,9 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
     <div class="port-stat"><div class="port-stat-label">Current Value</div><div class="port-stat-val">₹9.24L</div></div>
     <div class="port-stat"><div class="port-stat-label">Total P&L</div><div class="port-stat-val neg">-0.5%</div></div>
     <div class="port-stat"><div class="port-stat-label">Best Performer</div><div class="port-stat-val pos">EIEL +31.2%</div></div>
+  </div>
+  <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin: -10px 0 18px;letter-spacing:0.04em;">
+    Note: summary stats reflect last completed run (21 Apr 2026). Recent CMP corrections to Aelea Commodities will be applied on next pipeline refresh.
   </div>
 
   <table class="data-table">
@@ -768,57 +774,57 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
 
 const companies = [
   // buy zone — scored
-  {id:"HFCL",       name:"HFCL Ltd",              sector:"Cables",        q:"buy_zone",          score:89, scoringCMP:72,    cmp:94.9,   owned:false, hasReport:true,  hasDeep:true},
-  {id:"EIEL",       name:"Enviro Infra Engineers", sector:"Water",         q:"buy_zone",          score:85, scoringCMP:152,   cmp:209.1,  owned:true,  hasReport:true,  hasDeep:true},
-  {id:"KEC",        name:"KEC International",      sector:"Cables",        q:"buy_zone",          score:83, scoringCMP:775,   cmp:581.8,  owned:false, hasReport:true,  hasDeep:false},
-  {id:"VINDHYATEL", name:"Vindhya Telelinks",       sector:"Cables",        q:"buy_zone",          score:82, scoringCMP:1158,  cmp:1343.8, owned:false, hasReport:true,  hasDeep:false},
-  {id:"SANSERA",    name:"Sansera Engineering",     sector:"Auto Metal",    q:"buy_zone",          score:78, scoringCMP:2130,  cmp:2370,   owned:true,  hasReport:true,  hasDeep:true},
-  {id:"SONACOMS",   name:"Sona BLW Precision",      sector:"Auto Metal",    q:"buy_zone",          score:77, scoringCMP:511,   cmp:581.5,  owned:true,  hasReport:true,  hasDeep:true},
-  {id:"FIVESTARBUS",name:"Five-Star Business Fin.", sector:"Lending",       q:"buy_zone",          score:77, scoringCMP:470,   cmp:504.4,  owned:true,  hasReport:true,  hasDeep:true},
-  {id:"TARIL",      name:"Transformers & Rect.",    sector:"Cables",        q:"buy_zone",          score:67, scoringCMP:290,   cmp:332.4,  owned:true,  hasReport:true,  hasDeep:false},
-  {id:"GRAVITA",    name:"Gravita India",           sector:"Recycling",     q:"buy_zone",          score:73, scoringCMP:1357,  cmp:1647.7, owned:false, hasReport:true,  hasDeep:false},
-  {id:"IEX",        name:"Indian Energy Exchange",  sector:"Energy",        q:"buy_zone",          score:70, scoringCMP:129.8, cmp:126.2,  owned:true,  hasReport:true,  hasDeep:false},
-  {id:"CRAFTSMAN",  name:"Craftsman Automation",    sector:"Auto Metal",    q:"buy_zone",          score:70, scoringCMP:7000,  cmp:7683,   owned:false, hasReport:true,  hasDeep:true},
-  {id:"POCL",       name:"Pondy Oxides",            sector:"Recycling",     q:"buy_zone",          score:68, scoringCMP:null,  cmp:1174.8, owned:false, hasReport:true,  hasDeep:false},
-  {id:"ANTONYWASTE",name:"Antony Waste Handling",   sector:"Recycling",     q:"buy_zone",          score:66, scoringCMP:null,  cmp:null,   owned:false, hasReport:true,  hasDeep:false},
-  {id:"HBLPOWER",   name:"HBL Engineering",         sector:"Cables",        q:"buy_zone",          score:66, scoringCMP:701,   cmp:788.3,  owned:true,  hasReport:true,  hasDeep:false},
-  {id:"MSTC",       name:"MSTC Ltd",                sector:"Recycling",     q:"buy_zone",          score:66, scoringCMP:416,   cmp:458.1,  owned:true,  hasReport:true,  hasDeep:false},
-  {id:"RKFORGE",    name:"Ramkrishna Forgings",     sector:"Auto Metal",    q:"buy_zone",          score:64, scoringCMP:471,   cmp:553.3,  owned:false, hasReport:true,  hasDeep:true},
-  {id:"TRANSRAIL",  name:"Transrail Lighting",      sector:"Cables",        q:"buy_zone",          score:62, scoringCMP:532.6, cmp:571,    owned:true,  hasReport:true,  hasDeep:false},
-  {id:"FINCABLES",  name:"Finolex Cables",          sector:"Cables",        q:"buy_zone",          score:61, scoringCMP:969,   cmp:954,    owned:false, hasReport:true,  hasDeep:false},
-  {id:"UNIVCABLES", name:"Universal Cables",        sector:"Cables",        q:"buy_zone",          score:61, scoringCMP:776,   cmp:851.2,  owned:true,  hasReport:true,  hasDeep:false},
-  {id:"JASH",       name:"Jash Engineering",        sector:"Water",         q:"buy_zone",          score:70, scoringCMP:null,  cmp:407.9,  owned:false, hasReport:true,  hasDeep:true},
-  {id:"LUMAXTECH",  name:"Lumax Auto Technologies", sector:"Auto Metal",    q:"buy_zone",          score:51, scoringCMP:1680,  cmp:1783.9, owned:true,  hasReport:true,  hasDeep:false},
+  {id:"HFCL",       name:"HFCL Ltd",              sector:"Cables",        q:"buy_zone",          score:89, scoringCMP:72,    cmp:94.9,   scoringDate:'5 Apr 2026',  owned:false, hasReport:true,  hasDeep:true},
+  {id:"EIEL",       name:"Enviro Infra Engineers", sector:"Water",         q:"buy_zone",          score:85, scoringCMP:152,   cmp:209.1,  scoringDate:'5 Apr 2026',  owned:true,  hasReport:true,  hasDeep:true},
+  {id:"KEC",        name:"KEC International",      sector:"Cables",        q:"buy_zone",          score:83, scoringCMP:null,  cmp:581.8,  scoringDate:null,  owned:false, hasReport:true,  hasDeep:false},
+  {id:"VINDHYATEL", name:"Vindhya Telelinks",       sector:"Cables",        q:"buy_zone",          score:82, scoringCMP:1158,  cmp:1343.8, scoringDate:'5 Apr 2026',  owned:false, hasReport:true,  hasDeep:false},
+  {id:"SANSERA",    name:"Sansera Engineering",     sector:"Auto Metal",    q:"buy_zone",          score:78, scoringCMP:2130,  cmp:2370,   scoringDate:'5 Apr 2026',  owned:true,  hasReport:true,  hasDeep:true},
+  {id:"SONACOMS",   name:"Sona BLW Precision",      sector:"Auto Metal",    q:"buy_zone",          score:77, scoringCMP:511,   cmp:581.5,  scoringDate:'5 Apr 2026',  owned:true,  hasReport:true,  hasDeep:true},
+  {id:"FIVESTARBUS",name:"Five-Star Business Fin.", sector:"Lending",       q:"buy_zone",          score:77, scoringCMP:470,   cmp:504.4,  scoringDate:'5 Apr 2026',  owned:true,  hasReport:true,  hasDeep:true},
+  {id:"TARIL",      name:"Transformers & Rect.",    sector:"Cables",        q:"buy_zone",          score:67, scoringCMP:290,   cmp:332.4,  scoringDate:'5 Apr 2026',  owned:true,  hasReport:true,  hasDeep:false},
+  {id:"GRAVITA",    name:"Gravita India",           sector:"Recycling",     q:"buy_zone",          score:73, scoringCMP:1357,  cmp:1647.7, scoringDate:'5 Apr 2026',  owned:false, hasReport:true,  hasDeep:false},
+  {id:"IEX",        name:"Indian Energy Exchange",  sector:"Energy",        q:"buy_zone",          score:70, scoringCMP:129.8, cmp:126.2,  scoringDate:'5 Apr 2026',  owned:true,  hasReport:true,  hasDeep:false},
+  {id:"CRAFTSMAN",  name:"Craftsman Automation",    sector:"Auto Metal",    q:"buy_zone",          score:70, scoringCMP:7000,  cmp:7683,   scoringDate:'5 Apr 2026',  owned:false, hasReport:true,  hasDeep:true},
+  {id:"POCL",       name:"Pondy Oxides",            sector:"Recycling",     q:"buy_zone",          score:68, scoringCMP:null,  cmp:1174.8, scoringDate:null,  owned:false, hasReport:true,  hasDeep:false},
+  {id:"ANTONYWASTE",name:"Antony Waste Handling",   sector:"Recycling",     q:"buy_zone",          score:66, scoringCMP:null,  cmp:null,   scoringDate:null,  owned:false, hasReport:true,  hasDeep:false},
+  {id:"HBLPOWER",   name:"HBL Engineering",         sector:"Cables",        q:"buy_zone",          score:66, scoringCMP:701,   cmp:788.3,  scoringDate:'5 Apr 2026',  owned:true,  hasReport:true,  hasDeep:false},
+  {id:"MSTC",       name:"MSTC Ltd",                sector:"Recycling",     q:"buy_zone",          score:66, scoringCMP:416,   cmp:458.1,  scoringDate:'5 Apr 2026',  owned:true,  hasReport:true,  hasDeep:false},
+  {id:"RKFORGE",    name:"Ramkrishna Forgings",     sector:"Auto Metal",    q:"buy_zone",          score:64, scoringCMP:471,   cmp:553.3,  scoringDate:'5 Apr 2026',  owned:false, hasReport:true,  hasDeep:true},
+  {id:"TRANSRAIL",  name:"Transrail Lighting",      sector:"Cables",        q:"buy_zone",          score:62, scoringCMP:532.6, cmp:571,    scoringDate:'5 Apr 2026',  owned:true,  hasReport:true,  hasDeep:false},
+  {id:"FINCABLES",  name:"Finolex Cables",          sector:"Cables",        q:"buy_zone",          score:61, scoringCMP:969,   cmp:954,    scoringDate:'5 Apr 2026',  owned:false, hasReport:true,  hasDeep:false},
+  {id:"UNIVCABLES", name:"Universal Cables",        sector:"Cables",        q:"buy_zone",          score:61, scoringCMP:776,   cmp:851.2,  scoringDate:'5 Apr 2026',  owned:true,  hasReport:true,  hasDeep:false},
+  {id:"JASH",       name:"Jash Engineering",        sector:"Water",         q:"buy_zone",          score:70, scoringCMP:null,  cmp:407.9,  scoringDate:null,  owned:false, hasReport:true,  hasDeep:true},
+  {id:"LUMAXTECH",  name:"Lumax Auto Technologies", sector:"Auto Metal",    q:"buy_zone",          score:51, scoringCMP:1680,  cmp:1783.9, scoringDate:'5 Apr 2026',  owned:true,  hasReport:true,  hasDeep:false},
   // already priced in
-  {id:"APARINDS",   name:"Apar Industries",         sector:"Cables",        q:"already_priced_in", score:63, scoringCMP:11180, cmp:11867.5,owned:false, hasReport:true,  hasDeep:false},
-  {id:"UNOMINDA",   name:"UNO Minda",               sector:"Auto Metal",    q:"already_priced_in", score:58, scoringCMP:1140,  cmp:1150,   owned:false, hasReport:true,  hasDeep:false},
-  {id:"HDFCBANK",   name:"HDFC Bank",               sector:"Lending",       q:"already_priced_in", score:null,scoringCMP:809.8,cmp:810,   owned:true,  hasReport:false, hasDeep:false},
-  {id:"RELIANCE",   name:"Reliance Industries",     sector:"Energy",        q:"already_priced_in", score:null,scoringCMP:3013.9,cmp:1354.2,owned:true,  hasReport:false, hasDeep:false},
-  {id:"WABAG",      name:"VA Tech Wabag",           sector:"Water",         q:"already_priced_in", score:57, scoringCMP:null,  cmp:1497,   owned:false, hasReport:true,  hasDeep:true},
-  {id:"BHARATFORG", name:"Bharat Forge",            sector:"Auto Metal",    q:"already_priced_in", score:null,scoringCMP:null, cmp:1901.6, owned:false, hasReport:false, hasDeep:false},
-  {id:"ENDURANCE",  name:"Endurance Technologies",  sector:"Auto Metal",    q:"already_priced_in", score:null,scoringCMP:null, cmp:2391.8, owned:false, hasReport:false, hasDeep:false},
-  {id:"TIINDIA",    name:"Tube Investments of India",sector:"Auto Metal",   q:"already_priced_in", score:null,scoringCMP:null, cmp:2892.6, owned:false, hasReport:false, hasDeep:false},
-  {id:"POLYCAB",    name:"Polycab India",           sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:7984.5, owned:false, hasReport:false, hasDeep:false},
-  {id:"KEI",        name:"KEI Industries",          sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:4869.2, owned:false, hasReport:false, hasDeep:false},
-  {id:"RRKABEL",    name:"RR Kabel",                sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:1458.2, owned:false, hasReport:false, hasDeep:false},
-  {id:"HAVELLS",    name:"Havells India",           sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:1324.4, owned:false, hasReport:false, hasDeep:false},
-  {id:"DIAMONDPOW", name:"Diamond Power Infra",     sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:null,   owned:false, hasReport:false, hasDeep:false},
+  {id:"APARINDS",   name:"Apar Industries",         sector:"Cables",        q:"already_priced_in", score:63, scoringCMP:11180, cmp:11867.5,scoringDate:'5 Apr 2026',  owned:false, hasReport:true,  hasDeep:false},
+  {id:"UNOMINDA",   name:"UNO Minda",               sector:"Auto Metal",    q:"already_priced_in", score:58, scoringCMP:1140,  cmp:1150,   scoringDate:'5 Apr 2026',  owned:false, hasReport:true,  hasDeep:false},
+  {id:"HDFCBANK",   name:"HDFC Bank",               sector:"Lending",       q:"already_priced_in", score:null,scoringCMP:809.8,cmp:810,   scoringDate:'5 Apr 2026',  owned:true,  hasReport:false, hasDeep:false},
+  {id:"RELIANCE",   name:"Reliance Industries",     sector:"Energy",        q:"already_priced_in", score:null,scoringCMP:3013.9,cmp:1354.2,scoringDate:'5 Apr 2026',  owned:true,  hasReport:false, hasDeep:false},
+  {id:"WABAG",      name:"VA Tech Wabag",           sector:"Water",         q:"already_priced_in", score:57, scoringCMP:null,  cmp:1497,   scoringDate:null,  owned:false, hasReport:true,  hasDeep:true},
+  {id:"BHARATFORG", name:"Bharat Forge",            sector:"Auto Metal",    q:"already_priced_in", score:null,scoringCMP:null, cmp:1901.6, scoringDate:null,  owned:false, hasReport:false, hasDeep:false},
+  {id:"ENDURANCE",  name:"Endurance Technologies",  sector:"Auto Metal",    q:"already_priced_in", score:null,scoringCMP:null, cmp:2391.8, scoringDate:null,  owned:false, hasReport:false, hasDeep:false},
+  {id:"TIINDIA",    name:"Tube Investments of India",sector:"Auto Metal",   q:"already_priced_in", score:null,scoringCMP:null, cmp:2892.6, scoringDate:null,  owned:false, hasReport:false, hasDeep:false},
+  {id:"POLYCAB",    name:"Polycab India",           sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:7984.5, scoringDate:null,  owned:false, hasReport:false, hasDeep:false},
+  {id:"KEI",        name:"KEI Industries",          sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:4869.2, scoringDate:null,  owned:false, hasReport:false, hasDeep:false},
+  {id:"RRKABEL",    name:"RR Kabel",                sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:1458.2, scoringDate:null,  owned:false, hasReport:false, hasDeep:false},
+  {id:"HAVELLS",    name:"Havells India",           sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:1324.4, scoringDate:null,  owned:false, hasReport:false, hasDeep:false},
+  {id:"DIAMONDPOW", name:"Diamond Power Infra",     sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:null,   scoringDate:null,  owned:false, hasReport:false, hasDeep:false},
   // speculative watch
-  {id:"SUZLON",     name:"Suzlon Energy",           sector:"Energy",        q:"speculative_watch", score:62, scoringCMP:42.83,cmp:53,     owned:true,  hasReport:true,  hasDeep:false},
-  {id:"YATRA",      name:"Yatra Online",            sector:"Other",         q:"speculative_watch", score:30, scoringCMP:120,  cmp:121.5,  owned:true,  hasReport:false, hasDeep:false},
-  {id:"IFCI",       name:"IFCI Ltd",                sector:"Lending",       q:"speculative_watch", score:null,scoringCMP:62.5, cmp:60.7,  owned:true,  hasReport:false, hasDeep:false},
-  {id:"ANANTRAJ",   name:"Anant Raj",               sector:"Other",         q:"speculative_watch", score:39, scoringCMP:533.4,cmp:516.2,  owned:true,  hasReport:false, hasDeep:false},
-  {id:"DENTAWATER", name:"Denta Water & Infra",     sector:"Water",         q:"speculative_watch", score:null,scoringCMP:null, cmp:null,  owned:false, hasReport:true,  hasDeep:false},
-  {id:"GANECOS",    name:"Ganesha Ecosphere",       sector:"Recycling",     q:"speculative_watch", score:61, scoringCMP:null, cmp:1058,   owned:false, hasReport:true,  hasDeep:false},
-  {id:"NAMOEWASTE", name:"Namo eWaste Management",  sector:"Recycling",     q:"speculative_watch", score:null,scoringCMP:null,cmp:null,   owned:false, hasReport:false, hasDeep:false},
+  {id:"SUZLON",     name:"Suzlon Energy",           sector:"Energy",        q:"speculative_watch", score:62, scoringCMP:42.83,cmp:53,     scoringDate:'5 Apr 2026',  owned:true,  hasReport:true,  hasDeep:false},
+  {id:"YATRA",      name:"Yatra Online",            sector:"Other",         q:"speculative_watch", score:30, scoringCMP:120,  cmp:121.5,  scoringDate:'5 Apr 2026',  owned:true,  hasReport:false, hasDeep:false},
+  {id:"IFCI",       name:"IFCI Ltd",                sector:"Lending",       q:"speculative_watch", score:null,scoringCMP:62.5, cmp:60.7,  scoringDate:'5 Apr 2026',  owned:true,  hasReport:false, hasDeep:false},
+  {id:"ANANTRAJ",   name:"Anant Raj",               sector:"Other",         q:"speculative_watch", score:39, scoringCMP:533.4,cmp:516.2,  scoringDate:'5 Apr 2026',  owned:true,  hasReport:false, hasDeep:false},
+  {id:"DENTAWATER", name:"Denta Water & Infra",     sector:"Water",         q:"speculative_watch", score:null,scoringCMP:null, cmp:null,  scoringDate:null,  owned:false, hasReport:true,  hasDeep:false},
+  {id:"GANECOS",    name:"Ganesha Ecosphere",       sector:"Recycling",     q:"speculative_watch", score:61, scoringCMP:null, cmp:1058,   scoringDate:null,  owned:false, hasReport:true,  hasDeep:false},
+  {id:"NAMOEWASTE", name:"Namo eWaste Management",  sector:"Recycling",     q:"speculative_watch", score:null,scoringCMP:null,cmp:null,   scoringDate:null,  owned:false, hasReport:false, hasDeep:false},
   // avoid
-  {id:"EMSLIMITED", name:"EMS Limited",             sector:"Water",         q:"avoid",             score:null,scoringCMP:null, cmp:375.5, owned:false, hasReport:true,  hasDeep:false},
-  {id:"SHIVAMILLS", name:"Shivam Autotech",         sector:"Auto Metal",    q:"avoid",             score:5,  scoringCMP:null,  cmp:63,    owned:false, hasReport:false, hasDeep:false},
-  {id:"JAINREC",    name:"Jain Resource Recycling", sector:"Recycling",     q:"avoid",             score:20, scoringCMP:null,  cmp:420.9, owned:false, hasReport:false, hasDeep:false},
-  {id:"A2ZINFRA",   name:"A2Z Infra Engineering",   sector:"Other",         q:"avoid",             score:null,scoringCMP:null, cmp:17.2,  owned:false, hasReport:false, hasDeep:false},
-  {id:"AELEA",      name:"Aelea Commodities",       sector:"Recycling",     q:"avoid",             score:0,  scoringCMP:176,   cmp:null,  owned:true,  hasReport:false, hasDeep:false},
-  {id:"QUADRANTFTEK",name:"Quadrant Future Tek",    sector:"Cables",        q:"avoid",             score:null,scoringCMP:null, cmp:null,  owned:false, hasReport:false, hasDeep:false},
-  {id:"BIRLACABLE", name:"Birla Cable",             sector:"Cables",        q:"avoid",             score:null,scoringCMP:null, cmp:159,   owned:false, hasReport:false, hasDeep:false},
+  {id:"EMSLIMITED", name:"EMS Limited",             sector:"Water",         q:"avoid",             score:null,scoringCMP:null, cmp:375.5, scoringDate:null,  owned:false, hasReport:true,  hasDeep:false},
+  {id:"SHIVAMILLS", name:"Shivam Autotech",         sector:"Auto Metal",    q:"avoid",             score:5,  scoringCMP:null,  cmp:63,    scoringDate:null,  owned:false, hasReport:false, hasDeep:false},
+  {id:"JAINREC",    name:"Jain Resource Recycling", sector:"Recycling",     q:"avoid",             score:20, scoringCMP:null,  cmp:420.9, scoringDate:null,  owned:false, hasReport:false, hasDeep:false},
+  {id:"A2ZINFRA",   name:"A2Z Infra Engineering",   sector:"Other",         q:"avoid",             score:null,scoringCMP:null, cmp:17.2,  scoringDate:null,  owned:false, hasReport:false, hasDeep:false},
+  {id:"AELEA",      name:"Aelea Commodities",       sector:"Recycling",     q:"avoid",             score:0,  scoringCMP:176,   cmp:147.7,  scoringDate:'5 Apr 2026',  owned:true,  hasReport:false, hasDeep:false},
+  {id:"QUADRANTFTEK",name:"Quadrant Future Tek",    sector:"Cables",        q:"avoid",             score:null,scoringCMP:null, cmp:null,  scoringDate:null,  owned:false, hasReport:false, hasDeep:false},
+  {id:"BIRLACABLE", name:"Birla Cable",             sector:"Cables",        q:"avoid",             score:null,scoringCMP:null, cmp:159,   scoringDate:null,  owned:false, hasReport:false, hasDeep:false},
 ];
 
 const portfolio = [
@@ -839,7 +845,7 @@ const portfolio = [
   {ticker:"IFCI",    company:"IFCI Ltd",                q:"speculative_watch", entry:62.5,    cmp:60.7,   stop:null,  t6m:null},
   {ticker:"ANANTRAJ",company:"Anant Raj",               q:"speculative_watch", entry:533.4,   cmp:516.2,  stop:null,  t6m:null},
   {ticker:"RELIANCE",company:"Reliance Industries",     q:"already_priced_in", entry:3013.9,  cmp:1354.2, stop:null,  t6m:null},
-  {ticker:"AELEA",   company:"Aelea Commodities",       q:"avoid",             entry:176.0,   cmp:null,   stop:117,   t6m:null},
+  {ticker:"AELEA",   company:"Aelea Commodities",       q:"avoid",             entry:176.0,   cmp:147.7,  stop:117,   t6m:null},
 ];
 
 const sectors = [
@@ -883,6 +889,9 @@ function showTab(name, el) {
   document.getElementById('tab-' + name).classList.add('active');
   document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
   if (el && el.tagName === 'A') el.classList.add('active');
+  // Hero only shows on Dashboard
+  const heroWrap = document.getElementById('heroWrap');
+  if (heroWrap) heroWrap.style.display = (name === 'dashboard') ? '' : 'none';
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -1009,6 +1018,7 @@ function renderUniverse() {
           <div class="score-bar"><div class="score-fill" style="width:${c.score}%;background:${sc}"></div></div>
         </div>` : '<span style="color:var(--muted);font-family:var(--mono);font-size:11px">pending</span>'}</td>
       <td>${c.score !== null ? `<span class="badge ${t.cls}">${t.label}</span>` : ''}</td>
+      <td><span style="font-family:var(--mono);font-size:11px;color:${c.scoringDate ? 'var(--ink)' : 'var(--muted)'}">${c.scoringDate || '—'}</span></td>
       <td class="${c.scoringCMP ? 'price-cell' : 'price-na'}">${c.scoringCMP ? fmt(c.scoringCMP) : '—'}</td>
       <td class="${c.cmp ? 'price-cell' : 'price-na'}">${c.cmp ? fmt(c.cmp) : '—'}</td>
       <td>${fmtRet(c.returnPct)}</td>`;
