@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAI — Passive Aggressive Investing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --ink: #0d0d0d;
+  --paper: #f5f2eb;
+  --paper2: #ede9e0;
+  --card: #ffffff;
+  --rule: #d4cfc4;
+  --muted: #7a7060;
+  --green: #1a5c38;
+  --green-bright: #00c853;
+  --green-pale: #d4edd8;
+  --amber: #b35a00;
+  --amber-pale: #fdefd8;
+  --red: #8b1a1a;
+  --red-pale: #fde0e0;
+  --blue: #1a3a6b;
+  --blue-pale: #dde5f5;
+  --mono: 'DM Mono', monospace;
+  --serif: 'Fraunces', serif;
+  --sans: 'DM Sans', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--paper); color: var(--ink); line-height: 1.5; min-height: 100vh; }
+
+/* DISCLAIMER */
+.disclaimer-banner { background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 10.5px; padding: 8px 24px; text-align: center; letter-spacing: 0.02em; line-height: 1.6; }
+.disclaimer-banner a { color: var(--paper); text-decoration: underline; }
+
+/* MASTHEAD */
+.masthead { border-bottom: 1px solid var(--rule); padding: 0 40px; display: flex; align-items: center; justify-content: space-between; background: var(--paper); position: sticky; top: 0; z-index: 100; }
+.logo-block { display: flex; align-items: baseline; gap: 12px; padding: 16px 0; text-decoration: none; color: var(--ink); }
+.logo-pi { font-family: var(--serif); font-size: 42px; font-weight: 700; color: var(--green); line-height: 1; letter-spacing: -2px; }
+.logo-text { display: flex; flex-direction: column; }
+.logo-name { font-family: var(--serif); font-size: 17px; font-weight: 300; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); }
+.logo-sub { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 1px; }
+.nav-links { display: flex; gap: 28px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+.nav-links a { color: var(--muted); text-decoration: none; transition: color 0.15s; cursor: pointer; }
+.nav-links a:hover { color: var(--ink); }
+.nav-links a.active { color: var(--green); border-bottom: 1.5px solid var(--green); padding-bottom: 2px; }
+
+/* HERO */
+.hero { padding: 56px 40px 40px; border-bottom: 1px solid var(--rule); display: grid; grid-template-columns: 1fr 380px; gap: 60px; align-items: start; }
+.hero-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+.hero-title { font-family: var(--serif); font-size: 42px; font-weight: 300; line-height: 1.12; letter-spacing: -0.5px; margin-bottom: 16px; }
+.hero-title em { font-style: italic; color: var(--green); font-weight: 500; }
+.hero-desc { font-size: 14px; color: var(--muted); max-width: 560px; line-height: 1.75; margin-bottom: 28px; }
+
+.lead-stat { background: var(--card); border-left: 3px solid var(--green); border-radius: 4px; padding: 18px 22px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.lead-stat-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.lead-stat-value { font-family: var(--serif); font-size: 28px; font-weight: 500; color: var(--green); line-height: 1.2; }
+.lead-stat-value em { font-style: italic; }
+.lead-stat-detail { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.6; }
+
+.hero-meta { display: flex; gap: 28px; }
+.hero-stat { display: flex; flex-direction: column; gap: 3px; }
+.hero-stat-val { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--ink); }
+.hero-stat-val.pos { color: var(--green); }
+.hero-stat-val.neg { color: var(--red); }
+.hero-stat-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+.hero-right { display: flex; flex-direction: column; gap: 8px; }
+.updated-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; text-align: right; margin-bottom: 4px; }
+
+.quadrant-pills { display: flex; flex-direction: column; gap: 6px; }
+.q-pill { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 6px; gap: 16px; }
+.q-pill-bz { background: var(--green-pale); }
+.q-pill-api { background: var(--blue-pale); }
+.q-pill-sw { background: var(--amber-pale); }
+.q-pill-av { background: var(--red-pale); }
+.q-pill-label { font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.q-pill-bz .q-pill-label { color: var(--green); }
+.q-pill-api .q-pill-label { color: var(--blue); }
+.q-pill-sw .q-pill-label { color: var(--amber); }
+.q-pill-av .q-pill-label { color: var(--red); }
+.q-pill-right { display: flex; align-items: center; gap: 12px; }
+.q-pill-count { font-family: var(--mono); font-size: 18px; font-weight: 500; color: var(--ink); }
+.q-pill-ret { font-family: var(--mono); font-size: 11px; font-weight: 500; }
+.ret-g { color: var(--green); }
+.ret-r { color: var(--red); }
+.ret-a { color: var(--amber); }
+.ret-m { color: var(--muted); }
+
+/* MAIN */
+.main { max-width: 1280px; margin: 0 auto; padding: 40px 40px; }
+
+.section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 22px; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+.section-title { font-family: var(--serif); font-size: 24px; font-weight: 300; letter-spacing: -0.3px; }
+.section-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* BAND CARDS */
+.band-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 36px; }
+.band-card { border-radius: 10px; padding: 20px 22px; position: relative; overflow: hidden; }
+.band-card::after { content: ''; position: absolute; bottom: 0; right: 0; width: 60px; height: 60px; border-radius: 50%; opacity: 0.08; }
+.bc1 { background: var(--green); color: #fff; }
+.bc1::after { background: #fff; }
+.bc2 { background: #2d6a4f; color: #fff; }
+.bc2::after { background: #fff; }
+.bc3 { background: var(--amber-pale); color: var(--amber); border: 1px solid #e8c99a; }
+.bc4 { background: var(--red-pale); color: var(--red); border: 1px solid #f0c0c0; }
+.bc-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85; margin-bottom: 8px; }
+.bc-score { font-family: var(--mono); font-size: 11px; opacity: 0.75; margin-bottom: 12px; }
+.bc-return { font-family: var(--serif); font-size: 34px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+.bc-sub { font-family: var(--mono); font-size: 10px; opacity: 0.75; }
+
+/* CHARTS */
+.charts-row { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; margin-bottom: 36px; }
+.chart-card { background: var(--card); border-radius: 10px; padding: 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.chart-card-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.chart-card-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+.chart-wrap { position: relative; height: 280px; }
+
+/* SAMPLE SIZE CAVEAT (under charts) */
+.sample-caveat { display: flex; gap: 14px; align-items: flex-start; background: var(--paper2); border-left: 3px solid var(--muted); border-radius: 6px; padding: 14px 18px; margin: -22px 0 36px; }
+.sc-icon { width: 22px; height: 22px; border-radius: 50%; background: var(--ink); color: var(--paper); font-family: var(--serif); font-size: 13px; font-style: italic; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 500; margin-top: 1px; }
+.sc-text { font-size: 13px; line-height: 1.65; color: #444; }
+.sc-text strong { color: var(--ink); font-weight: 600; }
+
+/* PORTFOLIO */
+.portfolio-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+.port-stat { background: var(--card); border-radius: 8px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.port-stat-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.port-stat-val { font-family: var(--mono); font-size: 20px; font-weight: 500; color: var(--ink); }
+.port-stat-val.pos { color: var(--green); }
+.port-stat-val.neg { color: var(--red); }
+
+/* TABLES */
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.fb { font-family: var(--mono); font-size: 10px; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--rule); background: var(--paper); cursor: pointer; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.15s; }
+.fb:hover { border-color: var(--ink); color: var(--ink); }
+.fb.active { background: var(--green); color: #fff; border-color: var(--green); }
+
+.data-table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.data-table thead tr { border-bottom: 1px solid var(--rule); }
+.data-table th { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 12px 14px; white-space: nowrap; font-weight: 500; }
+.data-table td { padding: 11px 14px; border-bottom: 1px solid var(--paper2); vertical-align: middle; font-size: 13px; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover td { background: var(--paper); }
+.ticker-cell { font-family: var(--mono); font-weight: 500; font-size: 12px; }
+.company-cell { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.owned-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--blue); margin-right: 5px; vertical-align: middle; }
+
+.badge { display: inline-block; font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 2px 8px; border-radius: 20px; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+.bz { background: var(--green-pale); color: var(--green); }
+.api { background: var(--blue-pale); color: var(--blue); }
+.sw { background: var(--amber-pale); color: var(--amber); }
+.av { background: var(--red-pale); color: var(--red); }
+.tier-fp { background: var(--green); color: #fff; }
+.tier-sp { background: #2d6a4f; color: #fff; }
+.tier-p { background: #c87941; color: #fff; }
+.tier-dn { background: var(--red); color: #fff; }
+
+.score-wrap { display: flex; align-items: center; gap: 8px; }
+.score-num { font-family: var(--mono); font-size: 14px; font-weight: 500; min-width: 26px; }
+.score-bar { height: 4px; width: 70px; background: var(--paper2); border-radius: 2px; overflow: hidden; }
+.score-fill { height: 100%; border-radius: 2px; }
+
+.ret-pos { color: var(--green); font-family: var(--mono); font-size: 12px; font-weight: 500; }
+.ret-neg { color: var(--red); font-family: var(--mono); font-size: 12px; font-weight: 500; }
+.ret-na { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.price-cell { font-family: var(--mono); font-size: 12px; color: var(--ink); }
+.price-na { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+.stop-alert { background: #fff8e6; border: 1px solid #f0c060; border-radius: 6px; padding: 10px 16px; font-family: var(--mono); font-size: 11px; color: var(--amber); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+/* SECTORS GRID */
+.sectors-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 40px; }
+.sector-card { background: var(--card); border-radius: 10px; padding: 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border-top: 3px solid var(--green); transition: transform 0.15s, box-shadow 0.15s; cursor: pointer; }
+.sector-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.sector-card.moderate { border-top-color: var(--amber); }
+.sector-card.watch { border-top-color: #888; }
+.sector-name { font-family: var(--serif); font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.sector-l1 { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+.sector-l1 .strong { color: var(--green); font-weight: 500; }
+.sector-l1 .mod { color: var(--amber); font-weight: 500; }
+.sector-stats { display: flex; gap: 18px; margin-bottom: 14px; }
+.sector-stat-val { font-family: var(--mono); font-size: 20px; font-weight: 500; }
+.sector-stat-label { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+.sector-schemes { font-size: 11px; color: var(--muted); border-top: 1px solid var(--paper2); padding-top: 10px; margin-top: 8px; line-height: 1.65; }
+.sector-cta { font-family: var(--mono); font-size: 10px; color: var(--green); margin-top: 10px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* FRAMEWORK SECTION (modular cards) */
+.framework-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 30px; }
+.framework-card { background: var(--card); border-radius: 12px; padding: 28px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); position: relative; overflow: hidden; }
+.framework-card.active { border-top: 3px solid var(--green); }
+.framework-card.coming { background: var(--paper2); border: 1px dashed var(--rule); box-shadow: none; }
+.fw-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.fw-tag .live { color: var(--green); }
+.fw-name { font-family: var(--serif); font-size: 22px; font-weight: 500; margin-bottom: 4px; line-height: 1.2; }
+.fw-name em { font-style: italic; color: var(--green); }
+.fw-scope { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 16px; }
+.fw-desc { font-size: 13px; color: #444; line-height: 1.7; margin-bottom: 14px; }
+.fw-pillars { list-style: none; padding: 0; margin: 12px 0; display: flex; flex-direction: column; gap: 6px; }
+.fw-pillars li { font-size: 12px; color: #444; padding-left: 18px; position: relative; line-height: 1.65; }
+.fw-pillars li::before { content: '→'; position: absolute; left: 0; color: var(--green); font-family: var(--mono); }
+.fw-pillars li strong { color: var(--ink); font-weight: 500; }
+.fw-cta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green); margin-top: 12px; display: inline-block; padding: 6px 12px; background: var(--green-pale); border-radius: 4px; }
+.fw-coming-text { font-family: var(--serif); font-size: 16px; font-weight: 300; color: var(--muted); font-style: italic; }
+
+/* REPORTS TAB */
+.reports-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 22px; flex-wrap: wrap; }
+.report-search { flex: 1; min-width: 200px; padding: 10px 14px; border: 1px solid var(--rule); border-radius: 6px; background: var(--card); font-family: var(--mono); font-size: 12px; color: var(--ink); }
+.report-search:focus { outline: none; border-color: var(--green); }
+
+.reports-by-sector { display: flex; flex-direction: column; gap: 24px; }
+.sector-report-block { background: var(--card); border-radius: 10px; padding: 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.sector-block-head { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--paper2); margin-bottom: 14px; }
+.sector-block-name { font-family: var(--serif); font-size: 18px; font-weight: 500; }
+.sector-block-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+.sector-deepdive-link { font-family: var(--mono); font-size: 10px; padding: 5px 12px; background: var(--green-pale); color: var(--green); border-radius: 4px; text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.15s; }
+.sector-deepdive-link:hover { background: var(--green); color: #fff; }
+.report-row-list { display: flex; flex-direction: column; gap: 6px; }
+.report-row { display: grid; grid-template-columns: 1fr auto auto auto auto auto; gap: 14px; align-items: center; padding: 12px 12px; border-radius: 6px; background: var(--paper); transition: all 0.15s; }
+.report-row:hover { background: var(--paper2); }
+.rr-name { font-family: var(--mono); font-size: 13px; font-weight: 500; }
+.rr-co { font-family: var(--sans); font-size: 11px; color: var(--muted); display: block; margin-top: 1px; }
+.rr-score { font-family: var(--mono); font-size: 13px; font-weight: 500; min-width: 36px; text-align: center; padding: 4px 10px; border-radius: 4px; }
+.rr-links { display: flex; gap: 6px; }
+.rr-link { font-family: var(--mono); font-size: 9px; padding: 4px 10px; border-radius: 4px; text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.15s; }
+.rr-link.summary { background: var(--blue-pale); color: var(--blue); }
+.rr-link.summary:hover { background: var(--blue); color: #fff; }
+.rr-link.deep { background: var(--green-pale); color: var(--green); }
+.rr-link.deep:hover { background: var(--green); color: #fff; }
+.rr-link.pending { background: var(--paper2); color: var(--muted); cursor: default; }
+
+/* ABOUT */
+.about-section { margin-bottom: 28px; background: var(--card); border-radius: 12px; padding: 36px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.about-narrative { margin-top: 22px; max-width: 760px; }
+.about-narrative p { font-size: 14.5px; color: #333; line-height: 1.85; margin-bottom: 16px; }
+.about-narrative p:last-child { margin-bottom: 0; }
+.about-narrative em { color: var(--green); font-style: italic; font-weight: 500; }
+.about-narrative strong { color: var(--ink); font-weight: 600; }
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; margin-top: 24px; }
+.about-block h3 { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.about-block p { font-size: 13px; color: #444; line-height: 1.75; margin-bottom: 12px; }
+.about-block .layer-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.about-block .layer-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; line-height: 1.7; color: #444; }
+.layer-num { font-family: var(--mono); font-size: 10px; background: var(--green); color: #fff; width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; font-weight: 500; }
+
+/* DISCLAIMER SECTION */
+.disclaimer-section { background: var(--ink); color: #bbb; border-radius: 10px; padding: 28px 32px; margin-bottom: 40px; font-family: var(--mono); font-size: 11px; line-height: 1.85; letter-spacing: 0.02em; }
+.disclaimer-section h3 { color: var(--paper); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+
+/* FOOTER */
+footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; justify-content: space-between; align-items: center; }
+.footer-left { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.06em; line-height: 1.7; }
+.footer-right { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+/* TABS */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+@media (max-width: 900px) {
+  .masthead { padding: 0 20px; flex-direction: column; align-items: flex-start; gap: 12px; }
+  .nav-links { padding-bottom: 12px; overflow-x: auto; width: 100%; }
+  .hero { padding: 32px 20px; grid-template-columns: 1fr; gap: 32px; }
+  .hero-title { font-size: 32px; }
+  .main { padding: 28px 20px; }
+  .band-row { grid-template-columns: repeat(2,1fr); }
+  .charts-row { grid-template-columns: 1fr; }
+  .sectors-grid { grid-template-columns: 1fr; }
+  .portfolio-summary { grid-template-columns: repeat(2,1fr); }
+  .about-grid { grid-template-columns: 1fr; }
+  .framework-grid { grid-template-columns: 1fr; }
+  .report-row { grid-template-columns: 1fr; gap: 8px; }
+  .report-row .rr-links { justify-self: start; }
+  footer { flex-direction: column; gap: 8px; text-align: center; padding: 20px; }
+  .data-table { font-size: 12px; }
+  .data-table th, .data-table td { padding: 8px 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- DISCLAIMER BANNER -->
+<div class="disclaimer-banner">
+  ⚠️ This website contains personal research and opinions only. Not SEBI-registered investment advice. Not a buy/sell recommendation. For educational purposes only. Invest at your own risk.
+  <a href="#disclaimer">Full disclaimer ↓</a>
+</div>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <a href="#" class="logo-block" onclick="showTab('dashboard',this)">
+    <span class="logo-pi">π</span>
+    <span class="logo-text">
+      <span class="logo-name">Passive Aggressive Investing</span>
+      <span class="logo-sub">Personal Research · Not SEBI Registered</span>
+    </span>
+  </a>
+  <nav class="nav-links">
+    <a onclick="showTab('dashboard',this)" class="active">Dashboard</a>
+    <a onclick="showTab('reports',this)">Reports</a>
+    <a onclick="showTab('universe',this)">Universe</a>
+    <a onclick="showTab('portfolio',this)">My Portfolio</a>
+    <a onclick="showTab('about',this)">About</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">Personal Research · The PAI Score is Proprietary</div>
+    <h1 class="hero-title">
+      Not passive.<br>
+      Not <em>quite</em> aggressive.<br>
+      Just research-first.
+    </h1>
+    <p class="hero-desc">
+      A personal investment research project for Indian listed equities. We score companies using PAI, a proprietary 100-point framework that combines regulatory tailwinds, network quality, valuation, and technical readiness. Not a trading service. Not advisory. Just public research, published openly.
+    </p>
+
+    <div class="lead-stat">
+      <div class="lead-stat-label">PAI Score 75+ · Highest Conviction Band</div>
+      <div class="lead-stat-value">+20.3% <em>average return</em></div>
+      <div class="lead-stat-detail">
+        Six companies scored 75+ at the start of April 2026. Average return measured 3 weeks later. Nifty SmallCap 100 over the same window: roughly flat. Sample size is small and the holding period is short. This is not a backtest, just a directional signal.
+      </div>
+    </div>
+
+    <div class="hero-meta">
+      <div class="hero-stat">
+        <div class="hero-stat-val pos">+12.6%</div>
+        <div class="hero-stat-label">Buy Zone avg return</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">88%</div>
+        <div class="hero-stat-label">Buy Zone win rate</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val pos">+37.6%</div>
+        <div class="hero-stat-label">Best call (EIEL)</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="updated-tag">Last updated · 21 Apr 2026</div>
+    <div class="quadrant-pills">
+      <div class="q-pill q-pill-bz">
+        <span class="q-pill-label">Buy Zone</span>
+        <div class="q-pill-right">
+          <span class="q-pill-count">21</span>
+          <span class="q-pill-ret ret-g">+12.6%</span>
+        </div>
+      </div>
+      <div class="q-pill q-pill-api">
+        <span class="q-pill-label">Already Priced In</span>
+        <div class="q-pill-right">
+          <span class="q-pill-count">13</span>
+          <span class="q-pill-ret ret-r">-12.0%</span>
+        </div>
+      </div>
+      <div class="q-pill q-pill-sw">
+        <span class="q-pill-label">Speculative Watch</span>
+        <div class="q-pill-right">
+          <span class="q-pill-count">7</span>
+          <span class="q-pill-ret ret-a">+5.4%</span>
+        </div>
+      </div>
+      <div class="q-pill q-pill-av">
+        <span class="q-pill-label">Avoid</span>
+        <div class="q-pill-right">
+          <span class="q-pill-count">7</span>
+          <span class="q-pill-ret ret-m">N/A</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- ════════ DASHBOARD TAB ════════ -->
+<div id="tab-dashboard" class="tab-content active">
+
+  <!-- BAND CARDS -->
+  <div class="section-head">
+    <div class="section-title">PAI Score — Performance by Band</div>
+    <div class="section-meta">Companies Scored · April 2026</div>
+  </div>
+  <div class="band-row">
+    <div class="band-card bc1">
+      <div class="bc-label">Band 1</div>
+      <div class="bc-score">Score 75–100 · Full Position</div>
+      <div class="bc-return">+20.3%</div>
+      <div class="bc-sub">avg return · 6 companies</div>
+    </div>
+    <div class="band-card bc2">
+      <div class="bc-label">Band 2</div>
+      <div class="bc-score">Score 55–74 · Standard</div>
+      <div class="bc-return">+8.1%</div>
+      <div class="bc-sub">avg return · 11 companies</div>
+    </div>
+    <div class="band-card bc3">
+      <div class="bc-label">Band 3</div>
+      <div class="bc-score">Score 35–54 · Pilot Only</div>
+      <div class="bc-return">-2.1%</div>
+      <div class="bc-sub">avg return · 2 companies</div>
+    </div>
+    <div class="band-card bc4">
+      <div class="bc-label">Band 4</div>
+      <div class="bc-score">Score 0–34 · Do Not Buy</div>
+      <div class="bc-return">-28.7%</div>
+      <div class="bc-sub">avg return · 3 companies</div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-card-title">Score vs Return — Scatter</div>
+      <div class="chart-card-sub">Each dot = one company · larger = author owns it · trend line shows direction</div>
+      <div class="chart-wrap"><canvas id="scatterChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Avg Return by Score Band</div>
+      <div class="chart-card-sub">Higher score → better outcome so far</div>
+      <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="sample-caveat">
+    <div class="sc-icon">i</div>
+    <div class="sc-text">
+      <strong>Read these charts with caution.</strong> The sample size here is small (around 20 scored companies) and the holding period is short (a few weeks). The trend is directionally encouraging, but a strong claim about correlation between PAI Score and forward returns needs a much larger sample over a longer horizon. The backtesting work described in the <a onclick="showTab('about',document.querySelector('.nav-links a:last-child'))" style="color:var(--green);text-decoration:underline;cursor:pointer">About</a> section is the next step toward that.
+    </div>
+  </div>
+
+  <!-- FRAMEWORK CARDS — modular -->
+  <div class="section-head">
+    <div class="section-title">Frameworks in Use</div>
+    <div class="section-meta">Modular · Multiple Frameworks Coming</div>
+  </div>
+  <div class="framework-grid">
+    <div class="framework-card active">
+      <div class="fw-tag">Framework #1 · <span class="live">Live</span></div>
+      <div class="fw-name">NAV — <em>The Sector-First Approach</em></div>
+      <div class="fw-scope">Best Suited · Indian Small to Mid Cap</div>
+      <div class="fw-desc">
+        NAV starts with sectors before companies. The intuition is that in India, the largest sustainable returns tend to come from the intersection of government policy tailwinds, quality business networks, and reasonable valuations, verified by technical readiness before deployment.
+      </div>
+      <ul class="fw-pillars">
+        <li><strong>Regulatory conviction.</strong> Is government a direct customer or scheme beneficiary?</li>
+        <li><strong>Network quality.</strong> Commercial customer network, institutional investors, promoter background.</li>
+        <li><strong>Valuation discipline.</strong> P/E vs peers, target upside, risk-reward.</li>
+        <li><strong>Technical readiness.</strong> Stage analysis, base structure, volume confirmation.</li>
+      </ul>
+      <a class="fw-cta" onclick="showTab('about',this)">Read the full story →</a>
+    </div>
+    <div class="framework-card coming">
+      <div class="fw-tag">Framework #2 · Coming Soon</div>
+      <div class="fw-name">More Frameworks</div>
+      <div class="fw-scope">In Development</div>
+      <div class="fw-coming-text">
+        NAV is built for small and mid-cap quality compounders riding policy tailwinds. Other situations need other lenses. Special situations, momentum breakouts, large-cap re-rating. Additional frameworks will be added as they are tested.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTORS -->
+  <div class="section-head">
+    <div class="section-title">Sectors Currently Covered</div>
+    <div class="section-meta">Coverage Expanding · Click for Sector Report</div>
+  </div>
+  <div class="sectors-grid" id="sectorsGrid"></div>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer-section" id="disclaimer">
+    <h3>⚠️ Full Disclaimer — Read Before Using This Site</h3>
+    This website is maintained by an individual investor for personal research documentation purposes only. The author is <strong style="color:#fff">not a SEBI-registered investment advisor, research analyst, or portfolio manager</strong>. Nothing on this website constitutes investment advice, a buy/sell recommendation, or a solicitation to invest in any security.<br><br>
+    All analysis, scores, quadrant classifications, entry prices, and target prices are personal research outputs based on publicly available information. They reflect the author's opinions at the time of writing and may be materially incorrect, outdated, or biased. Indian equities involve significant risk. Small-cap and mid-cap stocks are particularly volatile.<br><br>
+    <strong style="color:#fff">Past model returns shown on this site do not guarantee future results.</strong> The scoring period is short (weeks, not years). This is not a validated backtested strategy. The PAI framework is a personal tool that is still evolving.<br><br>
+    Technical analysis methodology used in some reports follows the SEPA approach described in <em>Trade Like a Stock Market Wizard</em> by Mark Minervini (McGraw-Hill, 2013). Reproduction of any part of that work is not implied.<br><br>
+    By using this website, you acknowledge that you are making your own independent investment decisions. The author accepts no liability for any financial loss arising from the use of this research. Always consult a SEBI-registered investment advisor before making investment decisions.
+  </div>
+
+</div>
+<!-- END DASHBOARD -->
+
+
+<!-- ════════ REPORTS TAB ════════ -->
+<div id="tab-reports" class="tab-content">
+
+  <div class="section-head">
+    <div class="section-title">Research Reports</div>
+    <div class="section-meta">Sector & Company Reports · Updated Continuously</div>
+  </div>
+
+  <div class="reports-toolbar">
+    <input type="text" class="report-search" placeholder="Search by ticker or company name..." id="reportSearch" oninput="filterReports()">
+    <button class="fb active" onclick="filterReportsBy('all',this)">All Reports</button>
+    <button class="fb" onclick="filterReportsBy('summary',this)">Summary Only</button>
+    <button class="fb" onclick="filterReportsBy('deep',this)">Deep Dive Available</button>
+    <button class="fb" onclick="filterReportsBy('high-score',this)">PAI 75+</button>
+  </div>
+
+  <div class="reports-by-sector" id="reportsBySector"></div>
+
+</div>
+<!-- END REPORTS -->
+
+
+<!-- ════════ UNIVERSE TAB ════════ -->
+<div id="tab-universe" class="tab-content">
+
+  <div class="section-head">
+    <div class="section-title">Research Universe</div>
+    <div class="section-meta">Scored April 2026 · PAI Score Where Available</div>
+  </div>
+
+  <div class="stop-alert">
+    ⚠️ Stop proximity alert: <strong>UNOMINDA</strong> CMP ₹1,150 is within 2.7% of stop ₹1,120
+  </div>
+
+  <div class="filter-row">
+    <button class="fb active" onclick="filterUniverse('all',this)">All</button>
+    <button class="fb" onclick="filterUniverse('buy_zone',this)">Buy Zone</button>
+    <button class="fb" onclick="filterUniverse('already_priced_in',this)">Priced In</button>
+    <button class="fb" onclick="filterUniverse('speculative_watch',this)">Watch</button>
+    <button class="fb" onclick="filterUniverse('avoid',this)">Avoid</button>
+    <button class="fb" onclick="filterUniverse('owned',this)">● Owned</button>
+    <button class="fb" onclick="filterUniverse('scored',this)">Scored only</button>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Company</th>
+        <th>Sector</th>
+        <th>Quadrant</th>
+        <th>PAI Score</th>
+        <th>Band</th>
+        <th>Scoring CMP</th>
+        <th>CMP</th>
+        <th>Return</th>
+      </tr>
+    </thead>
+    <tbody id="universeTbody"></tbody>
+  </table>
+
+</div>
+<!-- END UNIVERSE -->
+
+
+<!-- ════════ PORTFOLIO TAB ════════ -->
+<div id="tab-portfolio" class="tab-content">
+
+  <div class="section-head">
+    <div class="section-title">My Portfolio</div>
+    <div class="section-meta">Personal positions only · Not investment advice</div>
+  </div>
+
+  <div class="portfolio-summary">
+    <div class="port-stat"><div class="port-stat-label">Invested</div><div class="port-stat-val">₹9.29L</div></div>
+    <div class="port-stat"><div class="port-stat-label">Current Value</div><div class="port-stat-val">₹9.24L</div></div>
+    <div class="port-stat"><div class="port-stat-label">Total P&L</div><div class="port-stat-val neg">-0.5%</div></div>
+    <div class="port-stat"><div class="port-stat-label">Best Performer</div><div class="port-stat-val pos">EIEL +31.2%</div></div>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Company</th>
+        <th>Quadrant</th>
+        <th>Entry</th>
+        <th>CMP</th>
+        <th>P&L</th>
+        <th>Stop</th>
+        <th>6M Target</th>
+      </tr>
+    </thead>
+    <tbody id="portfolioTbody"></tbody>
+  </table>
+
+</div>
+<!-- END PORTFOLIO -->
+
+
+<!-- ════════ ABOUT TAB ════════ -->
+<div id="tab-about" class="tab-content">
+
+  <!-- Personal motivation -->
+  <div class="about-section">
+    <div class="section-head" style="margin-bottom:0;border-bottom:none;">
+      <div class="section-title">Why I Built PAI</div>
+      <div class="section-meta">A Personal Note</div>
+    </div>
+    <div class="about-narrative">
+      <p>
+        I studied economics. The thing that stuck with me from those years wasn't a particular model. It was a conviction that <em>firms are not interchangeable</em>. A small firm in its first decade faces a fundamentally different problem set than a mature large-cap. The factors that drive success at one stage of a company's life cycle are not the same factors that drive success at another. Theory of the firm, industrial organisation, network effects all tell us that the right lens depends on what kind of firm you are looking at.
+      </p>
+      <p>
+        Most retail investors in India are told to choose between two extremes. Passive index funds on one side, speculation on tips on the other. Neither approach uses what economics actually tells us about how firms create value. PAI is the framework I built for the middle path. Research-driven, framework-led, transparent.
+      </p>
+      <p>
+        I draw on what I learned as an economics student, and on time spent working in lending. Particularly in MSME lending, where you see up close how cash flows, customer concentration, working capital cycles, and informal networks actually decide whether a small business survives. Those years made me sceptical of valuation models that ignore the network around a firm. A balance sheet tells you what a company owns. It does not tell you who its customers are, who its investors are, or whether the founder has the relationships to keep the lights on through a downturn.
+      </p>
+      <p>
+        That observation, that <em>network effects are systematically underweighted in standard valuation and technical frameworks</em>, became the foundation of the C2 layer in PAI. The thinking on this layer was sharpened in conversations with a friend pursuing a PhD in economics whose research focus is on networks. I am grateful for those conversations. The framing of network quality as a scorable layer rather than soft commentary owes a lot to them.
+      </p>
+    </div>
+  </div>
+
+  <!-- Why my portfolio is public -->
+  <div class="about-section">
+    <div class="section-head" style="margin-bottom:0;border-bottom:none;">
+      <div class="section-title">Why My Portfolio Is Public</div>
+      <div class="section-meta">Skin in the Game</div>
+    </div>
+    <div class="about-narrative">
+      <p>
+        Most investment writing online does not show its own positions. Reports go out, calls get made, and the author is invisible when those calls go wrong. I find that uncomfortable. If I am putting research out under my own framework, I should also show what that framework looks like when I act on it myself.
+      </p>
+      <p>
+        My portfolio is on this site for that reason. The wins are visible. The losses are visible too. EIEL is up 31% from my entry. Reliance is down 55% from where I bought it. Aelea Commodities is in the avoid bucket and I still own it because I bought it before I had the framework. All of that stays on the page.
+      </p>
+      <p>
+        There is a second reason for showing it. <strong>Every model has limitations.</strong> No framework gets every call right. The score is a directional signal, not a guarantee. A high PAI Score raises the probability of a good outcome. It does not promise one. Putting my own portfolio next to the model output is the most honest way to show that gap. You can see when the model worked and when it did not. You can see when I followed the framework and when I did not.
+      </p>
+      <p>
+        And there is a third reason that often gets overlooked. <strong>Execution matters as much as the call.</strong> Buying at the right level, holding through volatility without panic-selling, exiting when the thesis breaks rather than when the price wobbles, all of that is separate from whether the underlying research is sound. The same buy-zone call, executed well or executed badly, produces very different returns. My portfolio is a record of execution, not just of analysis. It is one thing to identify a Stage 2 setup. It is another to actually buy it on the day, hold it through a 10% drawdown, and not flinch.
+      </p>
+      <p>
+        I am not selling anything. I am not running a paid newsletter, a Telegram channel, or a tip service. PAI exists because I needed it to exist for myself. The site is here so other people can read along if they find the work useful. The portfolio is here so they can see what acting on the work actually looks like.
+      </p>
+    </div>
+  </div>
+
+  <!-- The AI role -->
+  <div class="about-section">
+    <div class="section-head" style="margin-bottom:0;border-bottom:none;">
+      <div class="section-title">The Role of AI in This Work</div>
+      <div class="section-meta">Human-Guided, AI-Executed</div>
+    </div>
+    <div class="about-narrative">
+      <p>
+        The π in PAI is not decoration. This work would not be possible at this depth, at this speed, by one person, without AI. I want to be transparent about how AI is actually used here, because the difference between "AI-powered" as marketing and AI as a real working tool is large.
+      </p>
+      <p>
+        Specialised AI agents handle different parts of the pipeline. <strong>Each agent has one job, and the framework binds the outputs together into a coherent thesis.</strong>
+      </p>
+      <ul class="layer-list" style="margin-top: 14px;">
+        <li><div class="layer-num">0</div><div><strong>News and idea scout.</strong> Continuously scans financial news, sector announcements, government scheme updates, and market chatter. Surfaces sectors and companies that look worth a closer look. This is the funnel that feeds everything else.</div></li>
+        <li><div class="layer-num">1</div><div><strong>Sector and policy analyst.</strong> Reads government schemes, ministry circulars, and budget documents. Builds the L1 regulatory case that anchors the NAV framework.</div></li>
+        <li><div class="layer-num">2</div><div><strong>Universe builder and network mapper.</strong> Pulls financials, identifies peer sets, maps customer concentration, institutional holdings, and promoter networks. This is where the C2 layer comes from.</div></li>
+        <li><div class="layer-num">3</div><div><strong>Quadrant scorer.</strong> Applies the framework rules to assign each company to a quadrant and compute the PAI Score components.</div></li>
+        <li><div class="layer-num">4</div><div><strong>Peer comparator.</strong> Benchmarks each candidate against its sector peers on every relevant metric, surfaces who is genuinely better and who is just cheaper.</div></li>
+        <li><div class="layer-num">5</div><div><strong>Deep dive writer.</strong> Pulls everything together into a structured report. Same template every time, no narrative drift.</div></li>
+        <li><div class="layer-num">6</div><div><strong>Technical analyst.</strong> Computes moving averages, evaluates the trend template, classifies the stage, identifies pivots. Replaces hand-drawn chart analysis with consistent, rule-based output.</div></li>
+        <li><div class="layer-num">7</div><div><strong>Live verification monitor.</strong> Checks every price-sensitive number against a live source before publication. Catches stale data before it becomes a stale call.</div></li>
+      </ul>
+      <p style="margin-top: 22px;">
+        Every output goes through me. I read the report, push back on the score where I disagree, override the agent when I think it has missed context, and decide what gets published. <strong>The AI is fast and consistent. The human supplies judgment, scepticism, and the willingness to throw an output away when it does not feel right.</strong>
+      </p>
+      <p>
+        This is also why the framework can be honest about its limits. When AI is doing the heavy lifting on consistency, the human can spend energy on the things AI is bad at. Asking whether the data is even the right data. Noticing when a company's narrative has changed in a way the numbers have not yet caught. Deciding when a high score should still not be acted on because something feels off.
+      </p>
+    </div>
+  </div>
+
+  <!-- The frameworks roadmap -->
+  <div class="about-section">
+    <div class="section-head" style="margin-bottom:0;border-bottom:none;">
+      <div class="section-title">Many Firms, Many Frameworks</div>
+      <div class="section-meta">Modular by Design</div>
+    </div>
+    <div class="about-narrative">
+      <p>
+        If different kinds of firms need different lenses, no single framework can be universal. NAV is the first one. It is designed for small and mid-cap firms riding identifiable government policy tailwinds, where the regulatory anchor is a meaningful driver of revenue. It would be poorly suited to a large-cap turnaround, an early-stage IPO, or a momentum-driven breakout in a sector with no scheme behind it.
+      </p>
+      <p>
+        That is why this site is architected to be <strong>framework-modular</strong>. As I add new frameworks for special situations, momentum, large-cap re-rating, early-stage IPOs, they will appear as separate scoring systems. Each will have its own conviction bands, its own report format, and its own published track record. Reports will be tagged with which framework was used. Conflicting calls between frameworks will be visible, not hidden.
+      </p>
+      <p>
+        The PAI Score itself is proprietary. The exact rubric for converting layer assessments into a single number is not public. What is public is the score, the band it falls in, and the reasoning behind each layer for each company.
+      </p>
+    </div>
+  </div>
+
+  <!-- Framework #1: NAV -->
+  <div class="about-section">
+    <div class="section-head" style="margin-bottom:0;border-bottom:none;">
+      <div class="section-title">Framework #1 — NAV</div>
+      <div class="section-meta">For Indian Small and Mid-Cap Compounders</div>
+    </div>
+    <div class="about-grid">
+      <div class="about-block">
+        <h3>The Four Questions</h3>
+        <p>NAV asks four questions about a company, in order. The intuition is that all four matter, and any one being weak should make you pause.</p>
+        <ul class="layer-list">
+          <li><div class="layer-num">C1</div><div><strong>Is there a regulatory tailwind?</strong> Government schemes that fund the sector directly are stronger than schemes that hand cash incentives to private players. Direct customer beats indirect benefit.</div></li>
+          <li><div class="layer-num">C2</div><div><strong>Is the network around the firm high quality?</strong> Three sub-questions. Who are the customers, who are the institutional investors, who are the promoters. The C2 layer is where the network-effects thinking lives.</div></li>
+          <li><div class="layer-num">C3</div><div><strong>Is the valuation defensible?</strong> P/E versus sector peers, plus percent upside to a rigorously derived target. Stocks that are cheap but offer no upside are not interesting. Expensive stocks with strong upside earn closer attention.</div></li>
+          <li><div class="layer-num">C4</div><div><strong>Is the chart ready?</strong> Stock structure, base formation, volume confirmation. A fundamentally good firm in a downtrend is not bought. Wait for the chart to confirm.</div></li>
+        </ul>
+      </div>
+      <div class="about-block">
+        <h3>Score Bands</h3>
+        <ul class="layer-list">
+          <li><div class="layer-num" style="background:var(--green)">1</div><div><strong>75–100, Full Position tier.</strong> Highest conviction. The firms that pass all four layers strongly.</div></li>
+          <li><div class="layer-num" style="background:#2d6a4f">2</div><div><strong>55–74, Standard tier.</strong> Good across most layers, weaker on one.</div></li>
+          <li><div class="layer-num" style="background:#c87941">3</div><div><strong>35–54, Pilot tier.</strong> Mixed signals. Worth tracking but the case is not complete.</div></li>
+          <li><div class="layer-num" style="background:var(--red)">4</div><div><strong>0–34, Do Not Buy tier.</strong> The score overrides the quadrant label.</div></li>
+        </ul>
+        <h3 style="margin-top:24px">Beyond the Score</h3>
+        <ul class="layer-list">
+          <li><div class="layer-num">+</div><div><strong>Underwriter-style diligence on adverse signals.</strong> Like a credit underwriter looking at a borrower, every company in the universe is checked for adverse news, governance flags, regulatory action, auditor changes, related-party transactions, and unusual disclosures. All of this uses publicly available data. Adverse signals do not always change the score, but they always change how closely the position is monitored.</div></li>
+        </ul>
+        <p style="margin-top:20px; font-size:12px; font-style:italic; color:var(--muted);">
+          The technical layer (C4) draws on the stage analysis and trend template approach described in <em>Trade Like a Stock Market Wizard</em> by Mark Minervini (McGraw-Hill, 2013), adapted for Indian market data.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- What's coming -->
+  <div class="about-section">
+    <div class="section-head" style="margin-bottom:0;border-bottom:none;">
+      <div class="section-title">What's Next</div>
+      <div class="section-meta">Roadmap</div>
+    </div>
+    <div class="about-narrative">
+      <p>
+        The current focus is finishing coverage on sectors where NAV applies cleanly. Water, cables, recycling, auto metal forming, lending, energy. Reports will be added continuously. Beyond that, additional frameworks for different firm types are in design. Each will get its own scoring system, its own published track record, and its own home on this site.
+      </p>
+      <p>
+        I am also working on <strong>backtesting methodologies</strong> for the framework. The most immediate test is rebuilding the NAV scores using only data available as of 31 December 2024, then measuring how those calls would have performed across calendar 2025. That gives a full year of out-of-sample returns to look at, with no hindsight bias. Done honestly, this kind of test will show where the framework actually works and where it overfits. The results will go on this site, whatever they say.
+      </p>
+      <p>
+        Two new AI agents are also in development, extending the existing pipeline beyond entry-side analysis into ongoing portfolio monitoring. A good entry call only matters if the exit is also handled well.
+      </p>
+      <ul class="layer-list" style="margin-top: 12px;">
+        <li><div class="layer-num">A1</div><div><strong>Adverse news monitor.</strong> Continuously scans publicly available news and disclosures for every company in the active portfolio, the buy zone list, and the 75-plus score band. Flags governance changes, auditor exits, regulatory actions, and material announcements that should re-trigger a thesis review.</div></li>
+        <li><div class="layer-num">A2</div><div><strong>FII/DII flow monitor.</strong> Tracks foreign institutional and domestic institutional flows at the sector and stock level. When institutional positioning shifts materially in a stock you own, the framework needs to know quickly. Knowing when to exit is as critical as knowing when to enter.</div></li>
+      </ul>
+      <p style="margin-top: 20px;">
+        If a report on this site helps you think more clearly about a company, whether you end up agreeing with the call or disagreeing with it, that is the entire point. The framework is a thinking tool, not a buy list.
+      </p>
+    </div>
+  </div>
+
+</div>
+<!-- END ABOUT -->
+
+</div>
+<!-- END MAIN -->
+
+<footer>
+  <div class="footer-left">
+    π PAI — Passive Aggressive Investing · passiveaggressiveinvesting.io<br>
+    Personal research only. Not SEBI registered. Not investment advice.
+  </div>
+  <div class="footer-right">
+    Built with NAV Framework · April 2026
+  </div>
+</footer>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+
+const companies = [
+  // buy zone — scored
+  {id:"HFCL",       name:"HFCL Ltd",              sector:"Cables",        q:"buy_zone",          score:89, scoringCMP:72,    cmp:94.9,   owned:false, hasReport:true,  hasDeep:true},
+  {id:"EIEL",       name:"Enviro Infra Engineers", sector:"Water",         q:"buy_zone",          score:85, scoringCMP:152,   cmp:209.1,  owned:true,  hasReport:true,  hasDeep:true},
+  {id:"KEC",        name:"KEC International",      sector:"Cables",        q:"buy_zone",          score:83, scoringCMP:775,   cmp:581.8,  owned:false, hasReport:true,  hasDeep:false},
+  {id:"VINDHYATEL", name:"Vindhya Telelinks",       sector:"Cables",        q:"buy_zone",          score:82, scoringCMP:1158,  cmp:1343.8, owned:false, hasReport:true,  hasDeep:false},
+  {id:"SANSERA",    name:"Sansera Engineering",     sector:"Auto Metal",    q:"buy_zone",          score:78, scoringCMP:2130,  cmp:2370,   owned:true,  hasReport:true,  hasDeep:true},
+  {id:"SONACOMS",   name:"Sona BLW Precision",      sector:"Auto Metal",    q:"buy_zone",          score:77, scoringCMP:511,   cmp:581.5,  owned:true,  hasReport:true,  hasDeep:true},
+  {id:"FIVESTARBUS",name:"Five-Star Business Fin.", sector:"Lending",       q:"buy_zone",          score:77, scoringCMP:470,   cmp:504.4,  owned:true,  hasReport:true,  hasDeep:true},
+  {id:"TARIL",      name:"Transformers & Rect.",    sector:"Cables",        q:"buy_zone",          score:67, scoringCMP:290,   cmp:332.4,  owned:true,  hasReport:true,  hasDeep:false},
+  {id:"GRAVITA",    name:"Gravita India",           sector:"Recycling",     q:"buy_zone",          score:73, scoringCMP:1357,  cmp:1647.7, owned:false, hasReport:true,  hasDeep:false},
+  {id:"IEX",        name:"Indian Energy Exchange",  sector:"Energy",        q:"buy_zone",          score:70, scoringCMP:129.8, cmp:126.2,  owned:true,  hasReport:true,  hasDeep:false},
+  {id:"CRAFTSMAN",  name:"Craftsman Automation",    sector:"Auto Metal",    q:"buy_zone",          score:70, scoringCMP:7000,  cmp:7683,   owned:false, hasReport:true,  hasDeep:true},
+  {id:"POCL",       name:"Pondy Oxides",            sector:"Recycling",     q:"buy_zone",          score:68, scoringCMP:null,  cmp:1174.8, owned:false, hasReport:true,  hasDeep:false},
+  {id:"ANTONYWASTE",name:"Antony Waste Handling",   sector:"Recycling",     q:"buy_zone",          score:66, scoringCMP:null,  cmp:null,   owned:false, hasReport:true,  hasDeep:false},
+  {id:"HBLPOWER",   name:"HBL Engineering",         sector:"Cables",        q:"buy_zone",          score:66, scoringCMP:701,   cmp:788.3,  owned:true,  hasReport:true,  hasDeep:false},
+  {id:"MSTC",       name:"MSTC Ltd",                sector:"Recycling",     q:"buy_zone",          score:66, scoringCMP:416,   cmp:458.1,  owned:true,  hasReport:true,  hasDeep:false},
+  {id:"RKFORGE",    name:"Ramkrishna Forgings",     sector:"Auto Metal",    q:"buy_zone",          score:64, scoringCMP:471,   cmp:553.3,  owned:false, hasReport:true,  hasDeep:true},
+  {id:"TRANSRAIL",  name:"Transrail Lighting",      sector:"Cables",        q:"buy_zone",          score:62, scoringCMP:532.6, cmp:571,    owned:true,  hasReport:true,  hasDeep:false},
+  {id:"FINCABLES",  name:"Finolex Cables",          sector:"Cables",        q:"buy_zone",          score:61, scoringCMP:969,   cmp:954,    owned:false, hasReport:true,  hasDeep:false},
+  {id:"UNIVCABLES", name:"Universal Cables",        sector:"Cables",        q:"buy_zone",          score:61, scoringCMP:776,   cmp:851.2,  owned:true,  hasReport:true,  hasDeep:false},
+  {id:"JASH",       name:"Jash Engineering",        sector:"Water",         q:"buy_zone",          score:70, scoringCMP:null,  cmp:407.9,  owned:false, hasReport:true,  hasDeep:true},
+  {id:"LUMAXTECH",  name:"Lumax Auto Technologies", sector:"Auto Metal",    q:"buy_zone",          score:51, scoringCMP:1680,  cmp:1783.9, owned:true,  hasReport:true,  hasDeep:false},
+  // already priced in
+  {id:"APARINDS",   name:"Apar Industries",         sector:"Cables",        q:"already_priced_in", score:63, scoringCMP:11180, cmp:11867.5,owned:false, hasReport:true,  hasDeep:false},
+  {id:"UNOMINDA",   name:"UNO Minda",               sector:"Auto Metal",    q:"already_priced_in", score:58, scoringCMP:1140,  cmp:1150,   owned:false, hasReport:true,  hasDeep:false},
+  {id:"HDFCBANK",   name:"HDFC Bank",               sector:"Lending",       q:"already_priced_in", score:null,scoringCMP:809.8,cmp:810,   owned:true,  hasReport:false, hasDeep:false},
+  {id:"RELIANCE",   name:"Reliance Industries",     sector:"Energy",        q:"already_priced_in", score:null,scoringCMP:3013.9,cmp:1354.2,owned:true,  hasReport:false, hasDeep:false},
+  {id:"WABAG",      name:"VA Tech Wabag",           sector:"Water",         q:"already_priced_in", score:57, scoringCMP:null,  cmp:1497,   owned:false, hasReport:true,  hasDeep:true},
+  {id:"BHARATFORG", name:"Bharat Forge",            sector:"Auto Metal",    q:"already_priced_in", score:null,scoringCMP:null, cmp:1901.6, owned:false, hasReport:false, hasDeep:false},
+  {id:"ENDURANCE",  name:"Endurance Technologies",  sector:"Auto Metal",    q:"already_priced_in", score:null,scoringCMP:null, cmp:2391.8, owned:false, hasReport:false, hasDeep:false},
+  {id:"TIINDIA",    name:"Tube Investments of India",sector:"Auto Metal",   q:"already_priced_in", score:null,scoringCMP:null, cmp:2892.6, owned:false, hasReport:false, hasDeep:false},
+  {id:"POLYCAB",    name:"Polycab India",           sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:7984.5, owned:false, hasReport:false, hasDeep:false},
+  {id:"KEI",        name:"KEI Industries",          sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:4869.2, owned:false, hasReport:false, hasDeep:false},
+  {id:"RRKABEL",    name:"RR Kabel",                sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:1458.2, owned:false, hasReport:false, hasDeep:false},
+  {id:"HAVELLS",    name:"Havells India",           sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:1324.4, owned:false, hasReport:false, hasDeep:false},
+  {id:"DIAMONDPOW", name:"Diamond Power Infra",     sector:"Cables",        q:"already_priced_in", score:null,scoringCMP:null, cmp:null,   owned:false, hasReport:false, hasDeep:false},
+  // speculative watch
+  {id:"SUZLON",     name:"Suzlon Energy",           sector:"Energy",        q:"speculative_watch", score:62, scoringCMP:42.83,cmp:53,     owned:true,  hasReport:true,  hasDeep:false},
+  {id:"YATRA",      name:"Yatra Online",            sector:"Other",         q:"speculative_watch", score:30, scoringCMP:120,  cmp:121.5,  owned:true,  hasReport:false, hasDeep:false},
+  {id:"IFCI",       name:"IFCI Ltd",                sector:"Lending",       q:"speculative_watch", score:null,scoringCMP:62.5, cmp:60.7,  owned:true,  hasReport:false, hasDeep:false},
+  {id:"ANANTRAJ",   name:"Anant Raj",               sector:"Other",         q:"speculative_watch", score:39, scoringCMP:533.4,cmp:516.2,  owned:true,  hasReport:false, hasDeep:false},
+  {id:"DENTAWATER", name:"Denta Water & Infra",     sector:"Water",         q:"speculative_watch", score:null,scoringCMP:null, cmp:null,  owned:false, hasReport:true,  hasDeep:false},
+  {id:"GANECOS",    name:"Ganesha Ecosphere",       sector:"Recycling",     q:"speculative_watch", score:61, scoringCMP:null, cmp:1058,   owned:false, hasReport:true,  hasDeep:false},
+  {id:"NAMOEWASTE", name:"Namo eWaste Management",  sector:"Recycling",     q:"speculative_watch", score:null,scoringCMP:null,cmp:null,   owned:false, hasReport:false, hasDeep:false},
+  // avoid
+  {id:"EMSLIMITED", name:"EMS Limited",             sector:"Water",         q:"avoid",             score:null,scoringCMP:null, cmp:375.5, owned:false, hasReport:true,  hasDeep:false},
+  {id:"SHIVAMILLS", name:"Shivam Autotech",         sector:"Auto Metal",    q:"avoid",             score:5,  scoringCMP:null,  cmp:63,    owned:false, hasReport:false, hasDeep:false},
+  {id:"JAINREC",    name:"Jain Resource Recycling", sector:"Recycling",     q:"avoid",             score:20, scoringCMP:null,  cmp:420.9, owned:false, hasReport:false, hasDeep:false},
+  {id:"A2ZINFRA",   name:"A2Z Infra Engineering",   sector:"Other",         q:"avoid",             score:null,scoringCMP:null, cmp:17.2,  owned:false, hasReport:false, hasDeep:false},
+  {id:"AELEA",      name:"Aelea Commodities",       sector:"Recycling",     q:"avoid",             score:0,  scoringCMP:176,   cmp:null,  owned:true,  hasReport:false, hasDeep:false},
+  {id:"QUADRANTFTEK",name:"Quadrant Future Tek",    sector:"Cables",        q:"avoid",             score:null,scoringCMP:null, cmp:null,  owned:false, hasReport:false, hasDeep:false},
+  {id:"BIRLACABLE", name:"Birla Cable",             sector:"Cables",        q:"avoid",             score:null,scoringCMP:null, cmp:159,   owned:false, hasReport:false, hasDeep:false},
+];
+
+const portfolio = [
+  {ticker:"EIEL",    company:"Enviro Infra Engineers",  q:"buy_zone",          entry:159.4,   cmp:209.1,  stop:148,   t6m:225},
+  {ticker:"FIVESTARBUS",company:"Five-Star Business Fin.",q:"buy_zone",        entry:388.2,   cmp:504.4,  stop:445,   t6m:600},
+  {ticker:"SUZLON",  company:"Suzlon Energy",           q:"speculative_watch", entry:42.8,    cmp:53.0,   stop:40,    t6m:null},
+  {ticker:"SONACOMS",company:"Sona BLW Precision",      q:"buy_zone",          entry:500.0,   cmp:581.5,  stop:475,   t6m:600},
+  {ticker:"TARIL",   company:"Transformers & Rect.",    q:"buy_zone",          entry:290.0,   cmp:332.4,  stop:null,  t6m:null},
+  {ticker:"HBLPOWER",company:"HBL Engineering",         q:"buy_zone",          entry:701.0,   cmp:788.3,  stop:null,  t6m:null},
+  {ticker:"SANSERA", company:"Sansera Engineering",     q:"buy_zone",          entry:2141.8,  cmp:2370,   stop:1900,  t6m:2800},
+  {ticker:"MSTC",    company:"MSTC Ltd",                q:"buy_zone",          entry:416.0,   cmp:458.1,  stop:null,  t6m:null},
+  {ticker:"UNIVCABLES",company:"Universal Cables",      q:"buy_zone",          entry:776.0,   cmp:851.2,  stop:null,  t6m:null},
+  {ticker:"TRANSRAIL",company:"Transrail Lighting",     q:"buy_zone",          entry:532.6,   cmp:571.0,  stop:null,  t6m:null},
+  {ticker:"LUMAXTECH",company:"Lumax Auto Technologies",q:"buy_zone",          entry:1680.0,  cmp:1783.9, stop:null,  t6m:null},
+  {ticker:"YATRA",   company:"Yatra Online",            q:"speculative_watch", entry:120.0,   cmp:121.5,  stop:null,  t6m:null},
+  {ticker:"HDFCBANK",company:"HDFC Bank",               q:"already_priced_in", entry:809.8,   cmp:810.0,  stop:null,  t6m:null},
+  {ticker:"IEX",     company:"Indian Energy Exchange",  q:"buy_zone",          entry:129.8,   cmp:126.2,  stop:null,  t6m:null},
+  {ticker:"IFCI",    company:"IFCI Ltd",                q:"speculative_watch", entry:62.5,    cmp:60.7,   stop:null,  t6m:null},
+  {ticker:"ANANTRAJ",company:"Anant Raj",               q:"speculative_watch", entry:533.4,   cmp:516.2,  stop:null,  t6m:null},
+  {ticker:"RELIANCE",company:"Reliance Industries",     q:"already_priced_in", entry:3013.9,  cmp:1354.2, stop:null,  t6m:null},
+  {ticker:"AELEA",   company:"Aelea Commodities",       q:"avoid",             entry:176.0,   cmp:null,   stop:117,   t6m:null},
+];
+
+const sectors = [
+  { name:"Water Infrastructure", l1:"Strong", l1cls:"strong", schemes:"JJM ₹3.6L Cr · AMRUT 2.0 · State Water Boards", cos:7, buyZone:4, avgReturn:"+18.2%", note:"Government = direct anchor customer. Highest L1 conviction sector.", strength:"strong", slug:"water" },
+  { name:"Cables & Conductors", l1:"Strong", l1cls:"strong", schemes:"RDSS ₹3.03L Cr · BharatNet Phase III · KAVACH", cos:13, buyZone:7, avgReturn:"+11.4%", note:"DISCOMs pay directly under RDSS. Strong government-as-customer signal.", strength:"strong", slug:"cables" },
+  { name:"Auto Metal Forming", l1:"Moderate", l1cls:"mod", schemes:"PLI-AUTO ₹26K Cr · EV transition overlay", cos:11, buyZone:6, avgReturn:"+10.7%", note:"OEM is customer, not government. EV disruption risk for ICE-only players.", strength:"moderate", slug:"auto-metal-forming" },
+  { name:"Recycling / Waste", l1:"Strong", l1cls:"strong", schemes:"EPR mandates · PWMR 2025 · 30% rPET mandate FY26", cos:7, buyZone:3, avgReturn:"+9.1%", note:"EPR = legally compelled purchase from registered recyclers.", strength:"strong", slug:"recycling" },
+  { name:"Lending / NBFC", l1:"Strong (underserved)", l1cls:"strong", schemes:"RBI priority sector norms · Underserved NBFC regulations", cos:4, buyZone:2, avgReturn:"+15.2%", note:"Strong only for underserved lending segments with no bank branch access.", strength:"strong", slug:"lending" },
+  { name:"Energy / Renewables", l1:"Moderate", l1cls:"mod", schemes:"PM-KUSUM · RPO mandates · ISTS waiver · 500GW target 2030", cos:3, buyZone:1, avgReturn:"+8.3%", note:"Suzlon in speculative watch. IEX in buy zone. Sector under active monitoring.", strength:"moderate", slug:"energy" },
+];
+
+// Compute returns
+companies.forEach(c => {
+  c.returnPct = (c.scoringCMP && c.cmp) ? +((c.cmp - c.scoringCMP) / c.scoringCMP * 100).toFixed(1) : null;
+});
+portfolio.forEach(p => {
+  p.pnl = (p.entry && p.cmp) ? +((p.cmp - p.entry) / p.entry * 100).toFixed(1) : null;
+});
+
+// ── HELPERS ──────────────────────────────────────────────────────────────
+
+const qBadge = q => {
+  const m = {buy_zone:{l:'Buy Zone',c:'bz'}, already_priced_in:{l:'Priced In',c:'api'}, speculative_watch:{l:'Watch',c:'sw'}, avoid:{l:'Avoid',c:'av'}}[q] || {l:'?',c:'bz'};
+  return `<span class="badge ${m.c}">${m.l}</span>`;
+};
+const tierInfo = s => {
+  if (s === null) return {label:'Pending',cls:''};
+  if (s >= 75) return {label:'Full Pos',cls:'tier-fp'};
+  if (s >= 55) return {label:'Standard',cls:'tier-sp'};
+  if (s >= 35) return {label:'Pilot',cls:'tier-p'};
+  return {label:'Do Not Buy',cls:'tier-dn'};
+};
+const scoreColor = s => !s ? '#ccc' : s >= 75 ? '#1a5c38' : s >= 55 ? '#2d6a4f' : s >= 35 ? '#c87941' : '#8b1a1a';
+const fmt = v => v !== null ? '₹' + v.toLocaleString('en-IN', {maximumFractionDigits:1}) : '—';
+const fmtRet = v => v === null ? '<span class="ret-na">—</span>' : v >= 0 ? `<span class="ret-pos">+${v}%</span>` : `<span class="ret-neg">${v}%</span>`;
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+
+function showTab(name, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  if (el && el.tagName === 'A') el.classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ── SECTORS GRID ──────────────────────────────────────────────────────────
+
+const sg = document.getElementById('sectorsGrid');
+sectors.forEach(s => {
+  const el = document.createElement('div');
+  el.className = `sector-card ${s.strength === 'moderate' ? 'moderate' : ''}`;
+  el.onclick = () => showTab('reports', null);
+  el.innerHTML = `
+    <div class="sector-name">${s.name}</div>
+    <div class="sector-l1">Layer 1: <span class="${s.l1cls}">${s.l1}</span></div>
+    <div class="sector-stats">
+      <div class="sector-stat"><div class="sector-stat-val">${s.cos}</div><div class="sector-stat-label">Companies</div></div>
+      <div class="sector-stat"><div class="sector-stat-val">${s.buyZone}</div><div class="sector-stat-label">Buy Zone</div></div>
+      <div class="sector-stat"><div class="sector-stat-val" style="color:var(--green)">${s.avgReturn}</div><div class="sector-stat-label">Avg Return</div></div>
+    </div>
+    <div class="sector-schemes">${s.schemes}</div>
+    <div class="sector-schemes" style="margin-top:6px;font-style:italic">${s.note}</div>
+    <div class="sector-cta">View sector reports →</div>
+  `;
+  sg.appendChild(el);
+});
+
+// ── REPORTS TAB ───────────────────────────────────────────────────────────
+
+let reportFilter = 'all';
+let reportSearch = '';
+
+function renderReports() {
+  const wrap = document.getElementById('reportsBySector');
+  wrap.innerHTML = '';
+  const sectorOrder = ['Water','Cables','Auto Metal','Recycling','Lending','Energy','Other'];
+  const grouped = {};
+  companies.forEach(c => {
+    if (!grouped[c.sector]) grouped[c.sector] = [];
+    grouped[c.sector].push(c);
+  });
+  sectorOrder.forEach(secName => {
+    if (!grouped[secName]) return;
+    let cos = grouped[secName];
+    cos = cos.filter(c => {
+      if (reportSearch && !(c.id.toLowerCase().includes(reportSearch) || c.name.toLowerCase().includes(reportSearch))) return false;
+      if (reportFilter === 'summary' && !c.hasReport) return false;
+      if (reportFilter === 'deep' && !c.hasDeep) return false;
+      if (reportFilter === 'high-score' && (c.score === null || c.score < 75)) return false;
+      return c.hasReport || c.hasDeep || c.score !== null;
+    });
+    if (!cos.length) return;
+    cos.sort((a,b) => (b.score || 0) - (a.score || 0));
+    const sectorMeta = sectors.find(s => s.name.includes(secName.split(' ')[0])) || {slug: secName.toLowerCase()};
+    const block = document.createElement('div');
+    block.className = 'sector-report-block';
+    block.innerHTML = `
+      <div class="sector-block-head">
+        <div>
+          <div class="sector-block-name">${secName}</div>
+          <div class="sector-block-meta">${cos.length} companies · sector report ${sectorMeta.slug ? 'available' : 'pending'}</div>
+        </div>
+        ${sectorMeta.slug ? `<a href="/reports/sectors/${sectorMeta.slug}_sector.html" class="sector-deepdive-link">Sector Deep Dive →</a>` : ''}
+      </div>
+      <div class="report-row-list">
+        ${cos.map(c => {
+          const sc = scoreColor(c.score);
+          const t = tierInfo(c.score);
+          return `
+            <div class="report-row">
+              <div>
+                <span class="rr-name">${c.owned ? '<span class="owned-dot"></span>' : ''}${c.id}</span>
+                <span class="rr-co">${c.name}</span>
+              </div>
+              <div>${qBadge(c.q)}</div>
+              <div class="rr-score" style="background:${sc}22;color:${sc}">${c.score !== null ? c.score : '—'}</div>
+              <div>${c.score !== null ? `<span class="badge ${t.cls}">${t.label}</span>` : ''}</div>
+              <div>${fmtRet(c.returnPct)}</div>
+              <div class="rr-links">
+                ${c.hasReport ? `<a class="rr-link summary" href="/reports/summaries/${c.id.toLowerCase()}_summary.html">Summary</a>` : `<span class="rr-link pending">Summary pending</span>`}
+                ${c.hasDeep ? `<a class="rr-link deep" href="/reports/deep-dives/${c.id.toLowerCase()}_deepdive.html">Deep Dive</a>` : `<span class="rr-link pending">Deep dive pending</span>`}
+              </div>
+            </div>`;
+        }).join('')}
+      </div>`;
+    wrap.appendChild(block);
+  });
+}
+
+function filterReports() {
+  reportSearch = document.getElementById('reportSearch').value.toLowerCase();
+  renderReports();
+}
+function filterReportsBy(f, btn) {
+  reportFilter = f;
+  document.querySelectorAll('.reports-toolbar .fb').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderReports();
+}
+renderReports();
+
+// ── UNIVERSE TABLE ────────────────────────────────────────────────────────
+
+let universeFilter = 'all';
+function renderUniverse() {
+  const tbody = document.getElementById('universeTbody');
+  tbody.innerHTML = '';
+  companies.forEach(c => {
+    const show = universeFilter === 'all' || universeFilter === c.q ||
+      (universeFilter === 'owned' && c.owned) ||
+      (universeFilter === 'scored' && c.score !== null);
+    if (!show) return;
+    const t = tierInfo(c.score);
+    const sc = scoreColor(c.score);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="ticker-cell">${c.owned ? '<span class="owned-dot"></span>' : ''}${c.id}</div>
+        <div class="company-cell">${c.name}</div>
+      </td>
+      <td><span class="badge" style="background:var(--paper2);color:var(--muted);font-size:9px">${c.sector}</span></td>
+      <td>${qBadge(c.q)}</td>
+      <td>${c.score !== null ? `
+        <div class="score-wrap">
+          <div class="score-num" style="color:${sc}">${c.score}</div>
+          <div class="score-bar"><div class="score-fill" style="width:${c.score}%;background:${sc}"></div></div>
+        </div>` : '<span style="color:var(--muted);font-family:var(--mono);font-size:11px">pending</span>'}</td>
+      <td>${c.score !== null ? `<span class="badge ${t.cls}">${t.label}</span>` : ''}</td>
+      <td class="${c.scoringCMP ? 'price-cell' : 'price-na'}">${c.scoringCMP ? fmt(c.scoringCMP) : '—'}</td>
+      <td class="${c.cmp ? 'price-cell' : 'price-na'}">${c.cmp ? fmt(c.cmp) : '—'}</td>
+      <td>${fmtRet(c.returnPct)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+function filterUniverse(f, btn) {
+  universeFilter = f;
+  document.querySelectorAll('#tab-universe .filter-row .fb').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderUniverse();
+}
+renderUniverse();
+
+// ── PORTFOLIO TABLE ───────────────────────────────────────────────────────
+
+const ptbody = document.getElementById('portfolioTbody');
+portfolio.forEach(p => {
+  const tr = document.createElement('tr');
+  const pnlClass = p.pnl === null ? 'ret-na' : p.pnl >= 0 ? 'ret-pos' : 'ret-neg';
+  const pnlStr = p.pnl === null ? '—' : (p.pnl >= 0 ? '+' + p.pnl + '%' : p.pnl + '%');
+  tr.innerHTML = `
+    <td><div class="ticker-cell">${p.ticker}</div><div class="company-cell">${p.company}</div></td>
+    <td>${qBadge(p.q)}</td>
+    <td class="price-cell">${fmt(p.entry)}</td>
+    <td class="${p.cmp ? 'price-cell' : 'price-na'}">${p.cmp ? fmt(p.cmp) : '—'}</td>
+    <td><span class="${pnlClass}">${pnlStr}</span></td>
+    <td class="${p.stop ? 'price-cell' : 'price-na'}">${p.stop ? fmt(p.stop) : '—'}</td>
+    <td class="${p.t6m ? 'price-cell' : 'price-na'}">${p.t6m ? fmt(p.t6m) : '—'}</td>`;
+  ptbody.appendChild(tr);
+});
+
+// ── CHARTS ────────────────────────────────────────────────────────────────
+
+const qColor = { buy_zone:'#1a5c38', already_priced_in:'#1a3a6b', speculative_watch:'#b35a00', avoid:'#8b1a1a' };
+const withData = companies.filter(c => c.returnPct !== null && c.score !== null);
+const scatterData = withData.map(c => ({ x:c.score, y:c.returnPct, label:c.id, color:qColor[c.q], r:c.owned?9:5 }));
+let trendLine = [];
+if (scatterData.length > 1) {
+  const n = scatterData.length;
+  const sumX = scatterData.reduce((s,d)=>s+d.x,0);
+  const sumY = scatterData.reduce((s,d)=>s+d.y,0);
+  const sumXY = scatterData.reduce((s,d)=>s+d.x*d.y,0);
+  const sumX2 = scatterData.reduce((s,d)=>s+d.x*d.x,0);
+  const m = (n*sumXY - sumX*sumY)/(n*sumX2 - sumX*sumX);
+  const b = (sumY - m*sumX)/n;
+  trendLine = [{x:0,y:b},{x:100,y:m*100+b}];
+}
+
+new Chart(document.getElementById('scatterChart').getContext('2d'), {
+  type:'scatter',
+  data:{datasets:[
+    {label:'Companies',data:scatterData,backgroundColor:scatterData.map(d=>d.color+'bb'),borderColor:scatterData.map(d=>d.color),borderWidth:1.5,pointRadius:scatterData.map(d=>d.r),pointHoverRadius:scatterData.map(d=>d.r+3)},
+    {label:'Trend',data:trendLine,type:'line',borderColor:'#aaa',borderWidth:1.5,borderDash:[4,4],pointRadius:0,fill:false}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const d=ctx.raw;return d.label?` ${d.label}: Score ${d.x} → ${d.y>=0?'+':''}${d.y}%`:'';}}}},scales:{x:{title:{display:true,text:'PAI Score (0–100)',font:{size:11},color:'#888'},min:-5,max:105,grid:{color:'#f0ece4'}},y:{title:{display:true,text:'Return %',font:{size:11},color:'#888'},grid:{color:'#f0ece4'},ticks:{callback:v=>(v>=0?'+':'')+v+'%'}}}}
+});
+
+const bands = [
+  {companies: companies.filter(c=>c.score>=75)},
+  {companies: companies.filter(c=>c.score>=55&&c.score<75)},
+  {companies: companies.filter(c=>c.score>=35&&c.score<55)},
+  {companies: companies.filter(c=>c.score!==null&&c.score<35)},
+];
+const bandReturns = bands.map(b => {
+  const w = b.companies.filter(c=>c.returnPct!==null);
+  return w.length ? +(w.reduce((s,c)=>s+c.returnPct,0)/w.length).toFixed(1) : 0;
+});
+
+new Chart(document.getElementById('barChart').getContext('2d'), {
+  type:'bar',
+  data:{labels:['75–100\n(Full)','55–74\n(Std)','35–54\n(Pilot)','0–34\n(Avoid)'],datasets:[{data:bandReturns,backgroundColor:bandReturns.map(r=>r>=0?'#1a5c38bb':'#8b1a1abb'),borderColor:bandReturns.map(r=>r>=0?'#1a5c38':'#8b1a1a'),borderWidth:1,borderRadius:6}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>(v>=0?'+':'')+v+'%'},grid:{color:'#f0ece4'}},x:{grid:{display:false}}}}
+});
+</script>
+</body>
+</html>
