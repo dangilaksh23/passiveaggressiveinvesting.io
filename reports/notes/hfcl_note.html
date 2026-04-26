@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HFCL · Summary Note · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f5f2eb;--paper2:#ede9e0;--card:#ffffff;--rule:#d4cfc4;--ink:#0d0d0d;--muted:#7a7060;--green:#1a5c38;--green-pale:#d4edd8;--amber:#b35a00;--amber-pale:#fdefd8;--red:#8b1a1a;--red-pale:#fde0e0;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6;}
+.disclaimer-banner{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:10.5px;padding:8px 24px;text-align:center;letter-spacing:.02em;}
+.disclaimer-banner a{color:var(--paper);text-decoration:underline;}
+.masthead{border-bottom:1px solid var(--rule);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--paper);}
+.logo-block{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink);}
+.logo-pi{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-1.5px;}
+.logo-name{font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:.06em;text-transform:uppercase;}
+.report-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+.report-type{color:var(--green);font-weight:500;}
+.note-wrap{max-width:720px;margin:0 auto;padding:32px 24px;}
+.summary-card{background:var(--card);border-radius:12px;overflow:hidden;border-top:3px solid var(--green);}
+.card-head{padding:24px 28px 18px;border-bottom:1px solid var(--paper2);}
+.ticker-row{display:flex;align-items:baseline;gap:12px;margin-bottom:10px;}
+.ticker{font-family:var(--mono);font-size:20px;font-weight:500;color:var(--green);letter-spacing:.04em;}
+.company-name{font-family:var(--serif);font-size:16px;font-weight:300;color:var(--muted);}
+.meta-row{display:flex;gap:6px;flex-wrap:wrap;}
+.badge{font-family:var(--mono);font-size:9px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;}
+.badge.sector{background:var(--paper2);color:var(--muted);}
+.badge.sf{background:var(--green-pale);color:var(--green);}
+.badge.missed{background:var(--amber-pale);color:var(--amber);}
+.pai-score-strip{padding:20px 28px;background:var(--paper);border-bottom:1px solid var(--paper2);}
+.total-score{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;}
+.score-num{font-family:var(--serif);font-size:48px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-2px;}
+.score-denom{font-family:var(--mono);font-size:14px;color:var(--muted);}
+.tier-label{margin-left:auto;font-family:var(--mono);font-size:9px;padding:4px 12px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;background:var(--green);color:#fff;}
+.score-breakdown{display:grid;gap:8px;}
+.component{display:grid;grid-template-columns:100px 1fr 50px;align-items:center;gap:8px;}
+.component label{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.bar{height:5px;background:var(--paper2);border-radius:3px;overflow:hidden;}
+.fill{height:100%;border-radius:3px;background:var(--green);}
+.value{font-family:var(--mono);font-size:10px;font-weight:500;text-align:right;color:var(--ink);}
+.observations{padding:20px 28px;border-bottom:1px solid var(--paper2);list-style:none;}
+.observations li{display:grid;grid-template-columns:90px 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--paper2);font-size:13px;line-height:1.55;}
+.observations li:last-child{border-bottom:none;}
+.observations label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:2px;}
+.disclosure{padding:14px 28px;border-bottom:1px solid var(--paper2);}
+.disclosure-badge{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;background:var(--paper2);color:var(--muted);padding:5px 12px;border-radius:20px;display:inline-block;}
+.card-foot{padding:16px 28px;display:flex;justify-content:space-between;align-items:center;background:var(--paper);}
+.journal-link{font-family:var(--mono);font-size:10px;color:var(--amber);text-decoration:none;letter-spacing:.04em;}
+.journal-link:hover{text-decoration:underline;}
+.meta-foot{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.foot-links{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.pai-link{font-family:var(--mono);font-size:10px;color:var(--muted);text-decoration:none;letter-spacing:.04em;padding:4px 12px;border:1px solid var(--rule);border-radius:4px;transition:all .15s;}
+.pai-link:hover{color:var(--ink);border-color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="disclaimer-banner">⚠️ Personal investment journal entry. Not investment advice. Not a buy/sell recommendation. The author is not SEBI-registered. <a href="/#disclaimer">Full disclaimer</a></div>
+
+<header class="masthead">
+  <a href="/" class="logo-block"><span class="logo-pi">π</span><span class="logo-name">Passive Aggressive Investing</span></a>
+  <div class="report-meta"><span class="report-type">Personal Note</span> · Apr 2026</div>
+</header>
+
+<div class="note-wrap">
+  <div class="summary-card">
+
+    <div class="card-head">
+      <div class="ticker-row">
+        <span class="ticker">HFCL</span>
+        <span class="company-name">HFCL Ltd</span>
+      </div>
+      <div class="meta-row">
+        <span class="badge sector">Cables &amp; Conductors · OFC/Telecom</span>
+        <span class="badge sf">Strong Fit</span>
+        <span class="badge missed">Missed Position</span>
+      </div>
+    </div>
+
+    <div class="pai-score-strip">
+      <div class="total-score">
+        <span class="score-num">89</span>
+        <span class="score-denom">/ 100</span>
+        <span class="tier-label">Strong Fit</span>
+      </div>
+      <div class="score-breakdown">
+        <div class="component">
+          <label>C1 Regulatory</label>
+          <div class="bar"><div class="fill" style="width:100%"></div></div>
+          <span class="value">25/25</span>
+        </div>
+        <div class="component">
+          <label>C2 Network</label>
+          <div class="bar"><div class="fill" style="width:80%"></div></div>
+          <span class="value">20/25</span>
+        </div>
+        <div class="component">
+          <label>C3 Valuation</label>
+          <div class="bar"><div class="fill" style="width:100%"></div></div>
+          <span class="value">30/30</span>
+        </div>
+        <div class="component">
+          <label>C4 Chart Structure</label>
+          <div class="bar"><div class="fill" style="width:70%"></div></div>
+          <span class="value">14/20</span>
+        </div>
+      </div>
+    </div>
+
+    <ul class="observations">
+      <li>
+        <label>What It Is</label>
+        <span>OFC, telecom equipment, and defence communication manufacturer. BharatNet Phase III is the primary government demand anchor. PAT inflected from losses to ₹97.6 Cr in Q3 FY26 (+32.55% YoY). This was a missed position — I scored it at ₹72 in early April 2026; by April 24 the CMP was ₹98–100, a 36% move in three weeks.</span>
+      </li>
+      <li>
+        <label>On Layer 1</label>
+        <span>BharatNet Phase III (₹1.39 Lakh Cr) is direct government procurement — the sovereign is the buyer, not an OEM intermediary. BSNL and defence add two further government-facing demand streams. The combination means the majority of HFCL's addressable market is sovereign-driven, not merely incentivised. C1=25 maximum.</span>
+      </li>
+      <li>
+        <label>On Layer 2</label>
+        <span>Promoter Mahendra Nahata issued ₹555 Cr of warrants at ₹74 in March 2026 — near the then-market price of ₹72. This is a large capital commitment at fair-market terms, not a dilutive discount. Stage 2 confirmed (TT 6/8). Institutional base is moderate; government-dependency perception caps FII but the promoter signal is the more important C2 component here.</span>
+      </li>
+      <li>
+        <label>On Layer 3</label>
+        <span>At scoring CMP ₹72, HFCL was at ~27x P/E on inflecting PAT with four consecutive revenue growth quarters. That combination produced C3=30 (maximum). The original scoring conditions no longer apply at ₹98–100. The score recorded here is a point-in-time snapshot.</span>
+      </li>
+      <li>
+        <label>What Would Change My View</label>
+        <span>BharatNet Phase III disbursements reversing or being reallocated, PAT regression to loss-making quarters, Stage 2 deteriorating to Stage 3 or 4, or the promoter not executing on the ₹555 Cr warrant commitment. Any of these would invalidate one of the three core legs of the thesis.</span>
+      </li>
+    </ul>
+
+    <div class="disclosure">
+      <span class="disclosure-badge">Disclosure: I do not hold this position</span>
+    </div>
+
+    <div class="card-foot">
+      <div class="foot-links">
+        <a href="/#frameworks" class="pai-link">What is PAI?</a>
+        <a href="/reports/journals/hfcl_journal.html" class="journal-link">See full journal →</a>
+      </div>
+      <div class="meta-foot">Personal note · Apr 2026 · Last reviewed Apr 2026</div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

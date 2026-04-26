@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIVESTARBUS · Summary Note · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f5f2eb;--paper2:#ede9e0;--card:#ffffff;--rule:#d4cfc4;--ink:#0d0d0d;--muted:#7a7060;--green:#1a5c38;--green-pale:#d4edd8;--amber:#b35a00;--amber-pale:#fdefd8;--red:#8b1a1a;--red-pale:#fde0e0;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6;}
+.disclaimer-banner{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:10.5px;padding:8px 24px;text-align:center;letter-spacing:.02em;}
+.disclaimer-banner a{color:var(--paper);text-decoration:underline;}
+.masthead{border-bottom:1px solid var(--rule);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--paper);}
+.logo-block{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink);}
+.logo-pi{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-1.5px;}
+.logo-name{font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:.06em;text-transform:uppercase;}
+.report-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+.report-type{color:var(--green);font-weight:500;}
+.note-wrap{max-width:720px;margin:0 auto;padding:32px 24px;}
+.summary-card{background:var(--card);border-radius:12px;overflow:hidden;border-top:3px solid var(--red);}
+.card-head{padding:24px 28px 18px;border-bottom:1px solid var(--paper2);}
+.ticker-row{display:flex;align-items:baseline;gap:12px;margin-bottom:10px;}
+.ticker{font-family:var(--mono);font-size:20px;font-weight:500;color:var(--green);letter-spacing:.04em;}
+.company-name{font-family:var(--serif);font-size:16px;font-weight:300;color:var(--muted);}
+.meta-row{display:flex;gap:6px;flex-wrap:wrap;}
+.badge{font-family:var(--mono);font-size:9px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;}
+.badge.sector{background:var(--paper2);color:var(--muted);}
+.badge.sf{background:var(--green-pale);color:var(--green);}
+.badge.block{background:var(--red-pale);color:var(--red);}
+.pai-score-strip{padding:20px 28px;background:var(--paper);border-bottom:1px solid var(--paper2);}
+.total-score{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;}
+.score-num{font-family:var(--serif);font-size:48px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-2px;}
+.score-denom{font-family:var(--mono);font-size:14px;color:var(--muted);}
+.tier-label{margin-left:auto;font-family:var(--mono);font-size:9px;padding:4px 12px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;background:var(--green);color:#fff;}
+.score-breakdown{display:grid;gap:8px;}
+.component{display:grid;grid-template-columns:100px 1fr 50px;align-items:center;gap:8px;}
+.component label{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.bar{height:5px;background:var(--paper2);border-radius:3px;overflow:hidden;}
+.fill{height:100%;border-radius:3px;background:var(--green);}
+.fill.red{background:var(--red);}
+.value{font-family:var(--mono);font-size:10px;font-weight:500;text-align:right;color:var(--ink);}
+.value.red{color:var(--red);}
+.block-note{background:var(--red-pale);border-left:3px solid var(--red);border-radius:4px;padding:12px 16px;margin-top:12px;font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.02em;line-height:1.6;}
+.observations{padding:20px 28px;border-bottom:1px solid var(--paper2);list-style:none;}
+.observations li{display:grid;grid-template-columns:90px 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--paper2);font-size:13px;line-height:1.55;}
+.observations li:last-child{border-bottom:none;}
+.observations label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:2px;}
+.disclosure{padding:14px 28px;border-bottom:1px solid var(--paper2);}
+.disclosure-badge{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:20px;display:inline-block;}
+.disclosure-badge.held{background:var(--green-pale);color:var(--green);}
+.card-foot{padding:16px 28px;display:flex;justify-content:space-between;align-items:center;background:var(--paper);}
+.journal-link{font-family:var(--mono);font-size:10px;color:var(--amber);text-decoration:none;letter-spacing:.04em;}
+.journal-link:hover{text-decoration:underline;}
+.meta-foot{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.foot-links{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.pai-link{font-family:var(--mono);font-size:10px;color:var(--muted);text-decoration:none;letter-spacing:.04em;padding:4px 12px;border:1px solid var(--rule);border-radius:4px;transition:all .15s;}
+.pai-link:hover{color:var(--ink);border-color:var(--ink);}
+</style>
+</head>
+<body>
+
+<div class="disclaimer-banner">⚠️ Personal investment journal entry. Not investment advice. Not a buy/sell recommendation. The author is not SEBI-registered. <a href="/#disclaimer">Full disclaimer</a></div>
+
+<header class="masthead">
+  <a href="/" class="logo-block"><span class="logo-pi">π</span><span class="logo-name">Passive Aggressive Investing</span></a>
+  <div class="report-meta"><span class="report-type">Personal Note</span> · Mar–Apr 2026</div>
+</header>
+
+<div class="note-wrap">
+  <div class="summary-card">
+
+    <div class="card-head">
+      <div class="ticker-row">
+        <span class="ticker">FIVESTARBUS</span>
+        <span class="company-name">Five-Star Business Finance</span>
+      </div>
+      <div class="meta-row">
+        <span class="badge sector">NBFC · Underserved Lending</span>
+        <span class="badge sf">Strong Fit</span>
+        <span class="badge block">C4 = 0 · Held Before Golden Cross</span>
+      </div>
+    </div>
+
+    <div class="pai-score-strip">
+      <div class="total-score">
+        <span class="score-num">77</span>
+        <span class="score-denom">/ 100</span>
+        <span class="tier-label">Strong Fit</span>
+      </div>
+      <div class="score-breakdown">
+        <div class="component">
+          <label>C1 Regulatory</label>
+          <div class="bar"><div class="fill" style="width:100%"></div></div>
+          <span class="value">25/25</span>
+        </div>
+        <div class="component">
+          <label>C2 Network</label>
+          <div class="bar"><div class="fill" style="width:88%"></div></div>
+          <span class="value">22/25</span>
+        </div>
+        <div class="component">
+          <label>C3 Valuation</label>
+          <div class="bar"><div class="fill" style="width:100%"></div></div>
+          <span class="value">30/30</span>
+        </div>
+        <div class="component">
+          <label>C4 Chart Structure</label>
+          <div class="bar"><div class="fill red" style="width:0%"></div></div>
+          <span class="value red">0/20</span>
+        </div>
+      </div>
+      <div class="block-note">C4 = 0 — Stage 4 at scoring. My framework requires the 50-DMA to cross above the 200-DMA before establishing any new position. I entered before that signal confirmed — that was a framework discipline failure I am documenting. Holding existing position. Not adding until Stage 2 is confirmed.</div>
+    </div>
+
+    <ul class="observations">
+      <li>
+        <label>What It Is</label>
+        <span>Underserved lending NBFC — loans to thin-file, self-employed borrowers in semi-urban and rural India. Proprietary book only; no co-lending, no MFI exposure. Yield 24%+. P/E 11.9x at scoring CMP ~₹470 — cheapest quality NBFC in my research universe. Stage 4 at time of scoring.</span>
+      </li>
+      <li>
+        <label>On Layer 1</label>
+        <span>RBI priority sector classification for underserved lending creates a structural regulatory floor for the product. The MOB-mechanical NPA (~26% of book in the 24–36 month peak default window) is temporal, not structural — a cohort ageing effect that resolves as older vintage loans pass through the peak window. Zero MFI exposure, zero co-lending.</span>
+      </li>
+      <li>
+        <label>On Layer 2</label>
+        <span>Sequoia Capital, TPG, and KKR hold simultaneously — this combination is uniquely rare in Indian listed markets. 58% FII holding confirms deep global institutional conviction. These investors conducted operational due diligence before committing; their continued presence is the strongest available L2 signal. C2=22 is the second-highest in the NBFC sector.</span>
+      </li>
+      <li>
+        <label>On Layer 3</label>
+        <span>11.9x P/E on a business with 24%+ book yield and Tier-1 global PE backing. C3=30 maximum. The market is pricing the MOB-mechanical NPA as structural deterioration; my view is that it is temporal. The discount exists because the headline NPA number looks alarming without reading the book composition.</span>
+      </li>
+      <li>
+        <label>What Would Change My View</label>
+        <span>Golden cross confirming Stage 2 (50-DMA crossing above 200-DMA) would be the condition to reassess position size. NPA rising structurally and persistently above 3% would invalidate the self-correction thesis. Any of Sequoia, TPG, or KKR reducing by more than 5 percentage points would be a material conviction reversal.</span>
+      </li>
+    </ul>
+
+    <div class="disclosure">
+      <span class="disclosure-badge held">Disclosure: I hold this position</span>
+    </div>
+
+    <div class="card-foot">
+      <div class="foot-links">
+        <a href="/#frameworks" class="pai-link">What is PAI?</a>
+        <a href="/reports/journals/fivestarbus_journal.html" class="journal-link">See full journal →</a>
+      </div>
+      <div class="meta-foot">Personal note · Mar–Apr 2026 · Last reviewed Apr 2026</div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
