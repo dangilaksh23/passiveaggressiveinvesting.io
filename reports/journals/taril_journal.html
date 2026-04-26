@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TARIL · Journal · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f5f2eb;--paper2:#ede9e0;--card:#ffffff;--rule:#d4cfc4;--ink:#0d0d0d;--muted:#7a7060;--green:#1a5c38;--green-pale:#d4edd8;--amber:#b35a00;--amber-pale:#fdefd8;--red:#8b1a1a;--red-pale:#fde0e0;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6;}
+.disclaimer-banner{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:10.5px;padding:8px 24px;text-align:center;letter-spacing:.02em;}
+.disclaimer-banner a{color:var(--paper);text-decoration:underline;}
+.masthead{border-bottom:1px solid var(--rule);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--paper);}
+.logo-block{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink);}
+.logo-pi{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-1.5px;}
+.logo-name{font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:.06em;text-transform:uppercase;}
+.report-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+.report-type{color:var(--amber);font-weight:500;}
+.journal-wrap{max-width:760px;margin:0 auto;padding:32px 24px;}
+.hero{background:var(--card);border-radius:12px 12px 0 0;border-top:3px solid var(--red);padding:28px 32px 24px;border-bottom:1px solid var(--paper2);}
+.ticker-row{display:flex;align-items:baseline;gap:12px;margin-bottom:10px;}
+.ticker{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--amber);letter-spacing:.04em;}
+.company-name{font-family:var(--serif);font-size:17px;font-weight:300;color:var(--muted);}
+.meta-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.badge{font-family:var(--mono);font-size:9px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;}
+.badge.sector{background:var(--paper2);color:var(--muted);}
+.badge.gf{background:var(--amber-pale);color:var(--amber);}
+.badge.block{background:var(--red-pale);color:var(--red);}
+.score-row{display:flex;align-items:baseline;gap:10px;}
+.score-num-big{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--amber);line-height:1;letter-spacing:-2px;}
+.score-denom{font-family:var(--mono);font-size:15px;color:var(--muted);}
+.tier-badge{margin-left:auto;font-family:var(--mono);font-size:9px;padding:5px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;background:var(--amber);color:#fff;align-self:center;}
+.layer-grid{background:var(--paper);padding:20px 32px;border-bottom:1px solid var(--paper2);}
+.layer-row{display:grid;grid-template-columns:120px 1fr 55px;align-items:center;gap:10px;padding:5px 0;}
+.layer-label{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.bar{height:5px;background:var(--paper2);border-radius:3px;overflow:hidden;}
+.fill{height:100%;border-radius:3px;background:var(--amber);}
+.fill.red{background:var(--red);}
+.layer-score{font-family:var(--mono);font-size:10px;font-weight:500;text-align:right;color:var(--ink);}
+.layer-score.red{color:var(--red);}
+.block-note{background:var(--red-pale);border-left:3px solid var(--red);border-radius:4px;padding:12px 16px;margin-top:14px;font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.02em;line-height:1.6;}
+.kpi-strip{background:var(--card);padding:20px 32px;border-bottom:1px solid var(--paper2);}
+.kpi-label-head{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;}
+.kpi-item{padding:10px 12px;background:var(--paper);border-radius:6px;}
+.kpi-item-label{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.kpi-item-value{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--ink);}
+.kpi-item-sub{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.section{background:var(--card);border-bottom:1px solid var(--paper2);}
+.section-head{padding:18px 32px 4px;display:flex;gap:14px;align-items:baseline;}
+.section-num{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.section-title{font-family:var(--serif);font-size:15px;font-weight:500;color:var(--ink);}
+.section-body{padding:10px 32px 20px;}
+.section-body p{font-size:14px;line-height:1.65;margin-bottom:10px;}
+.section-body p:last-child{margin-bottom:0;}
+.flag-box{background:var(--amber-pale);border-left:3px solid var(--amber);border-radius:4px;padding:12px 16px;margin-top:12px;font-family:var(--mono);font-size:10px;color:var(--amber);line-height:1.6;}
+.stand-box{background:var(--paper2);border-radius:8px;padding:16px 20px;margin-top:6px;}
+.stand-box p{font-size:14px;line-height:1.65;margin-bottom:10px;}
+.stand-box p:last-child{margin-bottom:0;}
+.disclosure-row{padding:14px 32px;background:var(--card);border-bottom:1px solid var(--paper2);}
+.disclosure-badge{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:20px;display:inline-block;}
+.disclosure-badge.held{background:var(--green-pale);color:var(--green);}
+.retro-note{padding:12px 32px;background:var(--paper);font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.04em;border-bottom:1px solid var(--paper2);}
+.journal-foot{background:var(--paper);padding:16px 32px;display:flex;justify-content:space-between;align-items:center;border-radius:0 0 12px 12px;}
+.note-link{font-family:var(--mono);font-size:10px;color:var(--amber);text-decoration:none;letter-spacing:.04em;}
+.note-link:hover{text-decoration:underline;}
+.meta-foot{font-family:var(--mono);font-size:10px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="disclaimer-banner">⚠️ Personal investment journal entry. Not investment advice. Not a buy/sell recommendation. The author is not SEBI-registered. <a href="/#disclaimer">Full disclaimer</a></div>
+
+<header class="masthead">
+  <a href="/" class="logo-block"><span class="logo-pi">π</span><span class="logo-name">Passive Aggressive Investing</span></a>
+  <div class="report-meta"><span class="report-type">Personal Journal</span> · Apr 2026</div>
+</header>
+
+<div class="journal-wrap">
+
+  <div class="hero">
+    <div class="ticker-row">
+      <span class="ticker">TARIL</span>
+      <span class="company-name">Transformers &amp; Rectifiers (India) Ltd</span>
+    </div>
+    <div class="meta-row">
+      <span class="badge sector">Capital Goods · Power Transformers</span>
+      <span class="badge gf">Good Fit</span>
+      <span class="badge block">C4 = 0 · Holding Only</span>
+    </div>
+    <div class="score-row">
+      <span class="score-num-big">67</span>
+      <span class="score-denom">/ 100</span>
+      <span class="tier-badge">Good Fit</span>
+    </div>
+  </div>
+
+  <div class="layer-grid">
+    <div class="layer-row">
+      <span class="layer-label">C1 Regulatory</span>
+      <div class="bar"><div class="fill" style="width:100%"></div></div>
+      <span class="layer-score">25/25</span>
+    </div>
+    <div class="layer-row">
+      <span class="layer-label">C2 Network</span>
+      <div class="bar"><div class="fill" style="width:76%"></div></div>
+      <span class="layer-score">19/25</span>
+    </div>
+    <div class="layer-row">
+      <span class="layer-label">C3 Valuation</span>
+      <div class="bar"><div class="fill" style="width:77%"></div></div>
+      <span class="layer-score">23/30</span>
+    </div>
+    <div class="layer-row">
+      <span class="layer-label">C4 Chart Structure</span>
+      <div class="bar"><div class="fill red" style="width:0%"></div></div>
+      <span class="layer-score red">0/20</span>
+    </div>
+    <div class="block-note">C4 = 0 — Stage 4 at scoring. CMP is 52% below 52-week high. My framework treats Stage 4 as a hard block on adding to or initiating positions. I hold existing shares (entered Apr 13 2026). I am not adding. Score would move to 83+ if Stage 2 confirms — that is the watch condition.</div>
+  </div>
+
+  <div class="kpi-strip">
+    <div class="kpi-label-head">Key Numbers · FY26 / Apr 25 2026 Verified</div>
+    <div class="kpi-grid">
+      <div class="kpi-item">
+        <div class="kpi-item-label">FY26 Revenue</div>
+        <div class="kpi-item-value">₹2,395 Cr</div>
+        <div class="kpi-item-sub">+23% YoY</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-item-label">FY26 PAT</div>
+        <div class="kpi-item-value">₹225 Cr</div>
+        <div class="kpi-item-sub">+20% YoY</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-item-label">EBITDA Margin</div>
+        <div class="kpi-item-value">~15.1%</div>
+        <div class="kpi-item-sub">FY26</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-item-label">Order Book</div>
+        <div class="kpi-item-value">₹5,005 Cr</div>
+        <div class="kpi-item-sub">2x annual revenue</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-item-label">Inquiries Pipeline</div>
+        <div class="kpi-item-value">₹23,000 Cr</div>
+        <div class="kpi-item-sub">Approx</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-item-label">My Entry</div>
+        <div class="kpi-item-value">₹290</div>
+        <div class="kpi-item-sub">100 shares · Apr 13 2026</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><span class="section-num">01</span><span class="section-title">What This Company Does</span></div>
+    <div class="section-body">
+      <p>Transformers &amp; Rectifiers (India) manufactures power transformers for the Indian electricity grid — distribution transformers, power transformers, and specialist high-voltage units. The company's primary end-customers are DISCOMs (distribution companies) procuring equipment under the RDSS grid upgrade programme, and PGCIL (Power Grid Corporation of India) for transmission infrastructure.</p>
+      <p>In April 2026, TARIL achieved something that had never been done by an Indian company: it won a PGCIL order for HVDC (High Voltage Direct Current) transformer repair — a contract that had previously gone exclusively to ABB, Siemens, and Alstom. HVDC transformer capability is a qualification gateway. Once you win this category with PGCIL, it opens a pipeline that was structurally closed to Indian manufacturers. This is a 5-year positioning event, not a one-quarter win.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><span class="section-num">02</span><span class="section-title">Layer 1 — Regulatory Anchor</span></div>
+    <div class="section-body">
+      <p>C1 scores maximum (25/25). RDSS (Revamped Distribution Sector Scheme) is the Government of India's ₹3 Lakh Cr+ programme to upgrade the distribution grid and reduce AT&amp;C losses. DISCOMs procure transformers as primary RDSS equipment — they are the direct customer, and the government reimburses a significant portion of the cost. This is as close to sovereign-backed demand as you get in the capital goods sector.</p>
+      <p>PGCIL is the second anchor. PGCIL procures directly from manufacturers for transmission infrastructure. The HVDC milestone means TARIL has now cracked both the distribution (RDSS/DISCOM) and transmission (PGCIL) tiers of India's grid upgrade. No other Indian transformer company had the HVDC qualification before this win. The regulatory anchor for this business is multi-year and multi-channel.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><span class="section-num">03</span><span class="section-title">Layer 2 — Network &amp; People</span></div>
+    <div class="section-body">
+      <p>C2 scores 19/25 — solid but not exceptional. The PGCIL commercial anchor is strong and the HVDC milestone represents real long-term positioning, reflected in the commercial sub-score. The management team has maintained operational discipline through the grid upgrade cycle, which requires navigating both government procurement timelines and raw material volatility.</p>
+      <p>The institutional picture is weak by this framework's standards. FII holding is 8.3%, DII holding is only 0.04% — this is a retail-dominated register. That explains a significant part of the Stage 4 chart structure: when macro sentiment shifted and FII flows reversed in early 2026, a retail-heavy book has no natural buying pressure to absorb the selling. The DII absence is notable — when institutional domestic money hasn't discovered a company this far into a genuine government capex cycle, it often means the Street is still behind the curve.</p>
+      <div class="flag-box">QIP note: ₹205 Cr of a ₹500 Cr QIP raise remains undeployed as of Apr 2026. Monitoring deployment timeline — idle capital in a capex business is worth watching.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><span class="section-num">04</span><span class="section-title">Layer 3 — Valuation &amp; Upside</span></div>
+    <div class="section-body">
+      <p>C3 scores 23/30. At ~35x P/E with 23% revenue growth and an order book at 2x annual revenue, TARIL is not cheap in absolute terms — but it is reasonably valued for the quality of the regulatory anchor and the growth trajectory. No formal 12-month target was set at the time of initial scoring (Step 6 was verified but without a formal price estimate), which caps the C3 upside-point component at a partial score.</p>
+      <p>The Q4 FY26 result requires specific mention. PAT for Q4 FY26 came in at ~₹89 Cr, down 5% year-on-year. This triggered an 8% single-day decline and is the proximate cause of the Stage 4 chart structure. The full-year picture (FY26 PAT ₹225 Cr, +20% YoY; Revenue ₹2,395 Cr, +23% YoY) is entirely consistent with the thesis. One quarter of YoY PAT decline in a company with a 2x revenue order book and ₹23,000 Cr inquiries pipeline is the market pattern-matching on a headline number, not reading the business. It is retail noise amplified by the low institutional ownership base.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><span class="section-num">05</span><span class="section-title">Where I Stand Today</span></div>
+    <div class="section-body">
+      <div class="stand-box">
+        <p>I hold this position. I entered at ₹290 on April 13 2026, at what turned out to be near the 52-week low. The HVDC milestone was the deciding factor — I viewed it as a qualification gateway that was not yet priced into the stock at Stage 4 levels.</p>
+        <p>I am not adding to this position. My framework is clear: Stage 4 means no new capital. Holding an existing position through a Stage 4 period is different from initiating one. I am holding because the fundamental thesis (RDSS anchor + HVDC qualification + 2x order book) remains intact, and I entered when the technical damage was already reflected in price.</p>
+        <p>The watch condition is Q1 FY27 results combined with a technical reversal — specifically the 50-DMA beginning to slope upward and eventually crossing above the 200-DMA. Until both conditions are met, I hold and do not add.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><span class="section-num">06</span><span class="section-title">What Would Change My View</span></div>
+    <div class="section-body">
+      <p>The bull case would strengthen if Q1 FY27 shows PAT returning to growth trajectory and the new capacity contribution (from the QIP capex deployment) begins showing up in margins. The HVDC pipeline accumulating additional PGCIL contracts would be the most important long-term signal. On the technical side, Stage 2 confirmation — 50-DMA crossing above 200-DMA with volume — would be the trigger to reassess whether adding makes sense at the then-prevailing price. A deterioration would be confirmed if the QIP capital remains undeployed through H1 FY27 (suggesting management execution delay), if RDSS disbursements slow materially, or if TARIL loses future HVDC contracts back to foreign OEMs after winning the qualification.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><span class="section-num">07</span><span class="section-title">Sources &amp; Notes</span></div>
+    <div class="section-body">
+      <p>Primary research: NAV Framework company report TARIL_transformers_rectifiers.md (April 2026, Step 6 verified Apr 25 2026). Score components from nav_priority_scores.json. Fundamental data from company FY26 annual results, PGCIL tender records, and BSE filings. HVDC milestone sourced from PGCIL order announcement. Technical stage analysis via Stan Weinstein's <em>Secrets for Profiting in Bull and Bear Markets</em> methodology.</p>
+    </div>
+  </div>
+
+  <div class="disclosure-row">
+    <span class="disclosure-badge held">Disclosure: I hold this position</span>
+  </div>
+
+  <div class="retro-note">Score recorded April 2026 · Entry ₹290 · 100 shares · Apr 13 2026 · Stage 4 at entry · Verified Apr 25 2026 · Last reviewed Apr 2026</div>
+
+  <div class="journal-foot">
+    <a href="/reports/notes/taril_note.html" class="note-link">← Summary note for this company</a>
+    <div class="meta-foot">Personal journal · Apr 2026</div>
+  </div>
+
+</div>
+</body>
+</html>

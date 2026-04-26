@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SONACOMS · Personal Note · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f5f2eb;--paper2:#ede9e0;--card:#ffffff;--rule:#d4cfc4;--ink:#0d0d0d;--muted:#7a7060;--green:#1a5c38;--green-pale:#d4edd8;--amber:#b35a00;--amber-pale:#fdefd8;--red:#8b1a1a;--red-pale:#fde0e0;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6;}
+.disclaimer-banner{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:10.5px;padding:8px 24px;text-align:center;letter-spacing:.02em;}
+.disclaimer-banner a{color:var(--paper);text-decoration:underline;}
+.masthead{border-bottom:1px solid var(--rule);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--paper);}
+.logo-block{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink);}
+.logo-pi{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-1.5px;}
+.logo-name{font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:.06em;text-transform:uppercase;}
+.report-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+.report-type{color:var(--green);font-weight:500;}
+.page{max-width:900px;margin:0 auto;}
+.report-head{padding:36px 36px 28px;background:var(--card);border-bottom:1px solid var(--rule);}
+.head-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+.pill{font-family:var(--mono);font-size:9px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
+.pill.sf{background:var(--green-pale);color:var(--green);}
+.pill.neutral{background:var(--paper2);color:var(--muted);}
+.pill.warn{background:#fff8e6;color:var(--amber);border:1px solid #f0c060;}
+.pill.verified{background:var(--green);color:#fff;}
+.head-title{font-family:var(--serif);font-size:38px;font-weight:500;line-height:1.15;letter-spacing:-.5px;margin-bottom:6px;}
+.head-subtitle{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:18px;}
+.head-tagline{font-size:14px;color:#444;line-height:1.7;max-width:700px;}
+.content{padding:0 36px 40px;}
+.section{padding:32px 0;border-bottom:1px solid var(--paper2);}
+.section:last-child{border-bottom:none;}
+.section-head{display:flex;align-items:baseline;gap:16px;margin-bottom:22px;}
+.section-num{font-family:var(--mono);font-size:11px;font-weight:500;color:#fff;background:var(--ink);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.05em;}
+.section-title{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-.3px;line-height:1.2;}
+.thesis-box{background:var(--paper);border-left:3px solid var(--green);border-radius:4px;padding:22px 26px;margin-bottom:22px;}
+.th-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.th-call{font-family:var(--serif);font-size:18px;font-weight:300;line-height:1.5;color:var(--ink);}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0;}
+.kpi-cell{background:var(--paper);border-radius:8px;padding:14px 16px;}
+.kpi-label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.kpi-value{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.1;}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;}
+.kpi-cell.green{background:var(--green-pale);}
+.kpi-cell.green .kpi-value{color:var(--green);}
+.kpi-cell.amber{background:var(--amber-pale);}
+.kpi-cell.amber .kpi-value{color:var(--amber);}
+.pai-score-block{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:28px;margin-bottom:24px;}
+.retro-note{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed var(--rule);}
+.score-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;}
+.score-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.score-date{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.score-total{display:flex;align-items:baseline;gap:12px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--paper2);}
+.score-num-big{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-2px;}
+.score-denom{font-family:var(--mono);font-size:16px;color:var(--muted);}
+.tier-badge{margin-left:auto;font-family:var(--mono);font-size:10px;padding:5px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;background:var(--green-pale);color:var(--green);}
+.layers{display:grid;gap:12px;}
+.layer{display:grid;grid-template-columns:110px 1fr 60px;align-items:center;gap:12px;}
+.layer-label{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.layer-bar{height:6px;background:var(--paper2);border-radius:3px;overflow:hidden;}
+.layer-fill{height:100%;border-radius:3px;background:var(--green);}
+.layer-fill.amber{background:var(--amber);}
+.layer-score{font-family:var(--mono);font-size:11px;font-weight:500;text-align:right;color:var(--ink);}
+.layer-note{font-size:13px;color:#555;margin-top:4px;padding-left:122px;line-height:1.5;}
+.flag-box{background:var(--amber-pale);border-left:3px solid var(--amber);border-radius:4px;padding:16px 20px;margin:16px 0;font-size:13px;line-height:1.6;}
+.flag-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:6px;}
+p{margin-bottom:14px;}
+p:last-child{margin-bottom:0;}
+.stand-box{background:var(--paper);border-left:3px solid var(--green);border-radius:4px;padding:22px 26px;font-size:14px;line-height:1.7;color:#333;}
+.verify-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:16px;}
+.verify-table th{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:2px solid var(--rule);}
+.verify-table td{padding:8px 10px;border-bottom:1px solid var(--paper2);vertical-align:top;}
+.verify-table tr:last-child td{border-bottom:none;}
+.ok{color:var(--green);font-family:var(--mono);font-size:11px;}
+.watch{color:var(--amber);font-family:var(--mono);font-size:11px;}
+.sources{font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.8;margin-top:18px;}
+.disclosure-line{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);background:var(--green-pale);padding:8px 14px;border-radius:4px;display:inline-block;margin-top:16px;}
+.report-footer{padding:24px 36px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--paper);}
+.footer-note-link{font-family:var(--mono);font-size:10px;color:var(--green);text-decoration:none;letter-spacing:.06em;}
+.footer-meta{font-family:var(--mono);font-size:10px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="disclaimer-banner">⚠️ Personal investment journal entry. Not investment advice. Not a buy/sell recommendation. The author is not SEBI-registered. <a href="/#disclaimer">Full disclaimer</a></div>
+
+<header class="masthead">
+  <a href="/" class="logo-block"><span class="logo-pi">π</span><span class="logo-name">Passive Aggressive Investing</span></a>
+  <div class="report-meta"><span class="report-type">Personal Note</span> · Apr 2026</div>
+</header>
+
+<div class="page">
+  <div class="report-head">
+    <div class="head-pills">
+      <span class="pill sf">Strong Fit · 77/100</span>
+      <span class="pill neutral">Automotive Metal Forming</span>
+      <span class="pill warn">Governance Watch</span>
+      <span class="pill neutral">Retro-scored from Apr 2026</span>
+      <span class="pill verified">Step 6 Verified</span>
+    </div>
+    <h1 class="head-title">SONACOMS — Sona BLW Precision</h1>
+    <div class="head-subtitle">NSE: SONACOMS &nbsp;·&nbsp; Precision Forged Components &nbsp;·&nbsp; Personal Note</div>
+    <p class="head-tagline">Best business quality in the auto metal forming sector — 53.8% gross margin, 0.03x D/E, and 38% BEV revenue that serves as the best EV hedge in the group. One minor governance flag being monitored.</p>
+  </div>
+
+  <div class="content">
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">00</div>
+        <div class="section-title">What I'm Looking At</div>
+      </div>
+      <div class="thesis-box">
+        <div class="th-label">My read in one line</div>
+        <div class="th-call">Best business quality in the auto sector. 38% BEV revenue — the highest EV exposure of any auto ancillary in my universe. Global customers: BMW, GM, Ford, Stellantis, Volvo. D/E 0.03x. The valuation is fair, not cheap, but the quality justifies the multiple.</div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-cell green">
+          <div class="kpi-label">BEV Revenue</div>
+          <div class="kpi-value">38%</div>
+          <div class="kpi-sub">Best EV hedge in sector</div>
+        </div>
+        <div class="kpi-cell green">
+          <div class="kpi-label">Gross Margin</div>
+          <div class="kpi-value">53.8%</div>
+          <div class="kpi-sub">Exceptional for auto</div>
+        </div>
+        <div class="kpi-cell green">
+          <div class="kpi-label">D/E Ratio</div>
+          <div class="kpi-value">0.03x</div>
+          <div class="kpi-sub">Virtually debt-free</div>
+        </div>
+        <div class="kpi-cell amber">
+          <div class="kpi-label">TTM P/E</div>
+          <div class="kpi-value">~50x</div>
+          <div class="kpi-sub">Fair, not cheap</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">Scoring CMP</div>
+          <div class="kpi-value">₹511</div>
+          <div class="kpi-sub">Apr 2026</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">50-DMA</div>
+          <div class="kpi-value">₹504</div>
+          <div class="kpi-sub">Stage 2 structure</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">200-DMA</div>
+          <div class="kpi-value">₹477</div>
+          <div class="kpi-sub">Rising</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">52w High/Low</div>
+          <div class="kpi-value">₹559/₹380</div>
+          <div class="kpi-sub">Apr 2026</div>
+        </div>
+      </div>
+      <div class="flag-box">
+        <div class="flag-label">⚠ Governance watch — monitoring</div>
+        Company Secretary resignation filed March 2026. This is a minor flag — CS resignations happen for benign reasons (career moves, compensation) and also for early-warning reasons. I have assigned a -2 governance penalty to C2 and will monitor for any follow-on events (further KMP departures, auditor qualification, related-party activity). The Blackstone partial exit (promoter now ~33%) was absorbed cleanly by the market — this was a separate event and not a governance concern.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">01</div>
+        <div class="section-title">PAI Score &amp; Layer Breakdown</div>
+      </div>
+      <div class="pai-score-block">
+        <div class="retro-note">Score derived from research notes dated April 2026</div>
+        <div class="score-header">
+          <span class="score-label">PAI Priority Score</span>
+          <span class="score-date">Scored Apr 2026 · CMP ₹511</span>
+        </div>
+        <div class="score-total">
+          <span class="score-num-big">77</span>
+          <span class="score-denom">/ 100</span>
+          <span class="tier-badge">Strong Fit</span>
+        </div>
+        <div class="layers">
+          <div>
+            <div class="layer">
+              <div class="layer-label">C1 Regulatory</div>
+              <div class="layer-bar"><div class="layer-fill" style="width:100%"></div></div>
+              <div class="layer-score">25 / 25</div>
+            </div>
+            <div class="layer-note">Full score — the 38% BEV revenue is treated as a structural tailwind equivalent to direct regulatory mandate. EV transition is not a government preference here; it is a customer base requirement for global OEMs.</div>
+          </div>
+          <div>
+            <div class="layer">
+              <div class="layer-label">C2 Network</div>
+              <div class="layer-bar"><div class="layer-fill" style="width:80%"></div></div>
+              <div class="layer-score">20 / 25</div>
+            </div>
+            <div class="layer-note">Commercial: 10/10 (global OEM roster). Investor: 7/8 (Blackstone as former anchor, now 33% promoter post-exit). People: 5/7 — the CS flag applied a -2 penalty here. Without the flag, this would be 22/25.</div>
+          </div>
+          <div>
+            <div class="layer">
+              <div class="layer-label">C3 Valuation</div>
+              <div class="layer-bar"><div class="layer-fill" style="width:60%"></div></div>
+              <div class="layer-score">18 / 30</div>
+            </div>
+            <div class="layer-note">Fair-cheap, not cheap. TTM P/E ~50x is high in absolute terms; forward P/E ~30x is more palatable. Upside ~28% from scoring CMP. Valuation discount is partial (8/15) because TTM multiple is elevated.</div>
+          </div>
+          <div>
+            <div class="layer">
+              <div class="layer-label">C4 Chart Structure</div>
+              <div class="layer-bar"><div class="layer-fill" style="width:70%"></div></div>
+              <div class="layer-score">14 / 20</div>
+            </div>
+            <div class="layer-note">Stage 2 confirmed. Trend Template 7/8 — near-perfect setup at scoring. 50-DMA ₹504 above 200-DMA ₹477. CMP ₹511 above both. One criterion from full score.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">02</div>
+        <div class="section-title">Valuation as I See It</div>
+      </div>
+      <p>At scoring CMP ₹511, the TTM P/E was approximately 50x. That sounds expensive in isolation. But the forward P/E drops to ~30x on consensus earnings estimates, which is more aligned with what a high-quality auto ancillary with global customers and 53.8% gross margins should trade at.</p>
+      <p>The 53.8% gross margin is the key anchor here. Most auto ancillaries run 20–35% gross margins. SONA's 53.8% reflects the precision and IP content in its forgings — this is not a commodity manufacturer. That margin premium justifies a valuation premium.</p>
+      <p>The BEV revenue mix at 38% also matters for valuation. Investors increasingly discount auto ancillaries with ICE-heavy revenue. SONA's BEV mix insulates it from that discount and should, over time, attract a valuation premium as the EV transition accelerates.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">03</div>
+        <div class="section-title">Chart Structure</div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);font-style:italic;margin-bottom:16px;">Some of the chart-structure thinking on this site is informed by the stage analysis approach described in <em>Trade Like a Stock Market Wizard</em> by Mark Minervini (McGraw-Hill, 2013), adapted for Indian market data and personal use.</p>
+      <p>At scoring, SONACOMS was in Stage 2 with a near-perfect Trend Template (7/8). The 50-DMA at ₹504 was above the 200-DMA at ₹477, and the CMP at ₹511 was above both. This is the textbook Stage 2 structure.</p>
+      <p>The 52w range of ₹380–₹559 tells the story: the stock corrected from ₹559 to ₹380 (a 32% drawdown), then recovered to ₹511 at scoring with the moving averages in bullish alignment. This is a Stage 2 continuation setup — not a new breakout, but a healthy consolidation within an established uptrend.</p>
+      <p>The one criterion missing from a perfect Trend Template was the relative strength rank — it was high but not top-decile. This is the only technical caveat at scoring.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">04</div>
+        <div class="section-title">What Could Change My Mind</div>
+      </div>
+      <p><strong>Governance escalation:</strong> If the CS resignation is followed by another KMP departure, an auditor qualification, or any unusual related-party disclosure, the -2 penalty becomes a more significant concern. I would reduce the C2 score further and potentially reduce the position.</p>
+      <p><strong>BEV mix reversal:</strong> If the 38% BEV revenue share starts declining — because global OEMs are slowing EV production or shifting forging suppliers — the C1 full score is no longer warranted. This is the single biggest long-term risk to the thesis.</p>
+      <p><strong>Technical break:</strong> A close below the 50-DMA (₹504) on volume would be the first technical warning. A close below the 200-DMA (₹477) would be more serious. Stage 2 breaking down would move me to reassess.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">05</div>
+        <div class="section-title">Where I Stand Today</div>
+      </div>
+      <div class="stand-box">
+        I hold this position. My average entry was ₹500 — just below the CMP at scoring. I entered because the Stage 2 setup was near-perfect and the business quality is the best in the sector by my measures.<br><br>
+        I am monitoring the governance flag. If it resolves without further events, I expect the -2 penalty to drop off the score in my next review. If it escalates, I will reassess sizing.<br><br>
+        The BEV thesis is medium-term — the 38% revenue mix reflects where global OEMs are now, and I expect it to grow. I am not trying to trade this. This is a position I hold with a multi-quarter time horizon.
+      </div>
+      <div class="disclosure-line">Disclosure: I hold this position</div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">06</div>
+        <div class="section-title">Verification &amp; Sources</div>
+      </div>
+      <table class="verify-table">
+        <tr><th>Data Point</th><th>Value</th><th>Source</th><th>Status</th></tr>
+        <tr><td>BEV revenue mix</td><td>38%</td><td>Company investor presentation, Q3 FY26</td><td class="ok">✓ Verified</td></tr>
+        <tr><td>Gross margin</td><td>53.8%</td><td>P&amp;L statement, screener.in</td><td class="ok">✓ Verified</td></tr>
+        <tr><td>D/E ratio</td><td>0.03x</td><td>Balance sheet, screener.in</td><td class="ok">✓ Verified</td></tr>
+        <tr><td>CS resignation</td><td>March 2026</td><td>BSE filing</td><td class="watch">⚠ Monitoring</td></tr>
+        <tr><td>Promoter holding</td><td>~33% post-Blackstone exit</td><td>BSE shareholding pattern</td><td class="ok">✓ Verified</td></tr>
+        <tr><td>50-DMA / 200-DMA</td><td>₹504 / ₹477</td><td>NSE, at scoring date</td><td class="ok">✓ Verified</td></tr>
+        <tr><td>Pledge</td><td>None</td><td>BSE shareholding pattern</td><td class="ok">✓ Verified</td></tr>
+      </table>
+      <div class="sources">
+        Financial data: BSE/NSE quarterly filings, screener.in ·
+        Price data: NSE ·
+        Governance: BSE corporate disclosures ·
+        Original research notes: April 2026 · Last reviewed: April 2026
+      </div>
+    </div>
+
+  </div>
+
+  <div class="report-footer">
+    <a href="/reports/notes/sonacoms_note.html" class="footer-note-link">← One-page summary note</a>
+    <div class="footer-meta">Personal note · Originally written Apr 2026 · Migrated to v2.0 format Apr 2026</div>
+  </div>
+</div>
+
+</body>
+</html>
