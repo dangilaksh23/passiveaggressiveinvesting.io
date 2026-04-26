@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EIEL · Deep Dive · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f5f2eb; --paper2: #ede9e0; --card: #ffffff; --rule: #d4cfc4;
+  --ink: #0d0d0d; --muted: #7a7060; --green: #1a5c38; --green-pale: #d4edd8;
+  --green-bright: #00c853; --amber: #b35a00; --amber-pale: #fdefd8;
+  --red: #8b1a1a; --red-pale: #fde0e0; --blue: #1a3a6b; --blue-pale: #dde5f5;
+  --serif: 'Fraunces', serif; --sans: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--paper); color: var(--ink); font-size: 14px; line-height: 1.6; }
+.disclaimer-banner { background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 10.5px; padding: 8px 24px; text-align: center; letter-spacing: 0.02em; }
+.disclaimer-banner a { color: var(--paper); text-decoration: underline; }
+.masthead { border-bottom: 1px solid var(--rule); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; background: var(--paper); }
+.logo-block { display: flex; align-items: baseline; gap: 10px; text-decoration: none; color: var(--ink); }
+.logo-pi { font-family: var(--serif); font-size: 30px; font-weight: 700; color: var(--green); line-height: 1; letter-spacing: -1.5px; }
+.logo-name { font-family: var(--serif); font-size: 14px; font-weight: 300; letter-spacing: 0.06em; text-transform: uppercase; }
+.report-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.report-type { color: var(--green); font-weight: 500; }
+.page { max-width: 900px; margin: 0 auto; }
+.report-head { padding: 36px 36px 28px; background: var(--card); border-bottom: 1px solid var(--rule); }
+.head-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+.pill { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+.pill.bz { background: var(--green-pale); color: var(--green); }
+.pill.api { background: var(--blue-pale); color: var(--blue); }
+.pill.sw { background: var(--amber-pale); color: var(--amber); }
+.pill.av { background: var(--red-pale); color: var(--red); }
+.pill.stage-2 { background: var(--green-pale); color: var(--green); }
+.pill.stage-3 { background: var(--amber-pale); color: var(--amber); }
+.pill.stage-4 { background: var(--red-pale); color: var(--red); }
+.pill.neutral { background: var(--paper2); color: var(--muted); }
+.pill.warn { background: #fff8e6; color: var(--amber); border: 1px solid #f0c060; }
+.pill.verified { background: var(--green); color: #fff; }
+.head-title { font-family: var(--serif); font-size: 38px; font-weight: 500; line-height: 1.15; letter-spacing: -0.5px; margin-bottom: 6px; }
+.head-subtitle { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 18px; }
+.head-tagline { font-size: 14px; color: #444; line-height: 1.7; max-width: 700px; }
+.content { padding: 0 36px 40px; }
+.section { padding: 32px 0; border-bottom: 1px solid var(--paper2); }
+.section:last-child { border-bottom: none; }
+.section-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
+.section-num { font-family: var(--mono); font-size: 11px; font-weight: 500; color: #fff; background: var(--ink); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; letter-spacing: 0.05em; }
+.section-title { font-family: var(--serif); font-size: 24px; font-weight: 500; letter-spacing: -0.3px; line-height: 1.2; }
+.thesis-box { background: var(--paper); border-left: 3px solid var(--green); border-radius: 4px; padding: 22px 26px; }
+.th-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.th-call { font-family: var(--serif); font-size: 18px; font-weight: 300; line-height: 1.5; color: var(--ink); }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 22px 0; }
+.kpi-cell { background: var(--paper); border-radius: 8px; padding: 14px 16px; }
+.kpi-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.kpi-value { font-family: var(--serif); font-size: 22px; font-weight: 700; line-height: 1.1; }
+.kpi-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 4px; }
+.kpi-cell.green { background: var(--green-pale); }
+.kpi-cell.green .kpi-value { color: var(--green); }
+.kpi-cell.amber { background: var(--amber-pale); }
+.kpi-cell.amber .kpi-value { color: var(--amber); }
+.kpi-cell.red { background: var(--red-pale); }
+.kpi-cell.red .kpi-value { color: var(--red); }
+.pai-score-block { background: var(--card); border: 1px solid var(--rule); border-radius: 12px; padding: 28px; margin-bottom: 24px; }
+.pai-score-block.retrofit::before { content: 'Retro-scored from original report date'; display: block; font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed var(--rule); }
+.score-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
+.score-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.score-date { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.score-total { display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--paper2); }
+.score-num-big { font-family: var(--serif); font-size: 56px; font-weight: 700; color: var(--green); line-height: 1; letter-spacing: -2px; }
+.score-denom { font-family: var(--mono); font-size: 16px; color: var(--muted); }
+.tier-badge { margin-left: auto; font-family: var(--mono); font-size: 10px; padding: 5px 14px; border-radius: 20px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
+.tier-fp { background: var(--green); color: #fff; }
+.tier-sp { background: #2d6a4f; color: #fff; }
+.tier-p { background: #c87941; color: #fff; }
+.tier-dn { background: var(--red); color: #fff; }
+.score-components { display: flex; flex-direction: column; gap: 14px; }
+.component { display: grid; grid-template-columns: 160px 1fr 56px; align-items: center; gap: 12px; }
+.component label { font-family: var(--mono); font-size: 10px; color: var(--ink); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+.component .bar { height: 8px; background: var(--paper2); border-radius: 4px; overflow: hidden; }
+.component .fill { height: 100%; background: var(--green); border-radius: 4px; }
+.component .value { font-family: var(--mono); font-size: 12px; color: var(--ink); text-align: right; font-weight: 500; }
+.component-rationale { font-family: var(--sans); font-size: 12px; color: var(--muted); padding-left: 172px; margin-top: -8px; line-height: 1.6; }
+.layer-strip { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 18px; }
+.layer-chip { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
+.lc-strong { background: var(--green-pale); color: var(--green); }
+.lc-moderate { background: var(--amber-pale); color: var(--amber); }
+.lc-weak { background: var(--red-pale); color: var(--red); }
+.lc-cheap { background: var(--green-pale); color: var(--green); }
+.lc-fair { background: var(--paper2); color: var(--muted); }
+.lc-expensive { background: var(--red-pale); color: var(--red); }
+.lc-clean { background: var(--green-pale); color: var(--green); }
+.lc-watch { background: var(--amber-pale); color: var(--amber); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 18px 0; }
+.info-block { background: var(--paper); border-radius: 8px; padding: 18px 20px; }
+.ib-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.ib-content { font-size: 13px; line-height: 1.7; color: #333; }
+.ib-content strong { color: var(--ink); font-weight: 600; }
+.warn-strip { background: #fff8e6; border-left: 3px solid var(--amber); border-radius: 4px; padding: 14px 18px; display: flex; gap: 12px; margin: 18px 0; }
+.ws-icon { font-size: 20px; line-height: 1; flex-shrink: 0; color: var(--amber); }
+.ws-text { font-size: 13px; line-height: 1.6; color: #4a3a00; }
+.ws-text strong { color: var(--amber); }
+.para { font-size: 14px; line-height: 1.75; color: #333; margin-bottom: 14px; }
+.para strong { color: var(--ink); font-weight: 600; }
+.para em { color: var(--green); font-style: italic; }
+.peer-table { width: 100%; border-collapse: collapse; margin: 18px 0; background: var(--paper); border-radius: 8px; overflow: hidden; }
+.peer-table th { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); font-weight: 500; }
+.peer-table td { padding: 10px 12px; font-size: 12px; border-bottom: 1px solid var(--paper2); }
+.peer-table tbody tr:last-child td { border-bottom: none; }
+.peer-table .highlight { background: var(--green-pale); }
+.peer-table .highlight td:first-child { font-weight: 600; }
+.tt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 18px 0; }
+.tt-row { display: flex; align-items: center; gap: 10px; padding: 9px 14px; background: var(--paper); border-radius: 6px; font-size: 12px; }
+.tt-check { font-size: 14px; flex-shrink: 0; }
+.tt-row.pass { border-left: 3px solid var(--green); }
+.tt-row.pass .tt-check { color: var(--green); }
+.tt-row.fail { border-left: 3px solid var(--red); }
+.tt-row.fail .tt-check { color: var(--red); }
+.tt-text { color: #333; line-height: 1.4; }
+.tt-text strong { color: var(--ink); }
+.tt-summary { font-family: var(--mono); font-size: 13px; color: var(--ink); padding: 12px 16px; background: var(--green-pale); border-radius: 6px; margin-top: 10px; }
+.tt-summary strong { color: var(--green); font-weight: 600; }
+.tt-summary.warn-bg { background: var(--amber-pale); }
+.tt-summary.warn-bg strong { color: var(--amber); }
+.tt-summary.red-bg { background: var(--red-pale); }
+.tt-summary.red-bg strong { color: var(--red); }
+.risk-list { list-style: none; padding: 0; margin: 14px 0; }
+.risk-list li { background: var(--paper); border-left: 3px solid var(--red); border-radius: 4px; padding: 12px 18px; margin-bottom: 8px; font-size: 13px; line-height: 1.6; }
+.risk-list li strong { color: var(--red); font-weight: 600; display: block; margin-bottom: 3px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+.risk-list.watch li { border-left-color: var(--amber); }
+.risk-list.watch li strong { color: var(--amber); }
+.action-box { background: var(--ink); color: #fff; border-radius: 12px; padding: 28px; margin: 24px 0; }
+.action-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #999; margin-bottom: 16px; }
+.action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.action-cell { padding: 14px 16px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+.action-cell .ac-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-bottom: 6px; }
+.action-cell .ac-value { font-family: var(--mono); font-size: 18px; font-weight: 500; }
+.action-cell.entry .ac-value { color: var(--green-bright); }
+.action-cell.stop .ac-value { color: #ff6b6b; }
+.action-cell.target .ac-value { color: #6bb6ff; }
+.exits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
+.exits-block { padding: 16px 20px; background: rgba(255,255,255,0.03); border-radius: 8px; }
+.exits-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #999; margin-bottom: 10px; }
+.exits-block ul { list-style: none; padding: 0; margin: 0; }
+.exits-block li { font-family: var(--sans); font-size: 12px; color: #ccc; padding: 6px 0 6px 18px; line-height: 1.5; position: relative; }
+.exits-block li::before { content: '−'; position: absolute; left: 0; color: #888; font-family: var(--mono); }
+.tech-citation { background: var(--paper); border-radius: 6px; padding: 14px 18px; font-family: var(--sans); font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 18px; font-style: italic; }
+.tech-citation strong { color: var(--ink); font-style: normal; font-weight: 600; }
+.sources { padding: 24px 36px; background: var(--paper); border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 10px; color: var(--muted); line-height: 1.8; letter-spacing: 0.02em; }
+.sources strong { color: var(--ink); display: block; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: 500; }
+.report-foot { padding: 24px 36px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; background: var(--paper); }
+.summary-link { font-family: var(--mono); font-size: 11px; color: var(--blue); text-decoration: none; padding: 8px 14px; background: var(--blue-pale); border-radius: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+.foot-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.04em; }
+.verify-table { width: 100%; border-collapse: collapse; margin: 18px 0; background: var(--paper); border-radius: 8px; overflow: hidden; }
+.verify-table th { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); font-weight: 500; }
+.verify-table td { padding: 10px 12px; font-size: 12px; border-bottom: 1px solid var(--paper2); }
+.verify-table tbody tr:last-child td { border-bottom: none; }
+.owned-strip { background: var(--blue-pale); border-left: 3px solid var(--blue); border-radius: 4px; padding: 14px 18px; display: flex; gap: 12px; margin: 18px 0; align-items: center; }
+.owned-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+.owned-text { font-family: var(--mono); font-size: 11px; color: var(--blue); letter-spacing: 0.06em; }
+@media (max-width: 700px) {
+  .report-head { padding: 24px 20px; } .head-title { font-size: 28px; }
+  .content { padding: 0 20px 30px; } .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; } .tt-grid { grid-template-columns: 1fr; }
+  .action-grid { grid-template-columns: repeat(2, 1fr); } .exits-grid { grid-template-columns: 1fr; }
+  .component { grid-template-columns: 110px 1fr 50px; } .component-rationale { padding-left: 0; }
+}
+</style>
+</head>
+<body>
+<div class="disclaimer-banner">
+  ⚠️ Personal research only. Not SEBI-registered investment advice. Not a buy/sell recommendation. <a href="/#disclaimer">Full disclaimer</a>
+</div>
+<header class="masthead">
+  <a href="/" class="logo-block">
+    <span class="logo-pi">π</span>
+    <span class="logo-name">Passive Aggressive Investing</span>
+  </a>
+  <div class="report-meta">
+    <span class="report-type">Deep Dive</span> · April 2026
+  </div>
+</header>
+<div class="page">
+  <div class="report-head">
+    <div class="head-pills">
+      <span class="pill bz">★ Buy Zone</span>
+      <span class="pill neutral">Water Infrastructure</span>
+      <span class="pill neutral">Primary Base</span>
+      <span class="pill verified">Step 6 Verified · Apr 2026</span>
+    </div>
+    <div class="head-title">Enviro Infra Engineers</div>
+    <div class="head-subtitle">EIEL · NSE · Water EPC · IPO Nov 2024</div>
+    <div class="head-tagline">
+      100% government customer base executing on JJM, AMRUT, and NTPC BESS contracts. IPO at ₹148, corrected -65% to ₹134.71 while revenue grew +45% YoY — a textbook fundamentals-intact correction offering a 3C cheat entry. Order book of ₹3,500 Cr with EBITDA margins at 24% and D/E of 0.26x positions EIEL as the cleanest water EPC compounder in the mid-cap space.
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- SECTION 00 -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">00</div>
+        <div class="section-title">Core Thesis & Key Metrics</div>
+      </div>
+
+      <div class="owned-strip">
+        <div class="owned-dot"></div>
+        <div class="owned-text">OWNED — Entry ₹159.43 · 466 shares · CMP ~₹209 (Apr 2026)</div>
+      </div>
+
+      <div class="thesis-box">
+        <div class="th-label">Core Thesis</div>
+        <div class="th-call">EIEL is a 100%-government-customer water EPC company directly executing India's Jal Jeevan Mission, AMRUT 2.0, and NTPC BESS — three concurrent sovereign mandates. At ₹148–162 entry, a P/E of ~14x on a business with +45% YoY revenue growth and 24% EBITDA margin represents a fundamental mismatch the market has not yet corrected. Promoters buying open-market at ₹138–148 while institutions ignored it confirms asymmetric setup. Target ₹250 = 57% upside from ₹160 entry.</div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-cell green">
+          <div class="kpi-label">Revenue Growth</div>
+          <div class="kpi-value">+45%</div>
+          <div class="kpi-sub">YoY FY26 estimate</div>
+        </div>
+        <div class="kpi-cell green">
+          <div class="kpi-label">EBITDA Margin</div>
+          <div class="kpi-value">24%</div>
+          <div class="kpi-sub">Industry-leading for EPC</div>
+        </div>
+        <div class="kpi-cell green">
+          <div class="kpi-label">Order Book</div>
+          <div class="kpi-value">₹3,500 Cr</div>
+          <div class="kpi-sub">~4x trailing revenue</div>
+        </div>
+        <div class="kpi-cell green">
+          <div class="kpi-label">P/E (Entry)</div>
+          <div class="kpi-value">~14x</div>
+          <div class="kpi-sub">At ₹160 entry price</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">D/E Ratio</div>
+          <div class="kpi-value">0.26x</div>
+          <div class="kpi-sub">Clean balance sheet</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">Debtor Days</div>
+          <div class="kpi-value">&lt;60</div>
+          <div class="kpi-sub">Govt-backed receivables</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">Govt Customer %</div>
+          <div class="kpi-value">100%</div>
+          <div class="kpi-sub">JJM / AMRUT / NTPC</div>
+        </div>
+        <div class="kpi-cell amber">
+          <div class="kpi-label">Correction from ATH</div>
+          <div class="kpi-value">-65%</div>
+          <div class="kpi-sub">ATH ₹391.60 → ₹134.71</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="info-block">
+          <div class="ib-label">Price Levels</div>
+          <div class="ib-content">
+            <strong>IPO Price:</strong> ₹148 (Nov 2024)<br>
+            <strong>ATH:</strong> ₹391.60<br>
+            <strong>52w Low:</strong> ₹134.71<br>
+            <strong>50-DMA:</strong> ₹174.70<br>
+            <strong>200-DMA:</strong> ₹222.90<br>
+            <strong>52w High:</strong> ₹306.40<br>
+            <strong>CMP (Apr 2026):</strong> ~₹209
+          </div>
+        </div>
+        <div class="info-block">
+          <div class="ib-label">Business Profile</div>
+          <div class="ib-content">
+            <strong>Founded:</strong> Water & wastewater EPC<br>
+            <strong>IPO:</strong> November 2024 at ₹148<br>
+            <strong>Customers:</strong> JJM, AMRUT 2.0, NTPC BESS<br>
+            <strong>Anchor:</strong> NTPC — government endorsement<br>
+            <strong>Promoters:</strong> Buying open-market ₹138–148<br>
+            <strong>Pledge:</strong> Zero. No SEBI issues.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 01 -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">01</div>
+        <div class="section-title">PAI Score & NAV Framework Scorecard</div>
+      </div>
+
+      <div class="pai-score-block retrofit">
+        <div class="score-header">
+          <div class="score-label">PAI Score — EIEL</div>
+          <div class="score-date">Scored: April 2026</div>
+        </div>
+        <div class="score-total">
+          <div class="score-num-big">85</div>
+          <div class="score-denom">/ 100</div>
+          <div class="tier-badge tier-fp">Full Position</div>
+        </div>
+        <div class="score-components">
+          <div class="component">
+            <label>C1 · Tailwind</label>
+            <div class="bar"><div class="fill" style="width:100%"></div></div>
+            <div class="value">25/25</div>
+          </div>
+          <div class="component-rationale">JJM + AMRUT 2.0 + NTPC BESS — three concurrent sovereign mandates. L1 Strong. 100% government customer = direct beneficiary of ₹3.6 lakh Cr JJM allocation.</div>
+          <div class="component">
+            <label>C2 · People & Moat</label>
+            <div class="bar"><div class="fill" style="width:88%"></div></div>
+            <div class="value">22/25</div>
+          </div>
+          <div class="component-rationale">C2A: 10 (100% govt anchor = strongest possible). C2B: 5 moderate institutional. C2C: 7 — promoters buying open-market at ₹138–148. Governance: clean.</div>
+          <div class="component">
+            <label>C3 · Valuation</label>
+            <div class="bar"><div class="fill" style="width:100%"></div></div>
+            <div class="value">30/30</div>
+          </div>
+          <div class="component-rationale">P/E ~14x on +45% YoY growth = deep value. Target ₹250 from ₹160 entry = 57% upside. C3_val: 15/15, C3_upside: 15/15. Perfect score.</div>
+          <div class="component">
+            <label>C4 · Technical</label>
+            <div class="bar"><div class="fill" style="width:40%"></div></div>
+            <div class="value">8/20</div>
+          </div>
+          <div class="component-rationale">Primary base — not Stage 2 Trend Template confirmed. Valid base structure forming on right side of cup. Once TT confirms, score could reach 90+.</div>
+        </div>
+      </div>
+
+      <div class="layer-strip">
+        <span class="layer-chip lc-strong">L1: Strong (Sovereign)</span>
+        <span class="layer-chip lc-strong">L2: Promoters Buying</span>
+        <span class="layer-chip lc-cheap">L3: Cheap (14x P/E)</span>
+        <span class="layer-chip lc-moderate">L4: Primary Base</span>
+        <span class="layer-chip lc-clean">Governance: Clean</span>
+      </div>
+
+      <div class="warn-strip">
+        <div class="ws-icon">⚡</div>
+        <div class="ws-text"><strong>Score note:</strong> Highest score after HFCL (89) in the current universe. C4 is the only limitation — primary base, not yet Stage 2 Trend Template confirmed. Once 50-DMA crosses above 200-DMA and price holds above both, score upgrades to 90+. Fundamentals fully intact; technical is catching up.</div>
+      </div>
+    </div>
+
+    <!-- SECTION 02 -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">02</div>
+        <div class="section-title">Valuation</div>
+      </div>
+
+      <div class="para">EIEL trades at a trailing P/E of approximately <strong>14x at ₹160 entry</strong> — an anomaly for any EPC company, let alone one with +45% YoY revenue growth, 24% EBITDA margins, and a ₹3,500 Cr order book. The dislocation arose because the stock corrected <strong>-65% from its ATH of ₹391.60</strong> without any fundamental deterioration — purely a valuation compression after IPO euphoria.</div>
+
+      <div class="para">Peer group comparison reveals the extent of undervaluation. JASH Engineering (comparable water EPC) trades at ~28x P/E. VA Tech WABAG (process water, globally scaled) trades at ~35x forward. EMS Limited (same segment) is simply avoid-grade. EIEL's 14x entry point represents a <strong>50%+ discount to its nearest quality peer</strong>.</div>
+
+      <table class="peer-table">
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>P/E (Fwd)</th>
+            <th>Revenue Growth</th>
+            <th>EBITDA Margin</th>
+            <th>D/E</th>
+            <th>PAI View</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="highlight">
+            <td>EIEL</td>
+            <td>~14x</td>
+            <td>+45% YoY</td>
+            <td>24%</td>
+            <td>0.26x</td>
+            <td>Full Position</td>
+          </tr>
+          <tr>
+            <td>JASH Engineering</td>
+            <td>~28x</td>
+            <td>+18% YoY</td>
+            <td>18%</td>
+            <td>0.41x</td>
+            <td>Watch</td>
+          </tr>
+          <tr>
+            <td>VA Tech WABAG</td>
+            <td>~35x</td>
+            <td>+22% YoY</td>
+            <td>22%</td>
+            <td>0.18x</td>
+            <td>Already priced in</td>
+          </tr>
+          <tr>
+            <td>EMS Limited</td>
+            <td>N/A</td>
+            <td>Declining</td>
+            <td>&lt;10%</td>
+            <td>High</td>
+            <td>Avoid</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="two-col">
+        <div class="info-block">
+          <div class="ib-label">Target Construction</div>
+          <div class="ib-content">
+            <strong>Entry zone:</strong> ₹148–162<br>
+            <strong>6M Target:</strong> ₹250 (57% upside from ₹160)<br>
+            <strong>12M Target:</strong> ₹300 (88% upside from ₹160)<br>
+            <strong>Basis:</strong> Re-rating to ~22x P/E on growing earnings — still a 35% discount to peer median.
+          </div>
+        </div>
+        <div class="info-block">
+          <div class="ib-label">Earnings Sensitivity</div>
+          <div class="ib-content">
+            <strong>FY26E Revenue:</strong> ~₹1,200 Cr (+45% YoY)<br>
+            <strong>FY26E PAT:</strong> ~₹180 Cr (estimated)<br>
+            <strong>At 20x P/E:</strong> ₹240–260/share<br>
+            <strong>At 25x P/E:</strong> ₹300–320/share<br>
+            <strong>Downside at 12x P/E:</strong> ~₹135 (IPO support)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 03 -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">03</div>
+        <div class="section-title">Technical Setup</div>
+      </div>
+
+      <div class="tech-citation">
+        Technical analysis framework: <strong>Mark Minervini's SEPA methodology</strong> — Stage Analysis + Trend Template (8 criteria) + Volatility Contraction Pattern identification. All criteria evaluated at time of original scoring.
+      </div>
+
+      <div class="para">EIEL is in a <strong>Primary Base (3C cheat entry)</strong> — forming the right side of a cup-like base structure after the IPO euphoria correction. Volume is drying up on the right side (bullish), suggesting distribution has exhausted and accumulation is beginning. This is a valid entry on the right side of the base before the formal Stage 2 Trend Template confirms.</div>
+
+      <div class="tt-grid">
+        <div class="tt-row fail">
+          <div class="tt-check">✗</div>
+          <div class="tt-text"><strong>Price above 50-DMA:</strong> Price at ~₹209 vs 50-DMA ₹174.70 — now above</div>
+        </div>
+        <div class="tt-row fail">
+          <div class="tt-check">✗</div>
+          <div class="tt-text"><strong>Price above 200-DMA:</strong> ₹209 vs 200-DMA ₹222.90 — still below</div>
+        </div>
+        <div class="tt-row fail">
+          <div class="tt-check">✗</div>
+          <div class="tt-text"><strong>50-DMA above 200-DMA:</strong> Not yet — 50 ₹174.70 vs 200 ₹222.90</div>
+        </div>
+        <div class="tt-row fail">
+          <div class="tt-check">✗</div>
+          <div class="tt-text"><strong>200-DMA rising:</strong> Still declining from IPO high — not yet</div>
+        </div>
+        <div class="tt-row pass">
+          <div class="tt-check">✓</div>
+          <div class="tt-text"><strong>Price &gt;30% above 52w low:</strong> ₹209 vs ₹134.71 = +55% — pass</div>
+        </div>
+        <div class="tt-row fail">
+          <div class="tt-check">✗</div>
+          <div class="tt-text"><strong>Within 25% of 52w high:</strong> ₹209 vs ₹306.40 = -32% — not yet</div>
+        </div>
+        <div class="tt-row fail">
+          <div class="tt-check">✗</div>
+          <div class="tt-text"><strong>Volume confirmation:</strong> Volume drying — early accumulation signal, not confirmed</div>
+        </div>
+        <div class="tt-row fail">
+          <div class="tt-check">✗</div>
+          <div class="tt-text"><strong>RS line at new high:</strong> RS line not at new high — underperforming broad market</div>
+        </div>
+      </div>
+
+      <div class="tt-summary warn-bg">Trend Template: <strong>1/8 criteria met</strong> — Primary Base. Not Stage 2 confirmed. 3C cheat entry valid on fundamentals strength. Upgrade watch: 50-DMA cross above 200-DMA.
+      </div>
+
+      <div class="warn-strip">
+        <div class="ws-icon">⚡</div>
+        <div class="ws-text"><strong>3C Cheat Entry rationale:</strong> The SEPA framework permits early entry ("cheat entry") on the right side of a base when: (1) fundamentals are exceptional, (2) volume is drying, (3) promoter buying is confirmed, and (4) the base is structurally sound. All four conditions hold for EIEL. The trade-off is a wider stop (₹148 IPO price) vs. a tighter stop available at Stage 2 confirmation.</div>
+      </div>
+    </div>
+
+    <!-- SECTION 04 -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">04</div>
+        <div class="section-title">Risks & Invalidation</div>
+      </div>
+
+      <ul class="risk-list">
+        <li>
+          <strong>Government Budget Cuts / JJM Delays</strong>
+          100% government customer exposure means any reduction in JJM/AMRUT/NTPC allocations directly impacts revenue. Union Budget 2026-27 is the key watch event. JJM Phase 2 funding reduction of &gt;20% would require thesis reassessment.
+        </li>
+        <li>
+          <strong>NTPC BESS Cancellation / Delay</strong>
+          NTPC Battery Energy Storage System contract is a key growth driver. Any cancellation or multi-quarter delay removes one of three revenue pillars and invalidates the 45% growth thesis.
+        </li>
+        <li>
+          <strong>Promoter Open-Market Selling</strong>
+          Promoters are currently buying at ₹138–148. Any open-market selling above ₹200 would signal a change in insider conviction. Hard exit trigger.
+        </li>
+        <li>
+          <strong>Government Customer % Below 80%</strong>
+          If commercial customers rise to &gt;20% of revenue mix, the sovereign-grade revenue quality degrades and C1 score drops materially.
+        </li>
+        <li>
+          <strong>Two Consecutive PAT Declines</strong>
+          At 14x P/E the market is pricing in growth continuation. Two quarters of PAT decline (even on revenue growth) would signal margin compression and trigger re-rating risk.
+        </li>
+      </ul>
+
+      <ul class="risk-list watch">
+        <li>
+          <strong>IPO Lock-Up Expiry</strong>
+          IPO was November 2024. Anchor investor lock-ups typically run 90 days. Watch for institutional selling pressure in Feb-May 2025 period. Now absorbed — reduced risk.
+        </li>
+        <li>
+          <strong>Working Capital Cycle Stretch</strong>
+          Debtor days currently &lt;60 (excellent for govt EPC). If this stretches above 90 days, it signals payment delays from government customers and cash flow risk.
+        </li>
+      </ul>
+    </div>
+
+    <!-- SECTION 05 -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">05</div>
+        <div class="section-title">Action Plan</div>
+      </div>
+
+      <div class="action-box">
+        <div class="action-label">Entry / Stop / Targets — Tier: Full Position</div>
+        <div class="action-grid">
+          <div class="action-cell entry">
+            <div class="ac-label">Entry Zone</div>
+            <div class="ac-value">₹148–162</div>
+          </div>
+          <div class="action-cell stop">
+            <div class="ac-label">Hard Stop</div>
+            <div class="ac-value">₹148</div>
+          </div>
+          <div class="action-cell target">
+            <div class="ac-label">6M Target</div>
+            <div class="ac-value">₹250</div>
+          </div>
+          <div class="action-cell target">
+            <div class="ac-label">12M Target</div>
+            <div class="ac-value">₹300</div>
+          </div>
+        </div>
+
+        <div class="exits-grid">
+          <div class="exits-block">
+            <div class="exits-label">Hard Exit Triggers</div>
+            <ul>
+              <li>Close below ₹148 on heavy volume (&gt;2x average)</li>
+              <li>Two consecutive quarterly PAT declines (any magnitude)</li>
+              <li>Government customer % drops below 80% of revenue</li>
+              <li>Promoter sells open-market above ₹200</li>
+              <li>NTPC BESS contract delayed &gt;2 quarters or cancelled</li>
+            </ul>
+          </div>
+          <div class="exits-block">
+            <div class="exits-label">Partial Trim Triggers</div>
+            <ul>
+              <li>Price reaches ₹250 — reassess and trim if valuation fair</li>
+              <li>Price reaches ₹300 — reassess Stage 3 risk</li>
+              <li>50-DMA rolls over on above-average volume</li>
+              <li>JJM Phase 2 budget reduced &gt;20% in Union Budget</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="warn-strip">
+        <div class="ws-icon">📍</div>
+        <div class="ws-text"><strong>Current status:</strong> Owned at entry ₹159.43, 466 shares. CMP ~₹209 = ~+31% from entry. Stop at ₹148 is structural (IPO price / key support). At ₹209 CMP, stock is between entry zone and 6M target — continue holding, do not add above ₹175.</div>
+      </div>
+    </div>
+
+    <!-- SECTION 06 -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">06</div>
+        <div class="section-title">Live Verification</div>
+      </div>
+
+      <table class="verify-table">
+        <thead>
+          <tr>
+            <th>Checkpoint</th>
+            <th>Expected</th>
+            <th>Verified Value</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Revenue growth (YoY)</td>
+            <td>+40%+ YoY</td>
+            <td>+45% YoY FY26E</td>
+            <td>✅ Pass</td>
+          </tr>
+          <tr>
+            <td>EBITDA margin</td>
+            <td>&gt;20%</td>
+            <td>24%</td>
+            <td>✅ Pass</td>
+          </tr>
+          <tr>
+            <td>D/E ratio</td>
+            <td>&lt;0.5x</td>
+            <td>0.26x</td>
+            <td>✅ Pass</td>
+          </tr>
+          <tr>
+            <td>Government customer %</td>
+            <td>&gt;85%</td>
+            <td>100%</td>
+            <td>✅ Pass</td>
+          </tr>
+          <tr>
+            <td>Order book health</td>
+            <td>&gt;3x revenue</td>
+            <td>~₹3,500 Cr (~4x)</td>
+            <td>✅ Pass</td>
+          </tr>
+          <tr>
+            <td>Promoter buying</td>
+            <td>Confirmed</td>
+            <td>Buying at ₹138–148 open market</td>
+            <td>✅ Pass</td>
+          </tr>
+          <tr>
+            <td>Pledge</td>
+            <td>Zero</td>
+            <td>Zero pledge confirmed</td>
+            <td>✅ Pass</td>
+          </tr>
+          <tr>
+            <td>NTPC BESS status</td>
+            <td>Active</td>
+            <td>Active — no delays reported</td>
+            <td>✅ Pass</td>
+          </tr>
+          <tr>
+            <td>Price above ₹148 stop</td>
+            <td>Above ₹148</td>
+            <td>₹209 (Apr 2026)</td>
+            <td>✅ Pass</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="sources">
+  <strong>Sources & Data</strong>
+  EIEL Q3 FY26 investor presentation · NSE filing (IPO prospectus Nov 2024) · JJM Phase 2 allocation data (Ministry of Jal Shakti) · NTPC BESS project announcement · Screener.in financial data · Promoter shareholding BSE filing · PAI NAV Framework scoring April 2026
+</div>
+
+<div class="report-foot">
+  <a href="../summaries/eiel_summary.html" class="summary-link">→ View Summary Card</a>
+  <div class="foot-meta">PAI · EIEL Deep Dive · April 2026 · Not investment advice</div>
+</div>
+
+</body>
+</html>
