@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SANSERA · Personal Note · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f5f2eb;--paper2:#ede9e0;--card:#ffffff;--rule:#d4cfc4;--ink:#0d0d0d;--muted:#7a7060;--green:#1a5c38;--green-pale:#d4edd8;--amber:#b35a00;--amber-pale:#fdefd8;--red:#8b1a1a;--red-pale:#fde0e0;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6;}
+.disclaimer-banner{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:10.5px;padding:8px 24px;text-align:center;letter-spacing:.02em;}
+.disclaimer-banner a{color:var(--paper);text-decoration:underline;}
+.masthead{border-bottom:1px solid var(--rule);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--paper);}
+.logo-block{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink);}
+.logo-pi{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-1.5px;}
+.logo-name{font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:.06em;text-transform:uppercase;}
+.report-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+.report-type{color:var(--green);font-weight:500;}
+.page{max-width:900px;margin:0 auto;}
+.report-head{padding:36px 36px 28px;background:var(--card);border-bottom:1px solid var(--rule);}
+.head-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+.pill{font-family:var(--mono);font-size:9px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
+.pill.sf{background:var(--green-pale);color:var(--green);}
+.pill.neutral{background:var(--paper2);color:var(--muted);}
+.pill.verified{background:var(--green);color:#fff;}
+.head-title{font-family:var(--serif);font-size:38px;font-weight:500;line-height:1.15;letter-spacing:-.5px;margin-bottom:6px;}
+.head-subtitle{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:18px;}
+.head-tagline{font-size:14px;color:#444;line-height:1.7;max-width:700px;}
+.content{padding:0 36px 40px;}
+.section{padding:32px 0;border-bottom:1px solid var(--paper2);}
+.section:last-child{border-bottom:none;}
+.section-head{display:flex;align-items:baseline;gap:16px;margin-bottom:22px;}
+.section-num{font-family:var(--mono);font-size:11px;font-weight:500;color:#fff;background:var(--ink);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.05em;}
+.section-title{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-.3px;line-height:1.2;}
+.thesis-box{background:var(--paper);border-left:3px solid var(--green);border-radius:4px;padding:22px 26px;margin-bottom:22px;}
+.th-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.th-call{font-family:var(--serif);font-size:18px;font-weight:300;line-height:1.5;color:var(--ink);}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0;}
+.kpi-cell{background:var(--paper);border-radius:8px;padding:14px 16px;}
+.kpi-label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.kpi-value{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.1;}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;}
+.kpi-cell.green{background:var(--green-pale);}
+.kpi-cell.green .kpi-value{color:var(--green);}
+.kpi-cell.amber{background:var(--amber-pale);}
+.kpi-cell.amber .kpi-value{color:var(--amber);}
+.pai-score-block{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:28px;margin-bottom:24px;}
+.retro-note{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed var(--rule);}
+.score-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;}
+.score-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.score-date{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.score-total{display:flex;align-items:baseline;gap:12px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--paper2);}
+.score-num-big{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-2px;}
+.score-denom{font-family:var(--mono);font-size:16px;color:var(--muted);}
+.tier-badge{margin-left:auto;font-family:var(--mono);font-size:10px;padding:5px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;background:var(--green-pale);color:var(--green);}
+.layers{display:grid;gap:12px;}
+.layer{display:grid;grid-template-columns:110px 1fr 60px;align-items:center;gap:12px;}
+.layer-label{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.layer-bar{height:6px;background:var(--paper2);border-radius:3px;overflow:hidden;}
+.layer-fill{height:100%;border-radius:3px;background:var(--green);}
+.layer-score{font-family:var(--mono);font-size:11px;font-weight:500;text-align:right;color:var(--ink);}
+.layer-note{font-size:13px;color:#555;margin-top:4px;padding-left:122px;line-height:1.5;}
+p{margin-bottom:14px;}
+p:last-child{margin-bottom:0;}
+.stand-box{background:var(--paper);border-left:3px solid var(--green);border-radius:4px;padding:22px 26px;font-size:14px;line-height:1.7;color:#333;}
+.verify-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:16px;}
+.verify-table th{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:2px solid var(--rule);}
+.verify-table td{padding:8px 10px;border-bottom:1px solid var(--paper2);vertical-align:top;}
+.verify-table tr:last-child td{border-bottom:none;}
+.ok{color:var(--green);font-family:var(--mono);font-size:11px;}
+.sources{font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.8;margin-top:18px;}
+.disclosure-line{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);background:var(--green-pale);padding:8px 14px;border-radius:4px;display:inline-block;margin-top:16px;}
+.report-footer{padding:24px 36px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--paper);}
+.footer-note-link{font-family:var(--mono);font-size:10px;color:var(--green);text-decoration:none;letter-spacing:.06em;}
+.footer-meta{font-family:var(--mono);font-size:10px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="disclaimer-banner">⚠️ Personal investment journal entry. Not investment advice. Not a buy/sell recommendation. The author is not SEBI-registered. <a href="/#disclaimer">Full disclaimer</a></div>
+
+<header class="masthead">
+  <a href="/" class="logo-block"><span class="logo-pi">π</span><span class="logo-name">Passive Aggressive Investing</span></a>
+  <div class="report-meta"><span class="report-type">Personal Note</span> · Apr 2026</div>
+</header>
+
+<div class="page">
+  <div class="report-head">
+    <div class="head-pills">
+      <span class="pill sf">Strong Fit · 78/100</span>
+      <span class="pill neutral">Automotive Metal Forming</span>
+      <span class="pill neutral">Retro-scored from Apr 2026</span>
+      <span class="pill verified">Step 6 Verified</span>
+    </div>
+    <h1 class="head-title">SANSERA — Sansera Engineering</h1>
+    <div class="head-subtitle">NSE: SANSERA &nbsp;·&nbsp; Precision Engineered Components &nbsp;·&nbsp; Personal Note</div>
+    <p class="head-tagline">Rank 1 in my auto metal forming universe — best technical setup of the group at scoring, with a Japan JV that closes the EV revenue gap most peers don't have.</p>
+  </div>
+
+  <div class="content">
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">00</div>
+        <div class="section-title">What I'm Looking At</div>
+      </div>
+      <div class="thesis-box">
+        <div class="th-label">My read in one line</div>
+        <div class="th-call">Best technical setup in the auto sector at scoring. Revenue +24.7% YoY Q3 FY26. ~26x forward P/E. The Nichidai (Japan) JV for aluminium and steel precision forgings fills the EV driveline gap that most other auto ancillaries are ignoring.</div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-cell green">
+          <div class="kpi-label">Revenue Growth</div>
+          <div class="kpi-value">+24.7%</div>
+          <div class="kpi-sub">YoY Q3 FY26</div>
+        </div>
+        <div class="kpi-cell green">
+          <div class="kpi-label">Forward P/E</div>
+          <div class="kpi-value">~26x</div>
+          <div class="kpi-sub">Cheap for growth</div>
+        </div>
+        <div class="kpi-cell green">
+          <div class="kpi-label">MF Holding</div>
+          <div class="kpi-value">26.89%</div>
+          <div class="kpi-sub">Institutional conviction</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">Credit Rating</div>
+          <div class="kpi-value">ICRA AA</div>
+          <div class="kpi-sub">Independent validation</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">Scoring CMP</div>
+          <div class="kpi-value">₹2,130</div>
+          <div class="kpi-sub">Apr 2026</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">52w High</div>
+          <div class="kpi-value">₹2,396</div>
+          <div class="kpi-sub">VCP base near ATH</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">52w Low</div>
+          <div class="kpi-value">₹1,000</div>
+          <div class="kpi-sub">Deep correction</div>
+        </div>
+        <div class="kpi-cell neutral">
+          <div class="kpi-label">Pledge</div>
+          <div class="kpi-value">None</div>
+          <div class="kpi-sub">Clean governance</div>
+        </div>
+      </div>
+      <p>Sansera manufactures precision engineered components for automotive OEMs — 2-wheelers, passenger vehicles, commercial vehicles. Customers include Husqvarna, Bajaj Auto, KTM, Honda Motorcycle, Cummins, and others. The Nichidai Corporation (Japan) joint venture is a key strategic pivot: aluminium and steel precision forgings for EV driveline components. This JV is not yet in the run-rate revenue numbers, which means it's forward optionality that the current valuation doesn't yet price.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">01</div>
+        <div class="section-title">PAI Score &amp; Layer Breakdown</div>
+      </div>
+      <div class="pai-score-block">
+        <div class="retro-note">Score derived from research notes dated April 2026</div>
+        <div class="score-header">
+          <span class="score-label">PAI Priority Score</span>
+          <span class="score-date">Scored Apr 2026 · CMP ₹2,130</span>
+        </div>
+        <div class="score-total">
+          <span class="score-num-big">78</span>
+          <span class="score-denom">/ 100</span>
+          <span class="tier-badge">Strong Fit</span>
+        </div>
+        <div class="layers">
+          <div>
+            <div class="layer">
+              <div class="layer-label">C1 Regulatory</div>
+              <div class="layer-bar"><div class="layer-fill" style="width:60%"></div></div>
+              <div class="layer-score">15 / 25</div>
+            </div>
+            <div class="layer-note">Moderate — PLI-AUTO incentivises manufacturers, but the OEM is the customer, not the government. This is the ceiling on the auto sector across the board. It caps SANSERA's total but doesn't disqualify it.</div>
+          </div>
+          <div>
+            <div class="layer">
+              <div class="layer-label">C2 Network</div>
+              <div class="layer-bar"><div class="layer-fill" style="width:96%"></div></div>
+              <div class="layer-score">24 / 25</div>
+            </div>
+            <div class="layer-note">Best C2 in the auto sector — global OEM clients (commercial: 10/10), Nichidai JV signal (people: 7/7), MF holding 26.89% + ICRA AA (investor: 7/8). No governance penalty. One point shy of maximum.</div>
+          </div>
+          <div>
+            <div class="layer">
+              <div class="layer-label">C3 Valuation</div>
+              <div class="layer-bar"><div class="layer-fill" style="width:83%"></div></div>
+              <div class="layer-score">25 / 30</div>
+            </div>
+            <div class="layer-note">Cheap at ~26x forward P/E for 24% revenue growth. Upside to my research estimate was ~31% from scoring CMP. Discount maxed (15/15); upside partially scored because JV optionality is unquantified.</div>
+          </div>
+          <div>
+            <div class="layer">
+              <div class="layer-label">C4 Chart Structure</div>
+              <div class="layer-bar"><div class="layer-fill" style="width:70%"></div></div>
+              <div class="layer-score">14 / 20</div>
+            </div>
+            <div class="layer-note">Stage 2 confirmed. Trend Template 6/8 — one criterion shy of full score at scoring. VCP Base 2 forming near ATH of ₹2,396. 50-DMA ₹2,029 above 200-DMA ₹1,615. Strong setup.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">02</div>
+        <div class="section-title">Valuation as I See It</div>
+      </div>
+      <p>At scoring CMP ~₹2,130, the forward P/E was approximately 26x. For a company growing revenue at 24.7% YoY, that struck me as reasonably cheap — the PEG ratio is below 1.1 on that basis. This is not a deep discount setup, but it's not stretched either.</p>
+      <p>The MF holding at 26.89% tells me that institutional investors running larger mandates have independently arrived at a similar conclusion. ICRA AA is another independent validation — a credit rating agency has assessed the balance sheet as investment grade at the second highest category.</p>
+      <p>The Nichidai JV is forward optionality. It represents precision forging capability for EV driveline components — aluminium and steel. This JV has not yet hit the revenue line meaningfully at scoring time, which means the 26x P/E is a multiple on current earnings that don't include the JV contribution. If the JV ramps, the forward P/E drops.</p>
+      <p>I do not publish specific price targets in these notes. My research estimate implied a meaningful upside from the scoring CMP, primarily driven by the JV optionality and continued organic growth.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">03</div>
+        <div class="section-title">Chart Structure</div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);font-style:italic;margin-bottom:16px;">Some of the chart-structure thinking on this site is informed by the stage analysis approach described in <em>Trade Like a Stock Market Wizard</em> by Mark Minervini (McGraw-Hill, 2013), adapted for Indian market data and personal use.</p>
+      <p>At scoring, SANSERA was in Stage 2 with the 50-DMA (₹2,029) well above the 200-DMA (₹1,615). This is the clearest bullish configuration in the Trend Template. The stock was forming VCP Base 2 near its ATH of ₹2,396 — a second base formation after the initial Stage 2 breakout.</p>
+      <p>The Trend Template scored 6/8 at scoring — two criteria below the maximum. This is constructive without being a perfect setup. The CMP range of ₹2,130–2,560 at scoring time was still within the base, not a breakout.</p>
+      <p>The 52w low of ₹1,000 shows the depth of the prior correction. The recovery from ₹1,000 to ₹2,130+ with the 50-DMA clearing the 200-DMA is the Stage 1 to Stage 2 transition the framework looks for. The base at ₹2,130–2,396 is consolidation within Stage 2 — constructive.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">04</div>
+        <div class="section-title">What Could Change My Mind</div>
+      </div>
+      <p><strong>Hard invalidators:</strong></p>
+      <p>Q4 FY26 PAT materially below ₹60 Cr — this would suggest the revenue growth is not translating to earnings, which breaks the valuation thesis. A delay or cancellation of the Nichidai JV — the JV is a meaningful part of why I rate this above the sector average. Either outcome would reduce my score.</p>
+      <p><strong>Technical invalidators:</strong></p>
+      <p>The 50-DMA breaching below the CMP on expanding volume. In a Stage 2 setup, the 50-DMA acts as the first line of support. A clean break through it with expanding volume would tell me the base has failed, which would move me to reduce.</p>
+      <p><strong>Soft watch points:</strong></p>
+      <p>ICE vehicle demand slowing faster than the JV timeline allows for EV revenue to replace it. Any change in promoter holding pattern — they've been stable but I watch.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">05</div>
+        <div class="section-title">Where I Stand Today</div>
+      </div>
+      <div class="stand-box">
+        I hold this position. My average entry was ₹2,141.75 — I entered while the VCP base was forming, before the Trend Template reached 7/8. In retrospect, I could have waited for a higher confirmation score, but the fundamentals were strong enough that I judged the risk of missing the move to be higher than the risk of an early entry.<br><br>
+        My current read is that the Stage 2 setup remains intact. I am watching the Q4 FY26 result and any news on the Nichidai JV ramp timeline. If the base breaks on volume, I will reassess. If Q4 delivers, I expect the setup to strengthen.<br><br>
+        This is not advice to anyone. My entry, my risk tolerance, my read.
+      </div>
+      <div class="disclosure-line">Disclosure: I hold this position</div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">06</div>
+        <div class="section-title">Verification &amp; Sources</div>
+      </div>
+      <table class="verify-table">
+        <tr><th>Data Point</th><th>Value</th><th>Source</th><th>Status</th></tr>
+        <tr><td>Revenue growth Q3 FY26</td><td>+24.7% YoY</td><td>BSE quarterly filing</td><td class="ok">✓ Verified</td></tr>
+        <tr><td>Forward P/E</td><td>~26x</td><td>Screener.in, consensus estimates</td><td class="ok">✓ Verified</td></tr>
+        <tr><td>MF holding</td><td>26.89%</td><td>BSE shareholding pattern</td><td class="ok">✓ Verified</td></tr>
+        <tr><td>ICRA credit rating</td><td>AA</td><td>ICRA rating report</td><td class="ok">✓ Verified</td></tr>
+        <tr><td>50-DMA / 200-DMA</td><td>₹2,029 / ₹1,615</td><td>NSE, verified at scoring</td><td class="ok">✓ Verified</td></tr>
+        <tr><td>52w High / Low</td><td>₹2,396 / ₹1,000</td><td>NSE historical data</td><td class="ok">✓ Verified</td></tr>
+        <tr><td>Nichidai JV</td><td>Active — not yet in run-rate</td><td>Company announcements, BSE</td><td class="ok">✓ Verified</td></tr>
+        <tr><td>Promoter pledge</td><td>None</td><td>BSE shareholding pattern</td><td class="ok">✓ Verified</td></tr>
+      </table>
+      <div class="sources">
+        All financial data: BSE/NSE filings, Annual Report, screener.in ·
+        Credit rating: ICRA ·
+        Price data: NSE ·
+        Original research notes: April 2026 · Last reviewed: April 2026
+      </div>
+    </div>
+
+  </div>
+
+  <div class="report-footer">
+    <a href="/reports/notes/sansera_note.html" class="footer-note-link">← One-page summary note</a>
+    <div class="footer-meta">Personal note · Originally written Apr 2026 · Migrated to v2.0 format Apr 2026</div>
+  </div>
+</div>
+
+</body>
+</html>
