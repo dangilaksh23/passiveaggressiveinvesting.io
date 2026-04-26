@@ -248,6 +248,18 @@ body { font-family: var(--sans); background: var(--paper); color: var(--ink); li
 .disclaimer-section { background: var(--ink); color: #bbb; border-radius: 10px; padding: 28px 32px; margin-bottom: 40px; font-family: var(--mono); font-size: 11px; line-height: 1.85; letter-spacing: 0.02em; }
 .disclaimer-section h3 { color: var(--paper); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
 
+/* PASSWORD GATE */
+#password-gate{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--paper);z-index:9999;display:flex;align-items:center;justify-content:center;}
+.gate-card{background:var(--card);border-radius:14px;padding:48px 48px 40px;box-shadow:0 4px 24px rgba(0,0,0,0.1);max-width:380px;width:100%;text-align:center;border-top:3px solid var(--green);}
+.gate-pi{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--green);letter-spacing:-3px;line-height:1;margin-bottom:8px;}
+.gate-name{font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:32px;}
+.gate-input{width:100%;padding:12px 16px;border:1px solid var(--rule);border-radius:8px;font-family:var(--mono);font-size:15px;color:var(--ink);background:var(--paper);margin-bottom:12px;text-align:center;letter-spacing:.15em;outline:none;transition:border-color .15s;}
+.gate-input:focus{border-color:var(--green);}
+.gate-btn{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:opacity .15s;}
+.gate-btn:hover{opacity:.88;}
+.gate-error{font-family:var(--mono);font-size:10px;color:var(--red);margin-top:10px;min-height:16px;letter-spacing:.04em;}
+.gate-hint{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:22px;letter-spacing:.06em;}
+
 /* FOOTER */
 footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; justify-content: space-between; align-items: center; }
 .footer-left { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.06em; line-height: 1.7; }
@@ -279,9 +291,21 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
 </head>
 <body>
 
+<!-- PASSWORD GATE -->
+<div id="password-gate">
+  <div class="gate-card">
+    <div class="gate-pi">π</div>
+    <div class="gate-name">Passive Aggressive Investing</div>
+    <input class="gate-input" type="password" id="gateInput" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkGate()">
+    <button class="gate-btn" onclick="checkGate()">Enter</button>
+    <div class="gate-error" id="gateError"></div>
+    <div class="gate-hint">Private research journal · URL + password required</div>
+  </div>
+</div>
+
 <!-- DISCLAIMER BANNER -->
 <div class="disclaimer-banner">
-  ⚠️ This is a personal investment journal. Not investment advice. Not a recommendation to buy or sell any security. The author is not SEBI-registered. Read the <a href="#disclaimer">full disclaimer</a> before using anything on this site.
+  ⚠️ Personal research journal. Not SEBI-registered. Not investment advice. <a href="#disclaimer">Full disclaimer</a>
 </div>
 
 <!-- MASTHEAD -->
@@ -308,32 +332,32 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
 <div id="heroWrap" style="display:none">
 <div class="hero">
   <div class="hero-left">
-    <div class="hero-eyebrow">A Personal Journal · Not Investment Advice</div>
+    <div class="hero-eyebrow">Model Snapshot · April 2026 · 48 Companies Tracked</div>
     <h1 class="hero-title">
       Not passive.<br>
       Not <em>quite</em> aggressive.<br>
-      Just my own thinking.
+      Just research-first.
     </h1>
     <p class="hero-desc">
-      This is my personal journal of how I think about Indian listed equities. I track companies through a framework I built for myself. I write down what I notice. I share what I am learning. None of this is investment advice. None of this is a buy/sell call. It is a record of one investor's thinking, made public so that I am held to my own standards.
+      Personal research using the NAV framework — government policy tailwinds, network quality, valuation, and Minervini technicals. Tracking 48 companies across 6 sectors. Not a trading service.
     </p>
-
-    <div class="lead-stat">
-      <div class="lead-stat-label">What I am tracking</div>
-      <div class="lead-stat-value">A growing universe of Indian listed companies</div>
-      <div class="lead-stat-detail">
-        Each company is scored on a four-layer framework that looks at regulatory tailwinds, network quality, valuation, and chart structure. The score is a personal organisation tool — it tells me which companies fit my framework well and which do not. It is not a recommendation to anyone, including myself, to act on.
-      </div>
-    </div>
 
     <div class="hero-meta">
       <div class="hero-stat">
-        <div class="hero-stat-val">4</div>
-        <div class="hero-stat-label">Framework layers</div>
+        <div class="hero-stat-val pos">+12.6%</div>
+        <div class="hero-stat-label">Buy Zone avg return</div>
       </div>
       <div class="hero-stat">
-        <div class="hero-stat-val">6</div>
-        <div class="hero-stat-label">Sectors covered</div>
+        <div class="hero-stat-val">88%</div>
+        <div class="hero-stat-label">Win rate (buy zone)</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val pos">+37.6%</div>
+        <div class="hero-stat-label">Best call (EIEL)</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">21</div>
+        <div class="hero-stat-label">Companies in buy zone</div>
       </div>
       <div class="hero-stat">
         <div class="hero-stat-val">π</div>
@@ -345,27 +369,31 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
     <div class="updated-tag">Last updated · 21 Apr 2026</div>
     <div class="quadrant-pills">
       <div class="q-pill q-pill-bz">
-        <span class="q-pill-label">Strong Framework Fit</span>
+        <span class="q-pill-label">Buy Zone</span>
         <div class="q-pill-right">
           <span class="q-pill-count">21</span>
+          <span class="q-pill-ret ret-g">+12.6%</span>
         </div>
       </div>
       <div class="q-pill q-pill-api">
-        <span class="q-pill-label">Already Reflected in Price</span>
+        <span class="q-pill-label">Already Priced In</span>
         <div class="q-pill-right">
           <span class="q-pill-count">13</span>
+          <span class="q-pill-ret ret-r">-12.0%</span>
         </div>
       </div>
       <div class="q-pill q-pill-sw">
-        <span class="q-pill-label">Speculative — Watching</span>
+        <span class="q-pill-label">Speculative Watch</span>
         <div class="q-pill-right">
           <span class="q-pill-count">7</span>
+          <span class="q-pill-ret ret-a">+5.4%</span>
         </div>
       </div>
       <div class="q-pill q-pill-av">
-        <span class="q-pill-label">Poor Framework Fit</span>
+        <span class="q-pill-label">Avoid</span>
         <div class="q-pill-right">
           <span class="q-pill-count">7</span>
+          <span class="q-pill-ret ret-m">N/A</span>
         </div>
       </div>
     </div>
@@ -465,46 +493,42 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
 
   <!-- BAND CARDS -->
   <div class="section-head">
-    <div class="section-title">PAI Score — How My Model Buckets Companies I Track</div>
-    <div class="section-meta">My Personal Model · Not a Recommendation</div>
+    <div class="section-title">PAI Priority Score — Performance by Band</div>
+    <div class="section-meta">20 Companies Scored · April 2026</div>
   </div>
   <div class="band-row">
     <div class="band-card bc1">
       <div class="bc-label">Band 1</div>
-      <div class="bc-score">Score 75–100 · Strong Fit</div>
+      <div class="bc-score">Score 75–100 · Full Position</div>
       <div class="bc-return">+20.3%</div>
-      <div class="bc-sub">avg observed return · 6 cos · ~3 weeks</div>
+      <div class="bc-sub">avg return · 6 companies</div>
     </div>
     <div class="band-card bc2">
       <div class="bc-label">Band 2</div>
-      <div class="bc-score">Score 55–74 · Good Fit</div>
+      <div class="bc-score">Score 55–74 · Standard</div>
       <div class="bc-return">+8.1%</div>
-      <div class="bc-sub">avg observed return · 11 cos · ~3 weeks</div>
+      <div class="bc-sub">avg return · 11 companies</div>
     </div>
     <div class="band-card bc3">
       <div class="bc-label">Band 3</div>
-      <div class="bc-score">Score 35–54 · Mixed Fit</div>
+      <div class="bc-score">Score 35–54 · Pilot Only</div>
       <div class="bc-return">-2.1%</div>
-      <div class="bc-sub">avg observed return · 2 cos · ~3 weeks</div>
+      <div class="bc-sub">avg return · 2 companies</div>
     </div>
     <div class="band-card bc4">
       <div class="bc-label">Band 4</div>
-      <div class="bc-score">Score 0–34 · Poor Fit</div>
+      <div class="bc-score">Score 0–34 · Do Not Buy</div>
       <div class="bc-return">-28.7%</div>
-      <div class="bc-sub">avg observed return · 3 cos · ~3 weeks</div>
+      <div class="bc-sub">avg return · 3 companies</div>
     </div>
   </div>
 
   <div class="sample-caveat" style="margin-top:0; margin-bottom:36px;">
     <div class="sc-icon">!</div>
     <div class="sc-text">
-      <strong>Read these numbers very carefully.</strong> These are average observed returns of companies in each band measured roughly three weeks after my initial scoring. Sample size is tiny — between 2 and 11 companies per band. Holding period is short. The Nifty SmallCap 100 over the same window was roughly flat. <strong>This is not a backtest.</strong> It is not a basis on which to predict that companies in the strong-fit band will return 20% in any future period. Any single company in any band can lose 50% or gain 100% — band averages mask that variance entirely. Past observed returns of any company shown on this site are not a forecast of its future returns. The author is not SEBI-registered. Nothing here is investment advice. The proper test of this framework is the historical backtest described on the About tab — these numbers are early signal, nothing more.
+      <strong>Small sample, short window.</strong> Returns measured ~3 weeks after initial scoring. 2–11 companies per band. Not a backtest. Not predictive. Past model returns do not guarantee future results. Always do your own research.
     </div>
   </div>
-
-  <!-- CHARTS REMOVED — Charts showing score vs return constituted performance
-       claims under SEBI rules. They will be re-added once a proper backtest
-       is published as historical observation with full disclaimers. -->
 
   <!-- FRAMEWORK CARDS — modular -->
   <div class="section-head">
@@ -546,15 +570,11 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
 
   <!-- DISCLAIMER -->
   <div class="disclaimer-section" id="disclaimer">
-    <h3>⚠️ Full Disclaimer — Please Read</h3>
-    This website is a <strong style="color:#fff">personal investment journal</strong> maintained by an individual investor for their own use, made public so that the author is held to their own thinking. The author is <strong style="color:#fff">not a SEBI-registered investment advisor, research analyst, or portfolio manager</strong>. Nothing on this website constitutes investment advice, a research recommendation, a buy or sell call, or a solicitation to invest in any security.<br><br>
-    The PAI Score, the bucket assignments (Strong Fit, Good Fit, Mixed Fit, Poor Fit, Reflected, Watching), the framework descriptions, and any commentary about specific companies are <strong style="color:#fff">personal observations</strong> based on publicly available information. They reflect the author's own thinking at the time of writing and may be materially incorrect, outdated, or biased. They are not predictions about future stock prices.<br><br>
-    <strong style="color:#fff">No fees are charged for any content on this site. There are no advertisements, no affiliate links, no sponsorships, no paid newsletter, no premium tier, no Telegram or WhatsApp group, no consulting service, no course, and no other monetisation, direct or indirect.</strong> This site exists for the author's personal use and is shared at no cost.<br><br>
-    The author personally holds positions in some of the companies mentioned on this site. Holdings are disclosed on the "My Holdings" tab. The author may buy or sell any of those holdings at any time without notice and is under no obligation to update this site when their positions change.<br><br>
-    Indian equities involve significant risk. Small-cap and mid-cap stocks are particularly volatile and can lose substantial value. <strong style="color:#fff">You must do your own research, consult a SEBI-registered professional, and make your own independent investment decisions.</strong> The author accepts no liability for any financial loss arising from your use of this site or anything on it.<br><br>
-    Some technical analysis used in personal observations on this site is informed by the stage analysis approach described in <em>Trade Like a Stock Market Wizard</em> by Mark Minervini (McGraw-Hill, 2013). No reproduction of that work is implied.<br><br>
-    AI tools are used to assist in data gathering, screening, and drafting on this site. Final judgments are made by the author. AI does not place trades, manage money, or interact directly with users.<br><br>
-    By continuing to use this website, you acknowledge that you have read and accepted these terms.
+    <h3>⚠️ Full Disclaimer — Read Before Using This Site</h3>
+    This website is maintained by an individual investor for personal research documentation purposes only. The author is <strong style="color:#fff">not a SEBI-registered investment advisor, research analyst, or portfolio manager</strong>. Nothing on this website constitutes investment advice, a buy/sell recommendation, or a solicitation to invest in any security.<br><br>
+    All analysis, scores, quadrant classifications, entry prices, and target prices are personal research outputs based on publicly available information. They reflect the author's opinions at the time of writing and may be materially incorrect, outdated, or biased. Indian equities involve significant risk. Small-cap and mid-cap stocks are particularly volatile.<br><br>
+    <strong style="color:#fff">Past model returns shown on this site do not guarantee future results.</strong> The scoring period is short (weeks, not years). This is not a validated backtested strategy. The PAI framework is an evolving personal tool, not a proven commercial system.<br><br>
+    By using this website, you acknowledge that you are making your own independent investment decisions. The author accepts no liability for any financial loss arising from the use of this research. Always consult a SEBI-registered investment advisor before making investment decisions.
   </div>
 
 </div>
@@ -708,24 +728,21 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
 <div id="tab-universe" class="tab-content">
 
   <div class="section-head">
-    <div class="section-title">Companies I Track</div>
-    <div class="section-meta">My Personal Watchlist · PAI Score Where Computed</div>
+    <div class="section-title">Research Universe — 48 Companies</div>
+    <div class="section-meta">Scored April 2026 · PAI Priority Score where available</div>
   </div>
 
-  <div class="sample-caveat" style="margin-top:0;">
-    <div class="sc-icon">i</div>
-    <div class="sc-text">
-      <strong>This is my personal watchlist.</strong> Bucket assignments and PAI Scores reflect how each company maps to my own four-layer framework on the date scored. Numbers go stale. Companies change. Nothing on this table is a recommendation. The blue dot (●) indicates that I personally hold a position in that company at the time of writing — that is a disclosure, not a buying signal. I may sell at any time without notice or explanation.
-    </div>
+  <div class="stop-alert">
+    ⚠️ Stop proximity alert: <strong>UNOMINDA</strong> CMP ₹1,150 is within 2.7% of stop ₹1,120
   </div>
 
   <div class="filter-row">
-    <button class="fb active" onclick="filterUniverse('all',this)">All</button>
-    <button class="fb" onclick="filterUniverse('buy_zone',this)">Strong Fit</button>
-    <button class="fb" onclick="filterUniverse('already_priced_in',this)">Reflected</button>
-    <button class="fb" onclick="filterUniverse('speculative_watch',this)">Watching</button>
-    <button class="fb" onclick="filterUniverse('avoid',this)">Poor Fit</button>
-    <button class="fb" onclick="filterUniverse('owned',this)">● I Hold</button>
+    <button class="fb active" onclick="filterUniverse('all',this)">All (48)</button>
+    <button class="fb" onclick="filterUniverse('buy_zone',this)">Buy Zone (21)</button>
+    <button class="fb" onclick="filterUniverse('already_priced_in',this)">Priced In (13)</button>
+    <button class="fb" onclick="filterUniverse('speculative_watch',this)">Watch (7)</button>
+    <button class="fb" onclick="filterUniverse('avoid',this)">Avoid (7)</button>
+    <button class="fb" onclick="filterUniverse('owned',this)">● Owned</button>
     <button class="fb" onclick="filterUniverse('scored',this)">Scored only</button>
   </div>
 
@@ -754,14 +771,26 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
 <div id="tab-portfolio" class="tab-content">
 
   <div class="section-head">
-    <div class="section-title">My Holdings — Disclosure</div>
-    <div class="section-meta">Skin in the Game · Not Investment Advice</div>
+    <div class="section-title">My Portfolio — 18 Positions</div>
+    <div class="section-meta">Personal positions only · Not investment advice</div>
   </div>
 
-  <div class="sample-caveat" style="margin-top:0; margin-bottom:22px;">
-    <div class="sc-icon">!</div>
-    <div class="sc-text">
-      <strong>Read this carefully before reading the table below.</strong> This is a disclosure of stocks I personally own. It is not a recommendation. It is not a model portfolio. Disclosing my holdings is what an honest investor does when discussing companies in public — it lets you see my conflicts of interest. <strong>I may sell any of these positions at any time without notice.</strong> The percentage P&L shown is for transparency about how my own decisions have played out so far. Do not interpret it as evidence that any of these companies will continue to rise or fall. Past performance of any individual stock is not predictive of future returns.
+  <div class="portfolio-summary">
+    <div class="port-stat">
+      <div class="port-stat-label">Invested</div>
+      <div class="port-stat-val">₹9.29L</div>
+    </div>
+    <div class="port-stat">
+      <div class="port-stat-label">Current Value</div>
+      <div class="port-stat-val">₹9.24L</div>
+    </div>
+    <div class="port-stat">
+      <div class="port-stat-label">Total P&L</div>
+      <div class="port-stat-val neg">-0.5%</div>
+    </div>
+    <div class="port-stat">
+      <div class="port-stat-label">Best Performer</div>
+      <div class="port-stat-val pos">EIEL +31.2%</div>
     </div>
   </div>
 
@@ -769,17 +798,16 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
     <thead>
       <tr>
         <th>Company</th>
-        <th>Bucket</th>
-        <th>Holding Period P&L %</th>
-        <th>Personal Note</th>
+        <th>Quadrant</th>
+        <th>Entry</th>
+        <th>CMP</th>
+        <th>P&L</th>
+        <th>Stop Loss</th>
+        <th>6M Target</th>
       </tr>
     </thead>
     <tbody id="portfolioTbody"></tbody>
   </table>
-
-  <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin: 16px 0 0;letter-spacing:0.04em;line-height:1.6;">
-    P&L is from my own entry price to the most recent close. Position sizes are not disclosed. Entry dates and target prices are not disclosed. This is not enough information to replicate my portfolio, and that is intentional.
-  </div>
 
 </div>
 <!-- END HOLDINGS -->
@@ -947,12 +975,12 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
         </ul>
       </div>
       <div class="about-block">
-        <h3>Framework Fit Bands</h3>
+        <h3>Score Bands</h3>
         <ul class="layer-list">
-          <li><div class="layer-num" style="background:var(--green)">1</div><div><strong>75–100, Strong Fit.</strong> Companies that match all four framework criteria well.</div></li>
-          <li><div class="layer-num" style="background:#2d6a4f">2</div><div><strong>55–74, Good Fit.</strong> Strong on most criteria, weaker on one.</div></li>
-          <li><div class="layer-num" style="background:#c87941">3</div><div><strong>35–54, Mixed Fit.</strong> Framework signals are inconsistent. I track these but the case is not coherent.</div></li>
-          <li><div class="layer-num" style="background:var(--red)">4</div><div><strong>0–34, Poor Fit.</strong> The company does not match what my framework looks for. This says nothing about whether the stock will go up or down — it only says it is not within my framework.</div></li>
+          <li><div class="layer-num" style="background:var(--green)">1</div><div><strong>75–100 → Full Position.</strong> Highest conviction. All four framework criteria met.</div></li>
+          <li><div class="layer-num" style="background:#2d6a4f">2</div><div><strong>55–74 → Standard.</strong> Strong on most criteria, one weaker leg.</div></li>
+          <li><div class="layer-num" style="background:#c87941">3</div><div><strong>35–54 → Pilot Only.</strong> Framework signals inconsistent. Track but don't deploy full capital.</div></li>
+          <li><div class="layer-num" style="background:var(--red)">4</div><div><strong>0–34 → Do Not Buy.</strong> Does not match framework. Says nothing about price direction — just outside my framework.</div></li>
         </ul>
         <h3 style="margin-top:24px">Beyond the Score</h3>
         <ul class="layer-list">
@@ -1000,7 +1028,7 @@ footer { border-top: 1px solid var(--rule); padding: 26px 40px; display: flex; j
 <footer>
   <div class="footer-left">
     π PAI — Passive Aggressive Investing · passiveaggressiveinvesting.io<br>
-    A personal investment journal. Not SEBI registered. Not investment advice. Not a research recommendation. Read the <a href="#disclaimer" style="color:var(--muted);text-decoration:underline;">full disclaimer</a>.
+    Personal research only. Not SEBI registered. Not investment advice. <a href="#disclaimer" onclick="showTab('dashboard',null)" style="color:var(--muted);text-decoration:underline;">Full disclaimer</a>.
   </div>
   <div class="footer-right">
     Updated continuously · April 2026
@@ -1087,12 +1115,12 @@ const portfolio = [
 ];
 
 const sectors = [
-  { name:"Water Infrastructure", l1:"Strong", l1cls:"strong", schemes:"JJM ₹3.6L Cr · AMRUT 2.0 · State Water Boards", cos:7, strongFit:4, note:"Government is the direct customer. The strongest Layer 1 setup I track.", strength:"strong", slug:"water" },
-  { name:"Cables & Conductors", l1:"Strong", l1cls:"strong", schemes:"RDSS ₹3.03L Cr · BharatNet Phase III · KAVACH", cos:13, strongFit:7, note:"DISCOMs pay directly under RDSS. Government-as-customer signal is clear.", strength:"strong", slug:"cables" },
-  { name:"Auto Metal Forming", l1:"Moderate", l1cls:"mod", schemes:"PLI-AUTO ₹26K Cr · EV transition overlay", cos:11, strongFit:6, note:"OEM is the customer, not government. EV disruption is the medium-term overhang.", strength:"moderate", slug:"auto-metal-forming" },
-  { name:"Recycling / Waste", l1:"Strong", l1cls:"strong", schemes:"EPR mandates · PWMR 2025 · 30% rPET mandate FY26", cos:7, strongFit:3, note:"Extended Producer Responsibility creates legally compelled demand for registered recyclers.", strength:"strong", slug:"recycling" },
-  { name:"Lending / NBFC", l1:"Strong (underserved)", l1cls:"strong", schemes:"RBI priority sector norms · Underserved NBFC regulations", cos:4, strongFit:2, note:"Strong only for underserved lending segments with limited bank branch access.", strength:"strong", slug:"lending" },
-  { name:"Energy / Renewables", l1:"Moderate", l1cls:"mod", schemes:"PM-KUSUM · RPO mandates · ISTS waiver · 500GW target 2030", cos:3, strongFit:1, note:"Mixed framework signals across companies. Under active observation.", strength:"moderate", slug:"energy" },
+  { name:"Water Infrastructure", l1:"Strong", l1cls:"strong", schemes:"JJM ₹3.6L Cr · AMRUT 2.0 · State Water Boards", cos:7, buyZone:4, avgReturn:"+37.6%", note:"Government is the direct customer. The strongest Layer 1 setup I track.", strength:"strong", slug:"water" },
+  { name:"Cables & Conductors", l1:"Strong", l1cls:"strong", schemes:"RDSS ₹3.03L Cr · BharatNet Phase III · KAVACH", cos:13, buyZone:7, avgReturn:"+15.3%", note:"DISCOMs pay directly under RDSS. Government-as-customer signal is clear.", strength:"strong", slug:"cables" },
+  { name:"Auto Metal Forming", l1:"Moderate", l1cls:"mod", schemes:"PLI-AUTO ₹26K Cr · EV transition overlay", cos:11, buyZone:6, avgReturn:"+9.2%", note:"OEM is the customer, not government. EV disruption is the medium-term overhang.", strength:"moderate", slug:"auto-metal-forming" },
+  { name:"Recycling / Waste", l1:"Strong", l1cls:"strong", schemes:"EPR mandates · PWMR 2025 · 30% rPET mandate FY26", cos:7, buyZone:3, avgReturn:"+11.4%", note:"Extended Producer Responsibility creates legally compelled demand for registered recyclers.", strength:"strong", slug:"recycling" },
+  { name:"Lending / NBFC", l1:"Strong (underserved)", l1cls:"strong", schemes:"RBI priority sector norms · Underserved NBFC regulations", cos:4, buyZone:2, avgReturn:"+7.3%", note:"Strong only for underserved lending segments with limited bank branch access.", strength:"strong", slug:"lending" },
+  { name:"Energy / Renewables", l1:"Moderate", l1cls:"mod", schemes:"PM-KUSUM · RPO mandates · ISTS waiver · 500GW target 2030", cos:3, buyZone:1, avgReturn:"-2.8%", note:"Mixed framework signals across companies. Under active observation.", strength:"moderate", slug:"energy" },
 ];
 
 // Compute returns
@@ -1106,15 +1134,15 @@ portfolio.forEach(p => {
 // ── HELPERS ──────────────────────────────────────────────────────────────
 
 const qBadge = q => {
-  const m = {buy_zone:{l:'Strong Fit',c:'bz'}, already_priced_in:{l:'Reflected',c:'api'}, speculative_watch:{l:'Watching',c:'sw'}, avoid:{l:'Poor Fit',c:'av'}}[q] || {l:'?',c:'bz'};
+  const m = {buy_zone:{l:'Buy Zone',c:'bz'}, already_priced_in:{l:'Priced In',c:'api'}, speculative_watch:{l:'Watch',c:'sw'}, avoid:{l:'Avoid',c:'av'}}[q] || {l:'?',c:'bz'};
   return `<span class="badge ${m.c}">${m.l}</span>`;
 };
 const tierInfo = s => {
   if (s === null) return {label:'Pending',cls:''};
-  if (s >= 75) return {label:'Strong Fit',cls:'tier-fp'};
-  if (s >= 55) return {label:'Good Fit',cls:'tier-sp'};
-  if (s >= 35) return {label:'Mixed Fit',cls:'tier-p'};
-  return {label:'Poor Fit',cls:'tier-dn'};
+  if (s >= 75) return {label:'Full Pos',cls:'tier-fp'};
+  if (s >= 55) return {label:'Standard',cls:'tier-sp'};
+  if (s >= 35) return {label:'Pilot',cls:'tier-p'};
+  return {label:'Do Not Buy',cls:'tier-dn'};
 };
 const scoreColor = s => !s ? '#ccc' : s >= 75 ? '#1a5c38' : s >= 55 ? '#2d6a4f' : s >= 35 ? '#c87941' : '#8b1a1a';
 const fmt = v => v !== null ? '₹' + v.toLocaleString('en-IN', {maximumFractionDigits:1}) : '—';
@@ -1144,6 +1172,27 @@ function showTab(name, el) {
   if (hash && valid.includes(hash)) showTab(hash, null);
 })();
 
+// ── PASSWORD GATE ──────────────────────────────────────────────────────────
+
+const GATE_PASSWORD = 'pai2026';
+(function() {
+  if (sessionStorage.getItem('pai_auth') === '1') {
+    document.getElementById('password-gate').style.display = 'none';
+  }
+})();
+function checkGate() {
+  const val = document.getElementById('gateInput').value;
+  if (val === GATE_PASSWORD) {
+    sessionStorage.setItem('pai_auth', '1');
+    document.getElementById('password-gate').style.display = 'none';
+  } else {
+    const err = document.getElementById('gateError');
+    err.textContent = 'Incorrect password.';
+    document.getElementById('gateInput').value = '';
+    setTimeout(() => { err.textContent = ''; }, 2500);
+  }
+}
+
 // ── SECTORS GRID ──────────────────────────────────────────────────────────
 
 const sg = document.getElementById('sectorsGrid');
@@ -1156,7 +1205,8 @@ sectors.forEach(s => {
     <div class="sector-l1">Layer 1: <span class="${s.l1cls}">${s.l1}</span></div>
     <div class="sector-stats">
       <div class="sector-stat"><div class="sector-stat-val">${s.cos}</div><div class="sector-stat-label">Companies</div></div>
-      <div class="sector-stat"><div class="sector-stat-val" style="color:var(--green)">${s.strongFit}</div><div class="sector-stat-label">Strong Fit</div></div>
+      <div class="sector-stat"><div class="sector-stat-val">${s.buyZone}</div><div class="sector-stat-label">Buy Zone</div></div>
+      <div class="sector-stat"><div class="sector-stat-val" style="color:var(--green)">${s.avgReturn}</div><div class="sector-stat-label">Avg Return</div></div>
     </div>
     <div class="sector-schemes">${s.schemes}</div>
     <div class="sector-schemes" style="margin-top:6px;font-style:italic">${s.note}</div>
@@ -1220,36 +1270,18 @@ renderUniverse();
 // ── PORTFOLIO TABLE ───────────────────────────────────────────────────────
 
 const ptbody = document.getElementById('portfolioTbody');
-const personalNotes = {
-  EIEL: 'Held since before the framework existed. Re-rated higher under it.',
-  FIVESTARBUS: 'MSME lending fits my framework well. Watching loan quality.',
-  SUZLON: 'Speculative bucket. Smaller position. Watching for thesis confirmation.',
-  SONACOMS: 'EV transition exposure. Watching margins quarter on quarter.',
-  TARIL: 'Cables and transformers tailwind. Held since the policy thesis took shape.',
-  HBLPOWER: 'Defence and railways exposure. Quiet compounder.',
-  SANSERA: 'Long-term holding. The diversification across verticals reduces single-cycle risk.',
-  MSTC: 'Government recycling thesis. Patient holding.',
-  UNIVCABLES: 'RDSS-driven cables thesis. Watching order book.',
-  TRANSRAIL: 'T&D capex play. Concerns: project execution timelines.',
-  LUMAXTECH: 'Auto components. Lower conviction than Sansera or Sona BLW.',
-  YATRA: 'Speculative. Held as a small experimental position.',
-  HDFCBANK: 'Long-term core. Not framework-driven.',
-  IEX: 'Power exchange. Held through regulatory uncertainty. Re-evaluating.',
-  IFCI: 'Speculative. Government turnaround story. Small position.',
-  ANANTRAJ: 'Real estate exposure. Watching for thesis to play out.',
-  RELIANCE: 'Bought before the framework. The framework would not buy it today.',
-  AELEA: 'Bought before the framework. Now in poor-fit bucket. Holding decision under review.'
-};
 portfolio.forEach(p => {
   const tr = document.createElement('tr');
   const pnlClass = p.pnl === null ? 'ret-na' : p.pnl >= 0 ? 'ret-pos' : 'ret-neg';
   const pnlStr = p.pnl === null ? '—' : (p.pnl >= 0 ? '+' + p.pnl + '%' : p.pnl + '%');
-  const note = personalNotes[p.ticker] || '';
   tr.innerHTML = `
     <td><div class="ticker-cell">${p.ticker}</div><div class="company-cell">${p.company}</div></td>
     <td>${qBadge(p.q)}</td>
+    <td class="price-cell">${fmt(p.entry)}</td>
+    <td class="${p.cmp ? 'price-cell' : 'price-na'}">${p.cmp ? fmt(p.cmp) : '—'}</td>
     <td><span class="${pnlClass}">${pnlStr}</span></td>
-    <td style="font-size:12px;color:#444;line-height:1.5;max-width:340px;">${note}</td>`;
+    <td class="${p.stop ? 'price-cell' : 'price-na'}">${p.stop ? fmt(p.stop) : '—'}</td>
+    <td class="${p.t6m ? 'price-cell' : 'price-na'}">${p.t6m ? fmt(p.t6m) : '—'}</td>`;
   ptbody.appendChild(tr);
 });
 
