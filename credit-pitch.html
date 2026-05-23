@@ -244,6 +244,57 @@ body { font-family: var(--sans); background: var(--paper); color: var(--ink); fo
 .email-cta::before { content: '→ '; color: #7fd99f; margin-right: 8px; }
 .email-cta:hover { color: #7fd99f; border-bottom-color: #7fd99f; }
 
+/* Exec summary */
+.exec-summary-section { background: var(--ink); }
+.exec-summary-inner { padding: 56px 36px; }
+.exec-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+.exec-col { padding: 0 32px; border-right: 1px solid #222; }
+.exec-col:first-child { padding-left: 0; }
+.exec-col:last-child { border-right: none; }
+.exec-col-head { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: #7fd99f; margin-bottom: 20px; font-weight: 500; }
+.exec-item { font-family: var(--serif); font-size: 15px; font-weight: 300; color: #d4d4d4; line-height: 1.5; padding: 10px 0 10px 16px; border-left: 2px solid #1e293b; margin-bottom: 10px; }
+.exec-item.pos { border-left-color: #4ade80; }
+.exec-item.neg { border-left-color: #f87171; }
+.exec-item.amb { border-left-color: #fb923c; }
+
+/* ROI block */
+.roi-block { background: var(--paper2); border-radius: 8px; padding: 28px 32px; margin: 36px 0; }
+.roi-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; font-weight: 500; }
+.roi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.roi-num { font-family: var(--serif); font-size: 38px; font-weight: 500; color: var(--ink); line-height: 1.1; margin-bottom: 8px; }
+.roi-desc { font-size: 12.5px; color: #444; line-height: 1.6; }
+
+/* Bracket tabs */
+.bracket-tabs { display: flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; margin-bottom: 32px; }
+.btab { flex: 1; padding: 14px 8px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; border: none; background: var(--paper); color: var(--muted); cursor: pointer; border-right: 1px solid var(--rule); transition: background 0.15s, color 0.15s; }
+.btab:last-child { border-right: none; }
+.btab.btab-active { background: var(--ink); color: var(--paper); }
+
+/* Case cards */
+.case-card { background: var(--card); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.case-header { background: var(--paper); padding: 12px 18px; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.case-company { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); font-weight: 500; }
+.case-tag { font-family: var(--mono); font-size: 8px; padding: 3px 8px; border-radius: 3px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; flex-shrink: 0; }
+.tag-red { background: var(--red-pale); color: var(--red); }
+.tag-amber { background: var(--amber-pale); color: var(--amber); }
+.tag-green { background: var(--green-pale); color: var(--green); }
+.tag-blue { background: var(--blue-pale); color: var(--blue); }
+.case-body { padding: 14px 18px; }
+.case-module { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.case-text { font-size: 13px; color: #333; line-height: 1.65; }
+.case-text strong { color: var(--ink); }
+.cases-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+.featured-case { background: var(--card); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+.featured-case-inner { padding: 24px 28px; display: grid; grid-template-columns: 1fr 340px; gap: 32px; align-items: start; }
+
+/* What This Is NOT */
+.not-section { background: #0d0d0d; padding: 80px 36px; border-bottom: 1px solid #1a1a1a; }
+.not-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 40px; }
+.not-item { padding: 32px; border: 1px solid #1a1a1a; }
+.not-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: #f87171; margin-bottom: 12px; font-weight: 500; }
+.not-text { font-family: var(--serif); font-size: 18px; font-weight: 300; line-height: 1.5; color: #d4d4d4; }
+.not-text strong { color: #ffffff; font-weight: 500; font-style: italic; }
+
 @media (max-width: 760px) {
   .masthead { padding: 12px 20px; }
   .hero { padding: 70px 20px 60px; }
@@ -268,6 +319,18 @@ body { font-family: var(--sans); background: var(--paper); color: var(--ink); fo
   .close-section { padding: 70px 20px; }
   .close-headline { font-size: 30px; }
   .close-points { grid-template-columns: 1fr; gap: 24px; }
+  .exec-cols { grid-template-columns: 1fr; gap: 24px; }
+  .exec-col { border-right: none; padding: 0; padding-bottom: 24px; border-bottom: 1px solid #222; }
+  .exec-col:last-child { border-bottom: none; padding-bottom: 0; }
+  .roi-grid { grid-template-columns: 1fr; }
+  .bracket-tabs { flex-direction: column; }
+  .btab { border-right: none; border-bottom: 1px solid var(--rule); }
+  .btab:last-child { border-bottom: none; }
+  .featured-case-inner { grid-template-columns: 1fr; }
+  .cases-grid { grid-template-columns: 1fr; }
+  .not-grid { grid-template-columns: 1fr; }
+  .not-section { padding: 56px 20px; }
+  .not-item { padding: 24px 20px; }
 }
 
 /* PASSWORD GATE */
@@ -335,11 +398,36 @@ function checkPitchGate() {
 
   <p class="problem-para">Sales cannot pre-score a lead. Ops chooses which file to process first based on intuition. The lead with the highest approval probability sits behind one that will reject in week three. That lead leaks — or it sits for days while a borrower calls a competitor.</p>
 
-  <p class="problem-para">After sanction, the book gets reviewed annually, if at all. <strong>If a borrower's top customer goes under in month five, you find out in month twelve.</strong> The DPD appears. The committee asks what was missed. The answer is usually: nothing was missed — it wasn't checked.</p>
-
   <div class="villain-block">
     <div class="villain-label">The real problem</div>
     <div class="villain-text">This is not a hiring problem. A senior underwriter and a junior underwriter, given the same file, produce different outputs — not because one is worse at their job, but because <strong>manual underwriting at scale is structurally inconsistent</strong>. Your book pays for that inconsistency every year in write-offs you could have predicted.</div>
+  </div>
+</section>
+
+<!-- EXEC SUMMARY -->
+<section class="exec-summary-section">
+  <div class="exec-summary-inner">
+    <div style="font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #555; margin-bottom: 36px;">Executive summary</div>
+    <div class="exec-cols">
+      <div class="exec-col">
+        <div class="exec-col-head">What changes</div>
+        <div class="exec-item pos">Every lead pre-scored within hours of arrival</div>
+        <div class="exec-item pos">Every file gets full ecosystem validation — top 5 customers, top 5 suppliers</div>
+        <div class="exec-item pos">Every live borrower monitored quarterly, not annually</div>
+      </div>
+      <div class="exec-col">
+        <div class="exec-col-head">What doesn't change</div>
+        <div class="exec-item neg">Underwriter still reviews and signs off on every file</div>
+        <div class="exec-item neg">Data stays on-prem — nothing leaves your perimeter</div>
+        <div class="exec-item neg">Existing LOS / LMS remains intact</div>
+      </div>
+      <div class="exec-col">
+        <div class="exec-col-head">Time to first value</div>
+        <div class="exec-item amb">Phase 1 live in 4–6 weeks</div>
+        <div class="exec-item amb">First pre-scored lead on day of go-live</div>
+        <div class="exec-item amb">Measurable against your own historical response-time baseline</div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -375,7 +463,25 @@ function checkPitchGate() {
     <div class="aha-text">The KYC function that pre-qualifies a lead is the same KYC function that underwrites it — and the same one that monitors it on the book. <strong>Build the library once. Compose it three ways. You are already paying for monitoring when you build underwriting.</strong></div>
   </div>
 
-  <p class="star-tease">Later in this deck: a live case — ₹8,000+ Cr revenue company, REFER verdict, <strong>₹1,054 Cr of unverifiable suppliers caught in 9 minutes for $0.23.</strong> That is what consistent depth looks like.</p>
+  <div class="roi-block">
+    <div class="roi-label">The cost of inconsistency — quantified</div>
+    <div class="roi-grid">
+      <div>
+        <div class="roi-num">₹20 Cr</div>
+        <div class="roi-desc">Estimated annual write-offs from inconsistent network checks on a ₹2,000 Cr MSME book — assuming 1% of files pass where a senior underwriter would have flagged them</div>
+      </div>
+      <div>
+        <div class="roi-num">$0.23</div>
+        <div class="roi-desc">Cost to run all 13 modules on one file. 100 files costs $23. The credit losses those checks prevent cost 800× more.</div>
+      </div>
+      <div>
+        <div class="roi-num">800×</div>
+        <div class="roi-desc">The ratio between the cost of consistent depth and the cost of the inconsistency it eliminates. This is not a technology argument. It is a credit quality argument.</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="star-tease">In §08: cases across ₹1 Cr to ₹8,000+ Cr — <strong>₹1,054 Cr of unverifiable suppliers caught in 9 minutes for $0.23.</strong> Same depth, every file, regardless of who picked it up.</p>
 </section>
 
 <!-- 03 · WHO I AM (guide enters — empathy first, authority second) -->
@@ -383,12 +489,7 @@ function checkPitchGate() {
   <span class="section-num"><span class="num">03</span> Why I can help</span>
   <h2 class="section-head">I have not underwritten files. I have <em>written the policy</em> behind them.</h2>
 
-  <p class="guide-intro">I have been the person who designs what an underwriter is supposed to check — and then watches what actually gets checked when the queue has fifteen files in it. The policy does not change. The output does. <strong>My underwriters face this every week. That gap between policy and execution is exactly what this system closes.</strong></p>
-
-  <div class="role-block">
-    <div class="role-label">Standard Chartered Bank<span class="role-period">Retail credit</span></div>
-    <div class="role-text">Credit cards, personal loans, large consumer portfolios. Where risk is <strong>model-driven, validated against regulatory scrutiny, and managed at scale</strong> — not through individual underwriter judgment on each file.</div>
-  </div>
+  <p class="guide-intro">I design the policy that determines what an underwriter is supposed to check. Then I watch what actually gets checked when the queue has fifteen files in it. The policy does not change. The output does. <strong>That gap between policy and execution is what this system closes.</strong></p>
 
   <div class="role-block">
     <div class="role-label">SMFG India Credit<span class="role-period">Risk policy · micro-SME</span></div>
@@ -578,45 +679,95 @@ function checkPitchGate() {
   </div>
 </section>
 
-<!-- 08 · FINDINGS GALLERY -->
+<!-- 08 · FINDINGS BY BRACKET -->
 <section class="section">
   <span class="section-num"><span class="num">08</span> What it finds across the book</span>
-  <h2 class="section-head">18 cases. ₹35 Cr to ₹8,000+ Cr. <em>Same checks, every file.</em></h2>
+  <h2 class="section-head">₹1 Cr to ₹8,000+ Cr. <em>Select your revenue bracket.</em></h2>
 
-  <p style="font-family: var(--serif); font-size: 17px; font-weight: 300; color: #444; max-width: 680px; line-height: 1.6; margin-bottom: 36px;">Entity names masked. Findings are real. Every case below passed basic financial screening before the network layer ran. What follows is what the network layer caught on top.</p>
+  <p style="font-family: var(--serif); font-size: 17px; font-weight: 300; color: #444; max-width: 680px; line-height: 1.6; margin-bottom: 32px;">Entity names partially masked. Findings are real. Every case passed basic financial screening before the network layer ran.</p>
 
-  <!-- FEATURED: Director network graph -->
-  <div style="background: var(--card); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; margin-bottom: 14px;">
-    <div style="background: var(--paper); padding: 14px 24px; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); font-weight: 500;">KIMIA BIOSCIENCES LIMITED · DELHI NCR · Revenue undisclosed</span>
-      <span style="font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; border-radius: 3px; background: var(--red-pale); color: var(--red); font-weight: 500;">RELATED_PARTY_CYCLIC</span>
+  <div class="bracket-tabs">
+    <button class="btab btab-active" onclick="showBracket('b1', this)">≤₹100 Cr</button>
+    <button class="btab" onclick="showBracket('b2', this)">₹100–500 Cr</button>
+    <button class="btab" onclick="showBracket('b3', this)">₹500–₹2,500 Cr</button>
+    <button class="btab" onclick="showBracket('b4', this)">₹2,500 Cr+</button>
+  </div>
+
+  <!-- BRACKET B1: ≤₹100 Cr -->
+  <div id="bracket-b1">
+    <div class="cases-grid">
+
+      <div class="case-card">
+        <div class="case-header">
+          <span class="case-company">[SPICE EXPORTER · KERALA] · ₹62 Cr</span>
+          <span class="case-tag tag-red">AML Flag · Suspended</span>
+        </div>
+        <div class="case-body">
+          <div class="case-module">KYC Pre-screen · Stage 1</div>
+          <p class="case-text">Suspended before document collection. System detected an <strong>AML POSSIBLE flag at entity level</strong> in the pre-screening pass — name-list match on the spice export entity. Full underwriting never ran. Ops was notified within 40 minutes of lead submission.</p>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <div class="case-header">
+          <span class="case-company">[TRADING HOUSE · MUMBAI] · ₹21 Cr</span>
+          <span class="case-tag tag-green">Clean · Fast Onboard</span>
+        </div>
+        <div class="case-body">
+          <div class="case-module">KYC Pre-screen · Stage 1</div>
+          <p class="case-text"><strong>80+ year vintage</strong>, FIEO member, clean director records, diversified counterparty base. Pre-score returned in 47 minutes. No flags at any layer. The fastest onboarding in the dataset — because the data was clean, not because checks were skipped.</p>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <div class="case-header">
+          <span class="case-company">[HAND TOOLS TRADER · GUJARAT] · ₹2.5 Cr</span>
+          <span class="case-tag tag-amber">Deferred · Thin History</span>
+        </div>
+        <div class="case-body">
+          <div class="case-module">KYC Pre-screen · Stage 1</div>
+          <p class="case-text">Entity registered 18 months prior. GST filing cadence too thin to generate a reliable PD score. <strong>Deferred at pre-screen, not declined</strong> — system returned a "revisit in 6 months" recommendation, sparing the underwriting queue entirely.</p>
+        </div>
+      </div>
+
     </div>
-    <div style="padding: 24px 28px; display: grid; grid-template-columns: 1fr 340px; gap: 32px; align-items: center;">
-      <div>
-        <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px;">Director network flag</div>
-        <p style="font-family: var(--serif); font-size: 18px; font-weight: 300; line-height: 1.55; color: var(--ink); margin-bottom: 18px;">The <em style="font-style:italic;font-weight:500;">Goel</em> surname spans three directors — Sameer, Sachin, and Vipul — across 41 related entities. One of those entities appears in the applicant's GST as both a buyer and a seller in the same period. And a former Kimia director shares a surname with a sitting director at the applicant's top customer.</p>
-        <div style="background: var(--red-pale); border-left: 3px solid var(--red); border-radius: 4px; padding: 14px 18px; margin-bottom: 10px;">
-          <div style="font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); margin-bottom: 6px; font-weight: 500;">Flag 1 — Related party cyclic</div>
-          <div style="font-size: 12.5px; color: #333; line-height: 1.6;">BIOTAVIA LABS PVT LTD — related party via director PAN AAOPG9045R (Sameer Goel) — appears as GST counterparty in both sales (₹1.38 Cr) and purchases (₹1.27 Cr) in the same period. Potential round-tripping. Commercial substance verification required before sanction.</div>
-        </div>
-        <div style="background: var(--amber-pale); border-left: 3px solid var(--amber); border-radius: 4px; padding: 14px 18px; margin-bottom: 14px;">
-          <div style="font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; font-weight: 500;">Flag 2 — Surname overlap · applicant ↔ customer director</div>
-          <div style="font-size: 12.5px; color: #333; line-height: 1.6;">SHAKUNTALA PRASAD (former director, Kimia Biosciences) shares surname with G V PRASAD (Gunupati Venkateswara Prasad, director at DR REDDYS LABORATORIES — the applicant's largest customer at 7.3% revenue share). Relationship unconfirmed. Edge shown in graph.</div>
-        </div>
-        <div style="font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.05em;">41 related entities total · 7 shown in graph · 2 flags surfaced</div>
+  </div>
+
+  <!-- BRACKET B2: ₹100–500 Cr -->
+  <div id="bracket-b2" style="display:none;">
+
+    <!-- FEATURED: Kimia Biosciences director network -->
+    <div class="featured-case">
+      <div class="case-header">
+        <span class="case-company">KIMIA BIOSCIENCES LIMITED · DELHI NCR · Revenue undisclosed</span>
+        <span class="case-tag tag-red">RELATED_PARTY_CYCLIC</span>
       </div>
-      <!-- Live Cytoscape Network Graph -->
-      <div>
-        <div id="cy_pitch_dir_graph" style="width:100%;height:420px;border-radius:6px;border:1px solid var(--rule);background:#0f172a;"></div>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;">
-          <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0f172a;border:1.5px solid #64748b"></span>Applicant</span>
-          <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0c4a6e;border:1.5px solid #38bdf8"></span>Active director</span>
-          <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f8fafc;border:1.5px solid #94a3b8"></span>Former director</span>
-          <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0e7490;border:1.5px solid #22d3ee"></span>Customer</span>
-          <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#1e293b;border:1.5px solid #64748b"></span>Director's other stake</span>
+      <div class="featured-case-inner">
+        <div>
+          <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px;">Director network flag</div>
+          <p style="font-family: var(--serif); font-size: 18px; font-weight: 300; line-height: 1.55; color: var(--ink); margin-bottom: 18px;">The <em style="font-style:italic;font-weight:500;">Goel</em> surname spans three directors — Sameer, Sachin, and Vipul — across 41 related entities. One of those entities appears in the applicant's GST as both a buyer and a seller in the same period.</p>
+          <div style="background: var(--red-pale); border-left: 3px solid var(--red); border-radius: 4px; padding: 14px 18px; margin-bottom: 10px;">
+            <div style="font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); margin-bottom: 6px; font-weight: 500;">Flag 1 — Related party cyclic</div>
+            <div style="font-size: 12.5px; color: #333; line-height: 1.6;">BIOTAVIA LABS PVT LTD — related party via director PAN AAOPG9045R (Sameer Goel) — appears as GST counterparty in both sales (₹1.38 Cr) and purchases (₹1.27 Cr) in the same period. Potential round-tripping. Commercial substance verification required before sanction.</div>
+          </div>
+          <div style="background: var(--amber-pale); border-left: 3px solid var(--amber); border-radius: 4px; padding: 14px 18px; margin-bottom: 14px;">
+            <div style="font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; font-weight: 500;">Flag 2 — Surname overlap · applicant ↔ customer director</div>
+            <div style="font-size: 12.5px; color: #333; line-height: 1.6;">SHAKUNTALA PRASAD (former director, Kimia Biosciences) shares surname with G V PRASAD (director at DR REDDYS LABORATORIES — the applicant's largest customer at 7.3% revenue share). Relationship unconfirmed. Edge shown in graph.</div>
+          </div>
+          <div style="font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.05em;">41 related entities total · 7 shown in graph · 2 flags surfaced</div>
         </div>
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;color:var(--muted);margin-top:8px;">24 nodes · 24 links · scroll to zoom · click node to highlight · drag to explore</div>
-      </div>
+        <!-- Live Cytoscape Network Graph -->
+        <div>
+          <div id="cy_pitch_dir_graph" style="width:100%;height:420px;border-radius:6px;border:1px solid var(--rule);background:#0f172a;"></div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;">
+            <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0f172a;border:1.5px solid #64748b"></span>Applicant</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0c4a6e;border:1.5px solid #38bdf8"></span>Active director</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f8fafc;border:1.5px solid #94a3b8"></span>Former director</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0e7490;border:1.5px solid #22d3ee"></span>Customer</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#1e293b;border:1.5px solid #64748b"></span>Director's other stake</span>
+          </div>
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;color:var(--muted);margin-top:8px;">24 nodes · 24 links · scroll to zoom · click node to highlight · drag to explore</div>
+        </div>
 <script>
 (function() {
   var CONT_ID = 'cy_pitch_dir_graph';
@@ -697,73 +848,275 @@ function checkPitchGate() {
   }
 })();
 </script>
+        </div>
+      </div>
+    </div>
+
+    <div class="cases-grid">
+
+      <div class="case-card">
+        <div class="case-header">
+          <span class="case-company">[ADHESIVE TAPES CO · PUNE] · ₹114 Cr</span>
+          <span class="case-tag tag-red">Ghost customer</span>
+        </div>
+        <div class="case-body">
+          <div class="case-module">Network Validation · Stage 2 · REFER $150K</div>
+          <p class="case-text">Top customer holds <strong>47.6% of GST revenue</strong> — KYC score: 0 (NOT FOUND on any registry). Borrower's own PAN appears in a self-referential cyclic entry (₹3.23 Cr). Largest customer simultaneously acts as #2 supplier. Three flags on a single counterparty.</p>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <div class="case-header">
+          <span class="case-company">[CASHEW PROCESSOR · KERALA] · ₹126 Cr</span>
+          <span class="case-tag tag-amber">GST / Financials divergence</span>
+        </div>
+        <div class="case-body">
+          <div class="case-module">GST PD Model · Stage 5 · REFER $250K</div>
+          <p class="case-text">Financials show no obvious stress. Balance sheet passes. GST-based PD model scores <strong>70.2% default probability</strong> (HIGH RISK band). The two signals tell opposite stories. System flags the divergence — the underwriter decides which to trust.</p>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <div class="case-header">
+          <span class="case-company">[SOLAR EPC · GUJARAT] · ₹352 Cr</span>
+          <span class="case-tag tag-red">Rating downgrade · Cyclic</span>
+        </div>
+        <div class="case-body">
+          <div class="case-module">Network Validation + Bureau · REFER $750K</div>
+          <p class="case-text">CRISIL downgraded to <strong>B (Issuer Not Cooperating)</strong> April 2026 — two notches from BB (Sept 2024). Debt exploded <strong>3.6× YoY</strong> (₹32.9 Cr → ₹117.8 Cr). Own PAN found in GST cyclic data: ₹53.76 Cr self-referential entry. Rating at application vs. processing date: different company.</p>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <div class="case-header">
+          <span class="case-company">[POWER CO · GUJARAT] · ₹242 Cr</span>
+          <span class="case-tag tag-amber">GST vs. financials</span>
+        </div>
+        <div class="case-body">
+          <div class="case-module">GST PD Model · Stage 5 · REFER</div>
+          <p class="case-text">14 of 16 financial flags pass. Balance sheet looks acceptable. GST-based PD model scores <strong>98.1% default probability</strong> — highest in the dataset. 32 cyclic counterparties. GST predicts what the balance sheet does not yet show. The system flags the divergence; the underwriter decides which to trust.</p>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- 5 case cards grid -->
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 0;">
+  <!-- BRACKET B3: ₹500–₹2,500 Cr -->
+  <div id="bracket-b3" style="display:none;">
 
-    <div style="background: var(--card); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden;">
-      <div style="background: var(--paper); padding: 12px 18px; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); font-weight: 500;">[CHEMICALS CO · MUMBAI] · ₹262 Cr</span>
-        <span style="font-family: var(--mono); font-size: 8px; padding: 3px 8px; border-radius: 3px; background: var(--red-pale); color: var(--red); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;">Circular</span>
+    <!-- FEATURED: Xtreme Media / LEDX fraud -->
+    <div class="featured-case">
+      <div class="case-header">
+        <span class="case-company">[ELECTRONICS DISTRIBUTOR · GUJARAT] · Revenue masked</span>
+        <span class="case-tag tag-red">Fictitious procurement</span>
       </div>
-      <div style="padding: 16px 18px;">
-        <div style="font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px;">Finding</div>
-        <p style="font-size: 13px; color: #333; line-height: 1.6;">Parent company is simultaneously the <strong>99.7% majority shareholder</strong>, top customer (13.3% of sales), and top supplier (40.0% of purchases — breaches policy cap). Three-way related-party structure with round-tripping risk. Requires three-way invoice reconciliation before any limit can be sanctioned.</p>
+      <div class="featured-case-inner">
+        <div>
+          <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px;">Supplier network fraud flag</div>
+          <p style="font-family: var(--serif); font-size: 18px; font-weight: 300; line-height: 1.55; color: var(--ink); margin-bottom: 18px;">Three directors share the Rambhia surname across 6 related entities. Top supplier <em style="font-style:italic;font-weight:500;">LEDX TECHNOLOGY</em> appears with ₹24.78 Cr in supplies to the applicant. But LEDX's last filing declares <strong>₹3.23 Cr total revenue</strong>. Impossible. Fictitious procurement or intra-family transfer.</p>
+          <div style="background: var(--red-pale); border-left: 3px solid var(--red); border-radius: 4px; padding: 14px 18px; margin-bottom: 10px;">
+            <div style="font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); margin-bottom: 6px; font-weight: 500;">Critical — LEDX TECHNOLOGY</div>
+            <div style="font-size: 12.5px; color: #333; line-height: 1.6;">LEDX declares ₹3.23 Cr total revenue. Cannot have supplied ₹24.78 Cr to the applicant. The GST counterparty entry exists; the commercial substance does not. Hard flag before sanction.</div>
+          </div>
+          <div style="background: var(--amber-pale); border-left: 3px solid var(--amber); border-radius: 4px; padding: 14px 18px; margin-bottom: 14px;">
+            <div style="font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; font-weight: 500;">Supporting — ARP TECHNOLOGY cyclic · PARAS INFRA ghost</div>
+            <div style="font-size: 12.5px; color: #333; line-height: 1.6;">ARP TECHNOLOGY shows asymmetric buy-sell pattern (cyclic flag). PARAS INFRA appears in GST data but has no MCA registration — ghost entity. Three of top five suppliers fail basic verification.</div>
+          </div>
+          <div style="font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.05em;">7 nodes shown · 3 supplier flags · 0 flags surfaced by traditional underwriting</div>
+        </div>
+        <!-- Xtreme Media Cytoscape graph -->
+        <div>
+          <div id="cy_xtreme_graph" style="width:100%;height:420px;border-radius:6px;border:1px solid var(--rule);background:#0f172a;"></div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;">
+            <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0f172a;border:1.5px solid #64748b"></span>Applicant</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0c4a6e;border:1.5px solid #38bdf8"></span>Active director</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#7c2d12;border:1.5px solid #f97316"></span>Flagged supplier</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#78350f;border:1.5px solid #f59e0b"></span>Cyclic entity</span>
+            <span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#1e293b;border:1.5px solid #475569"></span>Ghost entity</span>
+          </div>
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;color:var(--muted);margin-top:8px;">7 nodes · scroll to zoom · click node to highlight</div>
+        </div>
+<script>
+(function() {
+  var CONT_ID = 'cy_xtreme_graph';
+  var elements = [
+    {"data":{"id":"xtreme","label":"XTREME\nMEDIA","tooltip":"<strong>ELECTRONICS DISTRIBUTOR</strong><br><span style='color:#94a3b8'>Main Applicant · Gujarat</span>","ntype":"company"},"position":{"x":300,"y":240}},
+    {"data":{"id":"kinjal","label":"KINJAL\nRAMBHIA","tooltip":"<strong>KINJAL RAMBHIA</strong><br>Active Director<br><span style='color:#7dd3fc'>RAMBHIA surname · 3 related entities</span>","ntype":"active"},"position":{"x":180,"y":130}},
+    {"data":{"id":"sanket","label":"SANKET\nRAMBHIA","tooltip":"<strong>SANKET RAMBHIA</strong><br>Active Director<br><span style='color:#7dd3fc'>RAMBHIA surname</span>","ntype":"active"},"position":{"x":300,"y":100}},
+    {"data":{"id":"sarjan","label":"SARJAN\nSATRA","tooltip":"<strong>SARJAN SATRA</strong><br>Active Director","ntype":"active"},"position":{"x":420,"y":130}},
+    {"data":{"id":"ledx","label":"LEDX\nTECHNOLOGY","tooltip":"<strong>CRITICAL: LEDX TECHNOLOGY</strong><br><span style='color:#f97316'>Declares ₹3.23 Cr total revenue</span><br><span style='color:#f87171'>Cannot have supplied ₹24.78 Cr to applicant</span><br>Fictitious procurement or intra-family transfer","ntype":"flagged_co"},"position":{"x":160,"y":360}},
+    {"data":{"id":"arp","label":"ARP\nTECHNOLOGY","tooltip":"<strong>ARP TECHNOLOGY</strong><br><span style='color:#f59e0b'>Cyclic buy-sell pattern</span><br>Asymmetric transaction imbalance — round-tripping flag","ntype":"cyclic_co"},"position":{"x":300,"y":400}},
+    {"data":{"id":"paras","label":"PARAS\nINFRA","tooltip":"<strong>PARAS INFRA</strong><br><span style='color:#94a3b8'>Ghost entity</span><br>In GST counterparty data — no MCA registration found","ntype":"ghost_co"},"position":{"x":440,"y":360}},
+    {"data":{"id":"e1","source":"xtreme","target":"kinjal","etype":"active"}},
+    {"data":{"id":"e2","source":"xtreme","target":"sanket","etype":"active"}},
+    {"data":{"id":"e3","source":"xtreme","target":"sarjan","etype":"active"}},
+    {"data":{"id":"e4","source":"xtreme","target":"ledx","etype":"flagged_sup"}},
+    {"data":{"id":"e5","source":"xtreme","target":"arp","etype":"cyclic"}},
+    {"data":{"id":"e6","source":"xtreme","target":"paras","etype":"ghost"}},
+    {"data":{"id":"e7","source":"kinjal","target":"ledx","etype":"shared_dir"}}
+  ];
+
+  function buildXtremeStylesheet() {
+    return [
+      { selector: 'node', style: { 'label': 'data(label)', 'text-wrap': 'wrap', 'text-halign': 'center', 'text-valign': 'center', 'font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', 'transition-property': 'opacity', 'transition-duration': '150ms' } },
+      { selector: 'edge', style: { 'curve-style': 'bezier', 'target-arrow-shape': 'none', 'opacity': 0.9 } },
+      { selector: '.dimmed', style: { 'opacity': 0.1 } },
+      { selector: '.highlighted', style: { 'opacity': 1.0 } },
+      { selector: 'node[ntype="company"]',    style: { 'width': 76, 'height': 76, 'background-color': '#0f172a', 'border-color': '#64748b', 'color': '#ffffff', 'font-weight': 'bold', 'font-size': 11, 'border-width': 2.5, 'shape': 'ellipse' } },
+      { selector: 'node[ntype="active"]',     style: { 'width': 56, 'height': 56, 'background-color': '#0c4a6e', 'border-color': '#38bdf8', 'color': '#ffffff', 'font-weight': 'bold', 'font-size': 10, 'border-width': 1.8, 'shape': 'ellipse' } },
+      { selector: 'node[ntype="flagged_co"]', style: { 'width': 60, 'height': 60, 'background-color': '#7c2d12', 'border-color': '#f97316', 'color': '#ffffff', 'font-weight': 'bold', 'font-size': 10, 'border-width': 2.5, 'shape': 'ellipse' } },
+      { selector: 'node[ntype="cyclic_co"]',  style: { 'width': 50, 'height': 50, 'background-color': '#78350f', 'border-color': '#f59e0b', 'color': '#ffffff', 'font-weight': 'bold', 'font-size': 10, 'border-width': 2.0, 'shape': 'ellipse' } },
+      { selector: 'node[ntype="ghost_co"]',   style: { 'width': 46, 'height': 46, 'background-color': '#1e293b', 'border-color': '#475569', 'color': '#94a3b8', 'font-weight': '600',  'font-size': 9,  'border-width': 1.5, 'shape': 'ellipse', 'border-style': 'dashed' } },
+      { selector: 'edge[etype="active"]',      style: { 'line-color': '#38bdf8', 'width': 1.2, 'line-style': 'solid' } },
+      { selector: 'edge[etype="shared_dir"]',  style: { 'line-color': '#f97316', 'width': 2.0, 'line-style': 'solid' } },
+      { selector: 'edge[etype="flagged_sup"]', style: { 'line-color': '#f87171', 'width': 2.0, 'line-style': 'solid' } },
+      { selector: 'edge[etype="cyclic"]',      style: { 'line-color': '#f59e0b', 'width': 1.8, 'line-style': 'dashed', 'line-dash-pattern': [5,4] } },
+      { selector: 'edge[etype="ghost"]',       style: { 'line-color': '#475569', 'width': 1.2, 'line-style': 'dashed', 'line-dash-pattern': [3,3] } },
+    ];
+  }
+
+  function initXtremeGraph() {
+    var cy = window.cytoscape({
+      container: document.getElementById(CONT_ID),
+      elements: elements,
+      style: buildXtremeStylesheet(),
+      layout: { name: 'cose', animate: false, randomize: false, fit: true, padding: 40, nodeRepulsion: function() { return 6000; }, idealEdgeLength: function() { return 160; }, nodeOverlap: 20, numIter: 1000 },
+      minZoom: 0.3, maxZoom: 3.0,
+    });
+
+    var tip = document.createElement('div');
+    tip.style.cssText = 'position:fixed;pointer-events:none;background:rgba(15,23,42,0.96);color:#e2e8f0;padding:8px 12px;border-radius:7px;font-size:12px;line-height:1.6;max-width:280px;z-index:99999;display:none;border:1px solid #334155;box-shadow:0 4px 20px rgba(0,0,0,0.4);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;';
+    document.body.appendChild(tip);
+
+    cy.on('mouseover', 'node', function(evt) { tip.innerHTML = evt.target.data('tooltip') || evt.target.data('label') || ''; tip.style.display = 'block'; });
+    cy.on('mouseout', 'node', function() { tip.style.display = 'none'; });
+    document.getElementById(CONT_ID).addEventListener('mousemove', function(e) { tip.style.left = (e.clientX + 14) + 'px'; tip.style.top = (e.clientY - 10) + 'px'; });
+    cy.on('tap', 'node', function(evt) { var n = evt.target; cy.elements().addClass('dimmed').removeClass('highlighted'); n.removeClass('dimmed').addClass('highlighted'); n.neighborhood().removeClass('dimmed').addClass('highlighted'); });
+    cy.on('tap', function(evt) { if (evt.target === cy) cy.elements().removeClass('dimmed').removeClass('highlighted'); });
+  }
+
+  if (window.cytoscape) {
+    initXtremeGraph();
+  } else {
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/cytoscape@3.29.2/dist/cytoscape.min.js';
+    s.onload = initXtremeGraph;
+    document.head.appendChild(s);
+  }
+})();
+</script>
+        </div>
       </div>
     </div>
 
-    <div style="background: var(--card); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden;">
-      <div style="background: var(--paper); padding: 12px 18px; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); font-weight: 500;">[SOLAR EPC CO · GUJARAT] · ₹352 Cr</span>
-        <span style="font-family: var(--mono); font-size: 8px; padding: 3px 8px; border-radius: 3px; background: var(--amber-pale); color: var(--amber); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;">Self-referential</span>
-      </div>
-      <div style="padding: 16px 18px;">
-        <div style="font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px;">Finding</div>
-        <p style="font-size: 13px; color: #333; line-height: 1.6;">Applicant's <strong>own PAN appears in its own GST counterparty data</strong> — ₹53.76 Cr in self-referential sales. 20 cyclic counterparties. CRISIL downgraded to B (Issuer Not Cooperating) after application was submitted. Rating at filing date vs. rating at processing date: different company.</p>
-      </div>
-    </div>
+    <div class="cases-grid">
 
-    <div style="background: var(--card); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden;">
-      <div style="background: var(--paper); padding: 12px 18px; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); font-weight: 500;">[CASHEW PROCESSOR · KERALA] · ₹127 Cr</span>
-        <span style="font-family: var(--mono); font-size: 8px; padding: 3px 8px; border-radius: 3px; background: var(--red-pale); color: var(--red); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;">Ghost entities</span>
+      <div class="case-card">
+        <div class="case-header">
+          <span class="case-company">[METALS TRADER · GUJARAT] · ₹767 Cr</span>
+          <span class="case-tag tag-amber">Leverage breach</span>
+        </div>
+        <div class="case-body">
+          <div class="case-module">Financials · Limit Engine · REFER $500K</div>
+          <p class="case-text">Debt/EBITDA <strong>5.54× (policy cap: 4×)</strong>. GP margin 3.61% — fails 5% minimum. Revenue doubled YoY on aluminium trading. At 3.6% margin, one commodity cycle compresses the book into covenant breach. The financials pass surface-level review; the ratios tell the real story.</p>
+        </div>
       </div>
-      <div style="padding: 16px 18px;">
-        <div style="font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px;">Finding</div>
-        <p style="font-size: 13px; color: #333; line-height: 1.6;"><strong>13 of 18 assessed counterparties failed KYC</strong>. Stated receivables pool shrank materially after ghost entities removed. Top supplier ASCEND PACKTECH does not exist in MCA records despite active GST filings — potential fictitious invoicing. Excess ITC claim ₹4.67 Cr flagged alongside EPF payment delays.</p>
-      </div>
-    </div>
 
-    <div style="background: var(--card); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden;">
-      <div style="background: var(--paper); padding: 12px 18px; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); font-weight: 500;">[POWER CO · GUJARAT] · ₹242 Cr</span>
-        <span style="font-family: var(--mono); font-size: 8px; padding: 3px 8px; border-radius: 3px; background: var(--amber-pale); color: var(--amber); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;">GST vs. financials</span>
+      <div class="case-card">
+        <div class="case-header">
+          <span class="case-company">[HOME FURNISHINGS CO · DELHI] · ₹506 Cr</span>
+          <span class="case-tag tag-amber">GST / Financials divergence</span>
+        </div>
+        <div class="case-body">
+          <div class="case-module">GST PD Model · Stage 5 · REFER $450K</div>
+          <p class="case-text"><strong>Zero TTM GST revenue</strong> vs. ₹506 Cr in audited P&L. GST-based PD: <strong>48.5% (MEDIUM-HIGH band)</strong>. 42 cyclic counterparties. Either nil-rated supplies or a filing anomaly. Financial statements and GST data tell completely different stories.</p>
+        </div>
       </div>
-      <div style="padding: 16px 18px;">
-        <div style="font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px;">Finding</div>
-        <p style="font-size: 13px; color: #333; line-height: 1.6;">14 of 16 <strong>financial flags pass</strong>. Balance sheet looks acceptable. GST-based default probability model scores <strong>98.1% PD</strong> — highest in the dataset. 32 cyclic counterparties. GST signal predicts what the balance sheet does not yet show. The system flags the divergence; the underwriter decides which to trust.</p>
-      </div>
-    </div>
 
-    <div style="background: var(--card); border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; grid-column: 1 / -1;">
-      <div style="background: var(--paper); padding: 12px 18px; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); font-weight: 500;">[AGRI-INPUTS CO · MAHARASHTRA] · ₹8,114 Cr · Full case shown in §07</span>
-        <span style="font-family: var(--mono); font-size: 8px; padding: 3px 8px; border-radius: 3px; background: var(--red-pale); color: var(--red); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;">Ghost suppliers · $0.23 · 9 min</span>
+      <div class="case-card">
+        <div class="case-header">
+          <span class="case-company">SUNBRIDGE AGRO PVT. LTD · ₹2,492 Cr</span>
+          <span class="case-tag tag-amber">Ghost customer · Rating Watch</span>
+        </div>
+        <div class="case-body">
+          <div class="case-module">Network Validation + Bureau · REFER $1M</div>
+          <p class="case-text">Largest customer DIL EXIM COMMODITIES (<strong>₹358 Cr = 14.88% revenue</strong>) is completely unverifiable — no financials, no website, PAN mismatch. Failed acquisition reversed March 2026. Infomerics: downgraded from IVR A- Stable → BBB Under Rating Watch within 5 months.</p>
+        </div>
       </div>
-      <div style="padding: 16px 18px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
-        <div><div style="font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px;">Unverifiable suppliers</div><div style="font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--red);">₹1,054 Cr</div><div style="font-size: 11px; color: var(--muted); margin-top: 3px;">of declared purchases — zero registry presence</div></div>
-        <div><div style="font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px;">Director CIBIL</div><div style="font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--green);">828 avg</div><div style="font-size: 11px; color: var(--muted); margin-top: 3px;">Clean on bureau. Not clean on suppliers.</div></div>
-        <div><div style="font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px;">Related parties</div><div style="font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--ink);">44</div><div style="font-size: 11px; color: var(--muted); margin-top: 3px;">Pending amalgamation + Rating Watch</div></div>
-      </div>
-    </div>
 
+    </div>
   </div>
 
-  <div style="margin-top: 24px; padding: 18px 24px; background: var(--paper2); border-radius: 6px;">
-    <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px;">Sector coverage across 18 cases</div>
-    <div style="font-family: var(--sans); font-size: 12.5px; color: #444; line-height: 1.7;">Agri-inputs · Cashew processing · Adhesive tapes · Chemicals &amp; pharma · Solar EPC · Electronics · Beverages · Medical devices · Wires · Organic food · Power · Minerals · Apparel &nbsp;·&nbsp; Revenue range ₹35 Cr – ₹8,114 Cr</div>
+  <!-- BRACKET B4: ₹2,500 Cr+ -->
+  <div id="bracket-b4" style="display:none;">
+    <div class="cases-grid">
+
+      <div class="case-card" style="grid-column: 1 / -1;">
+        <div class="case-header">
+          <span class="case-company">B.N. AGRITECH PVT. LTD · ₹8,114 Cr (annualised) · Full case in §07</span>
+          <span class="case-tag tag-amber">REFER · $1M · Ghost suppliers</span>
+        </div>
+        <div class="case-body" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+          <div><div style="font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px;">Unverifiable suppliers</div><div style="font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--red);">₹1,054 Cr</div><div style="font-size: 11px; color: var(--muted); margin-top: 3px;">2 suppliers · zero registry presence</div></div>
+          <div><div style="font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px;">Director CIBIL (avg)</div><div style="font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--green);">828</div><div style="font-size: 11px; color: var(--muted); margin-top: 3px;">Clean bureau. Not clean on suppliers.</div></div>
+          <div><div style="font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px;">Pipeline cost</div><div style="font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--ink);">$0.23</div><div style="font-size: 11px; color: var(--muted); margin-top: 3px;">All 13 modules · ~9 min</div></div>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <div class="case-header">
+          <span class="case-company">MANGALAM GLOBAL ENTERPRISES · ₹3,384 Cr</span>
+          <span class="case-tag tag-red">DECLINE · Criminal fraud</span>
+        </div>
+        <div class="case-body">
+          <div class="case-module">Litigation · Stage 7 · HARD DECLINE</div>
+          <p class="case-text">Active pending criminal revision (2025) under <strong>IPC 420 (cheating) + 409 (criminal breach of trust) + 120B (conspiracy)</strong>. Exact entity name and address match confirmed. Mandatory hard-decline trigger. No amount of financial hygiene overrides an active fraud case. Founder carries 20-year DRT history (1998–2012).</p>
+        </div>
+      </div>
+
+      <div class="case-card">
+        <div class="case-header">
+          <span class="case-company">[CHEMICALS CO · MAHARASHTRA] · ₹3,600 Cr</span>
+          <span class="case-tag tag-red">Circular · Three-way related party</span>
+        </div>
+        <div class="case-body">
+          <div class="case-module">Network Validation · Stage 2 · REFER</div>
+          <p class="case-text">Parent company simultaneously holds <strong>99.7% equity stake</strong>, appears as top customer (13.3% of sales), and top supplier (40.0% of purchases — breaches policy cap). Three-way related-party structure with round-tripping risk. Cannot be sanctioned without three-way invoice reconciliation.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div style="margin-top: 32px; padding: 18px 24px; background: var(--paper2); border-radius: 6px;">
+    <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px;">Coverage across 25+ cases</div>
+    <div style="font-family: var(--sans); font-size: 12.5px; color: #444; line-height: 1.7;">Agri-inputs · Cashew processing · Adhesive tapes · Chemicals &amp; pharma · Solar EPC · Electronics · Metals trading · Home furnishings · Spices · Power · Apparel &nbsp;·&nbsp; Revenue range ₹2 Cr – ₹8,114 Cr</div>
+  </div>
+</section>
+
+<!-- WHAT THIS IS NOT -->
+<section class="not-section">
+  <div style="max-width:880px;margin:0 auto;">
+    <span style="font-family:var(--mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#555;margin-bottom:18px;display:block;">A note on scope</span>
+    <h2 style="font-family:var(--serif);font-size:42px;font-weight:500;line-height:1.1;letter-spacing:-1px;color:#ffffff;margin-bottom:0;">What this is <em style="color:#f87171;font-style:italic;font-weight:300;">not.</em></h2>
+    <div class="not-grid">
+      <div class="not-item">
+        <div class="not-label">Not a SaaS subscription</div>
+        <div class="not-text">No monthly fee. No vendor dependency after deployment. <strong>You own the open modules.</strong> The proprietary containers run on your hardware, under your control, without calling home.</div>
+      </div>
+      <div class="not-item">
+        <div class="not-label">Not a black box</div>
+        <div class="not-text">Every finding is sourced. Every flag has a traceable reason. <strong>Your underwriter reviews the output and signs off</strong> — the system prepares the file, not the decision.</div>
+      </div>
+      <div class="not-item">
+        <div class="not-label">Not a cloud solution</div>
+        <div class="not-text">Borrower data does not leave your perimeter. <strong>No RBI data localisation risk. No third-party in the data path.</strong> Deployed on your infrastructure — not ours.</div>
+      </div>
+      <div class="not-item">
+        <div class="not-label">Not a 6-month implementation</div>
+        <div class="not-text">Phase 1 is live in 4–6 weeks. <strong>First value is measurable from day one</strong> — faster lead responses, a sorted queue, and a pre-scored file on every new application.</div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -818,12 +1171,22 @@ function checkPitchGate() {
     <div class="arch-block arch-native">
       <div class="arch-label">Open modules</div>
       <div class="arch-title">Runs natively on your pipeline</div>
-      <div class="arch-desc" style="color: #333;">KYC, GST, financials, bureau orchestration, litigation, portfolio performance — standard Python modules. Code is readable. Your team can audit it, extend it, and own it after the engagement ends.</div>
+      <div class="arch-desc" style="color: #444; line-height: 1.7;">
+        <div style="margin-bottom: 6px;">· KYC, GST, financials, bureau orchestration</div>
+        <div style="margin-bottom: 6px;">· Litigation, portfolio performance</div>
+        <div style="margin-bottom: 6px;">· Standard Python — auditable, extendable</div>
+        <div>· Your team owns it after the engagement ends</div>
+      </div>
     </div>
     <div class="arch-block arch-docker">
       <div class="arch-label">Proprietary modules</div>
       <div class="arch-title">Encrypted Docker containers</div>
-      <div class="arch-desc">Network validation and underwriting synthesis ship as encrypted containers. They run on your hardware. They call no external API. The model weights stay inside your perimeter.</div>
+      <div class="arch-desc" style="line-height: 1.7;">
+        <div style="margin-bottom: 6px;">· Network validation + underwriting synthesis</div>
+        <div style="margin-bottom: 6px;">· Run on your hardware — no external API calls</div>
+        <div style="margin-bottom: 6px;">· Model weights stay inside your perimeter</div>
+        <div>· No cloud intermediary in the data path</div>
+      </div>
     </div>
   </div>
 
@@ -975,5 +1338,17 @@ function checkPitchGate() {
 </section>
 
 </div>
+<script>
+function showBracket(id, btn) {
+  ['b1','b2','b3','b4'].forEach(function(b) {
+    var el = document.getElementById('bracket-'+b);
+    if (el) el.style.display = (b === id) ? 'block' : 'none';
+  });
+  document.querySelectorAll('.btab').forEach(function(t) {
+    t.classList.remove('btab-active');
+  });
+  btn.classList.add('btab-active');
+}
+</script>
 </body>
 </html>
