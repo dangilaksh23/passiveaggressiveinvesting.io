@@ -288,6 +288,7 @@ body { font-family: var(--sans); background: var(--paper); color: var(--ink); fo
 .featured-case-inner { padding: 24px 28px; display: grid; grid-template-columns: 1fr 340px; gap: 32px; align-items: start; }
 
 /* What This Is NOT */
+.bracket-divider { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); padding: 20px 0 14px; border-top: 1px solid var(--rule); margin-top: 40px; margin-bottom: 20px; }
 .not-section { background: #0d0d0d; padding: 80px 36px; border-bottom: 1px solid #1a1a1a; }
 .not-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 40px; }
 .not-item { padding: 32px; border: 1px solid #1a1a1a; }
@@ -682,18 +683,12 @@ function checkPitchGate() {
 <!-- 08 · FINDINGS BY BRACKET -->
 <section class="section">
   <span class="section-num"><span class="num">08</span> What it finds across the book</span>
-  <h2 class="section-head">₹1 Cr to ₹8,000+ Cr. <em>Select your revenue bracket.</em></h2>
+  <h2 class="section-head">₹1 Cr to ₹8,000+ Cr. <em>Real cases across the book.</em></h2>
 
   <p style="font-family: var(--serif); font-size: 17px; font-weight: 300; color: #444; max-width: 680px; line-height: 1.6; margin-bottom: 32px;">Entity names partially masked. Findings are real. Every case passed basic financial screening before the network layer ran.</p>
 
-  <div class="bracket-tabs">
-    <button class="btab btab-active" onclick="showBracket('b1', this)">≤₹100 Cr</button>
-    <button class="btab" onclick="showBracket('b2', this)">₹100–500 Cr</button>
-    <button class="btab" onclick="showBracket('b3', this)">₹500–₹2,500 Cr</button>
-    <button class="btab" onclick="showBracket('b4', this)">₹2,500 Cr+</button>
-  </div>
-
   <!-- BRACKET B1: ≤₹100 Cr -->
+  <div class="bracket-divider">≤ ₹100 Cr</div>
   <div id="bracket-b1">
     <div class="cases-grid">
 
@@ -734,7 +729,8 @@ function checkPitchGate() {
   </div>
 
   <!-- BRACKET B2: ₹100–500 Cr -->
-  <div id="bracket-b2" style="display:none;">
+  <div class="bracket-divider">₹100 – 500 Cr</div>
+  <div id="bracket-b2">
 
     <!-- FEATURED: Kimia Biosciences director network -->
     <div class="featured-case">
@@ -867,17 +863,6 @@ function checkPitchGate() {
 
       <div class="case-card">
         <div class="case-header">
-          <span class="case-company">[CASHEW PROCESSOR · KERALA] · ₹126 Cr</span>
-          <span class="case-tag tag-amber">GST / Financials divergence</span>
-        </div>
-        <div class="case-body">
-          <div class="case-module">GST PD Model · Stage 5 · REFER $250K</div>
-          <p class="case-text">Financials show no obvious stress. Balance sheet passes. GST-based PD model scores <strong>70.2% default probability</strong> (HIGH RISK band). The two signals tell opposite stories. System flags the divergence — the underwriter decides which to trust.</p>
-        </div>
-      </div>
-
-      <div class="case-card">
-        <div class="case-header">
           <span class="case-company">[SOLAR EPC · GUJARAT] · ₹352 Cr</span>
           <span class="case-tag tag-red">Rating downgrade · Cyclic</span>
         </div>
@@ -887,22 +872,12 @@ function checkPitchGate() {
         </div>
       </div>
 
-      <div class="case-card">
-        <div class="case-header">
-          <span class="case-company">[POWER CO · GUJARAT] · ₹242 Cr</span>
-          <span class="case-tag tag-amber">GST vs. financials</span>
-        </div>
-        <div class="case-body">
-          <div class="case-module">GST PD Model · Stage 5 · REFER</div>
-          <p class="case-text">14 of 16 financial flags pass. Balance sheet looks acceptable. GST-based PD model scores <strong>98.1% default probability</strong> — highest in the dataset. 32 cyclic counterparties. GST predicts what the balance sheet does not yet show. The system flags the divergence; the underwriter decides which to trust.</p>
-        </div>
-      </div>
-
     </div>
   </div>
 
   <!-- BRACKET B3: ₹500–₹2,500 Cr -->
-  <div id="bracket-b3" style="display:none;">
+  <div class="bracket-divider">₹500 Cr – ₹2,500 Cr</div>
+  <div id="bracket-b3">
 
     <!-- FEATURED: Xtreme Media / LEDX fraud -->
     <div class="featured-case">
@@ -1024,17 +999,6 @@ function checkPitchGate() {
 
       <div class="case-card">
         <div class="case-header">
-          <span class="case-company">[HOME FURNISHINGS CO · DELHI] · ₹506 Cr</span>
-          <span class="case-tag tag-amber">GST / Financials divergence</span>
-        </div>
-        <div class="case-body">
-          <div class="case-module">GST PD Model · Stage 5 · REFER $450K</div>
-          <p class="case-text"><strong>Zero TTM GST revenue</strong> vs. ₹506 Cr in audited P&L. GST-based PD: <strong>48.5% (MEDIUM-HIGH band)</strong>. 42 cyclic counterparties. Either nil-rated supplies or a filing anomaly. Financial statements and GST data tell completely different stories.</p>
-        </div>
-      </div>
-
-      <div class="case-card">
-        <div class="case-header">
           <span class="case-company">SUNBRIDGE AGRO PVT. LTD · ₹2,492 Cr</span>
           <span class="case-tag tag-amber">Ghost customer · Rating Watch</span>
         </div>
@@ -1048,7 +1012,8 @@ function checkPitchGate() {
   </div>
 
   <!-- BRACKET B4: ₹2,500 Cr+ -->
-  <div id="bracket-b4" style="display:none;">
+  <div class="bracket-divider">₹2,500 Cr+</div>
+  <div id="bracket-b4">
     <div class="cases-grid">
 
       <div class="case-card" style="grid-column: 1 / -1;">
@@ -1338,17 +1303,5 @@ function checkPitchGate() {
 </section>
 
 </div>
-<script>
-function showBracket(id, btn) {
-  ['b1','b2','b3','b4'].forEach(function(b) {
-    var el = document.getElementById('bracket-'+b);
-    if (el) el.style.display = (b === id) ? 'block' : 'none';
-  });
-  document.querySelectorAll('.btab').forEach(function(t) {
-    t.classList.remove('btab-active');
-  });
-  btn.classList.add('btab-active');
-}
-</script>
 </body>
 </html>
