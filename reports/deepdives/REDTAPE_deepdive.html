@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>REDTAPE — Deep Dive</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #0d1117; color: #c9d1d9; padding: 28px 32px; font-size: 13px; line-height: 1.5; }
+.card { background: #161b22; border-radius: 10px; padding: 22px 24px;
+        box-shadow: 0 1px 6px rgba(0,0,0,.25); margin-bottom: 16px; }
+.section-title { font-family: monospace; font-size: 10px; letter-spacing: .14em;
+                 text-transform: uppercase; color: #8b949e; margin-bottom: 14px;
+                 display: flex; align-items: center; gap: 8px; }
+.metrics-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.metric-box { background: #0d1117; border-radius: 6px; padding: 10px 14px; min-width: 115px; }
+.metric-label { font-family: monospace; font-size: 9px; letter-spacing: .1em;
+                text-transform: uppercase; color: #484f58; margin-bottom: 4px; }
+.metric-val { font-family: monospace; font-size: 18px; font-weight: 700; }
+.metric-sub { font-family: monospace; font-size: 9px; color: #8b949e; margin-top: 3px; }
+.mini-card { background: #0d1117; border-radius: 6px; padding: 12px; }
+.mini-label { font-family: monospace; font-size: 9px; letter-spacing: .1em;
+              text-transform: uppercase; color: #484f58; }
+.mini-metric { display: inline-flex; flex-direction: column; margin-right: 16px; margin-bottom: 8px; }
+.mini-metrics-row { display: flex; flex-wrap: wrap; }
+.ml { font-size: 9px; color: #484f58; font-family: monospace; text-transform: uppercase; letter-spacing: .06em; }
+.mv { font-family: monospace; font-size: 14px; font-weight: 700; color: #e6edf3; }
+.ms { font-size: 9px; color: #8b949e; font-family: monospace; }
+.peer-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.peer-table th { font-family: monospace; font-size: 9px; letter-spacing: .08em;
+                 text-transform: uppercase; color: #484f58; padding: 6px 10px;
+                 text-align: left; border-bottom: 1px solid #21262d; white-space: nowrap; }
+.peer-table td { padding: 8px 10px; border-bottom: 1px solid #161b22; vertical-align: middle; }
+.peer-table tr:hover td { background: #1c2128; }
+.tip { border-bottom: 1px dashed #484f58; cursor: help; position: relative; }
+.tip:hover::after { content: attr(data-tip); position: absolute; bottom: 120%; left: 0;
+  background: #161b22; border: 1px solid #30363d; border-radius: 6px;
+  padding: 6px 10px; font-size: 11px; color: #c9d1d9; white-space: nowrap;
+  z-index: 10; min-width: 180px; max-width: 300px; white-space: normal; line-height: 1.5; }
+.takeaway { font-size: 11px; border-left: 2px solid; padding: 3px 8px; margin-bottom: 5px; }
+.fin-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.fin-table th { font-family: monospace; font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
+  color: #484f58; padding: 5px 8px; border-bottom: 1px solid #21262d; text-align: right; }
+.fin-table th:first-child { text-align: left; }
+.fin-table td { padding: 5px 8px; border-bottom: 1px solid #0d1117; font-family: monospace; font-size: 11px;
+  text-align: right; color: #c9d1d9; }
+.fin-table td:first-child { text-align: left; color: #8b949e; font-size: 10px; white-space: nowrap; }
+.fin-table tr:hover td { background: #161b22; }
+.fin-table .hl td { font-weight: 700; color: #e6edf3; }
+@media (max-width: 800px) { body { padding: 16px; } }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+<div class="card" style="margin-bottom:16px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap"><div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px"><span style="font-family:monospace;font-size:24px;font-weight:800;color:#e6edf3">REDTAPE</span><span style="font-size:15px;color:#8b949e">REDTAPE</span><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:6px;font-size:10px">Consumer Goods</span></div><div style="margin-bottom:12px"><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">NN clean</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#58a6ff22;color:#58a6ff;margin-right:4px">stable conviction</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">Stage 2</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#d2992222;color:#d29922;margin-right:4px">TT 5/8</span></div><p style='font-size:12px;color:#8b949e;max-width:720px;line-height:1.7;margin:0'>REDTAPE Limited is a global lifestyle brand engaged in the manufacturing and trading of footwear, garments, and accessories. It operates through a mix of owned retail outlets, franchisee outlets, and e-commerce platforms across India and 12 other countries. The company focuses on quality, design, innovation, and sustainability to cater to diverse customer segments, driven by a…</p></div><div style="text-align:right"><div style="font-family:monospace;font-size:38px;font-weight:800;color:#e6edf3;line-height:1">6.9</div><div style="font-size:9px;color:#484f58;letter-spacing:.1em;text-transform:uppercase;margin-top:2px">Composite #24</div><div style="margin-top:10px"><span style="font-family:monospace;font-size:22px;font-weight:700;color:#58a6ff">₹137</span>&ensp;<span class="tip" data-tip="Current Market Price — the last traded price of this stock on NSE">CMP</span><div style='font-family:monospace;font-size:9px;color:#484f58;margin-top:2px'>as of Jun 04, 2026</div></div></div></div></div><div class="card">
+<div class="section-title">Business Model
+  <span style="font-size:10px;color:#8b949e">· Fashion Footwear and Apparel</span>
+</div>
+
+<div style="margin-bottom:12px"><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">Asset Heavy Manufacturer | Trader</span><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">Product Sale</span><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">Commission</span><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">manufacturer</span><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">trader</span><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">pan-India | export-heavy</span></div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">
+  <div>
+    <div class="mini-label" style="margin-bottom:6px">Competitive Moat</div><div style="margin-bottom:12px"><span style="background:#3fb95022;color:#3fb950;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">brand</span><span style="background:#3fb95022;color:#3fb950;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">scale</span><span style="background:#3fb95022;color:#3fb950;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">technology</span></div>
+    <div class="mini-label" style="margin-bottom:4px">Government Proximity</div><div style="font-size:12px;color:#a371f7;font-weight:600;margin-bottom:12px;text-transform:capitalize">high</div>
+    <div class="mini-label" style="margin-bottom:4px">Key Customers</div><div style="line-height:1.8;margin-bottom:12px"><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">retail_consumer</span><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">urban Indian audience</span><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">youth audiences</span><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">working professionals</span><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">fitness enthusiasts</span></div>
+    <div class="mini-label" style="margin-bottom:6px">Operational Metrics</div><div class="mini-metrics-row"><div class="mini-metric"><span class="ml">Debtor Days</span><span class="mv" style="color:#3fb950">18d</span></div><div class="mini-metric"><span class="ml">CapEx (latest)</span><span class="mv">₹-171Cr</span></div><div class="mini-metric"><span class="ml">Employees</span><span class="mv">819</span></div><div class="mini-metric"><span class="ml">Contingent Liab.</span><span class="mv" style="color:#8b949e">₹53Cr</span></div></div>
+  </div>
+  <div>
+    <div class="mini-label" style="margin-bottom:6px">Key Risks</div><div style="margin-bottom:12px"><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>Customer dissatisfaction due to incorrect sizing or returns</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>Economic instability and rising costs for raw materials and labour in India's apparel industry</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>Intensified competition from international brands and unorganized sector</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>Supply chain disruptions and geopolitical events</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>Market saturation with numerous competing brands</div></div>
+    <div class="mini-label" style="margin-bottom:6px">Key Initiatives</div><div style="margin-bottom:12px"><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#58a6ff;font-size:10px;margin-top:1px">→</span>National Apprenticeship Promotion Scheme (NAPS)</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#58a6ff;font-size:10px;margin-top:1px">→</span>Adopt a Heritage scheme</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#58a6ff;font-size:10px;margin-top:1px">→</span>Expanding product portfolio with distinct sub-brands</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#58a6ff;font-size:10px;margin-top:1px">→</span>Nationwide store expansion</div></div>
+  </div>
+</div></div><div class="card">
+<div class="section-title">KYC — Company · Individuals · Investors</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:20px">
+  <div>
+<div class="mini-label" style="margin-bottom:8px">Company Integrity</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
+  <div style="background:#0d1117;border-radius:6px;padding:10px">
+    <div style="font-family:monospace;font-size:20px;font-weight:700;color:#3fb950">2</div>
+    <div style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.08em">Contagion</div>
+    <div style="font-size:9px;color:#3fb950;margin-top:2px">0 severe DIN links</div>
+  </div>
+  <div style="background:#0d1117;border-radius:6px;padding:10px">
+    <div style="font-size:14px;font-weight:600;color:#3fb950">CLEAN</div>
+    <div style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.08em;margin-top:2px">News flag</div>
+    <div style="font-size:9px;color:#3fb950;margin-top:2px">No adverse regulatory or enforcement actions found; cases tr</div>
+  </div>
+  <div style="background:#0d1117;border-radius:6px;padding:10px">
+    <div style="font-size:11px;font-weight:600;color:#8b949e">Watch</div>
+    <div style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Governance</div>
+  </div>
+</div>
+<div style="margin-bottom:10px">
+  <div style="font-size:11px;color:#3fb950;margin-bottom:4px">
+    <span style="color:#484f58">Auditor:</span> Ashwani & Associates
+    
+    
+  </div>
+  <div style="margin-left:8px"><div style="font-size:10px;color:#8b949e;margin-bottom:2px">· Revenue recognition</div><div style="font-size:10px;color:#8b949e;margin-bottom:2px">· Right of Use Assets and Lease Liabilities</div></div>
+</div>
+<div style="margin-bottom:10px"><div style="font-size:11px;color:#8b949e;margin-bottom:3px"><span style="color:#484f58">via</span> shared_investor → <span style="color:#f0883e">POWERMECH <span style="font-size:9px">(concern)</span></span></div><div style="font-size:11px;color:#8b949e;margin-bottom:3px"><span style="color:#484f58">via</span> shared_investor → <span style="color:#f0883e">AUROPHARMA <span style="font-size:9px">(concern)</span></span></div></div>
+</div>
+  <div>
+<div class="mini-label" style="margin-bottom:8px">Promoters & Management</div>
+<div style="margin-bottom:8px">
+  <div style="font-size:13px;color:#e6edf3;font-weight:600">Mr. Shuja Mirza</div>
+  <div style="font-size:10px;color:#8b949e;text-transform:capitalize;margin-bottom:4px">family promoter</div>
+  <div style="font-size:11px;color:#c9d1d9;line-height:1.6;margin-bottom:8px">A graduate in science from California State University, USA, Mr. Shuja Mirza has over two decades of experience in marketing, operations, product design, development, and manufacturing. He is…</div>
+</div>
+<div style="display:flex;gap:16px;margin-bottom:10px;flex-wrap:wrap">
+  <div><div style="font-family:monospace;font-size:16px;font-weight:700;color:#ffa657">71.8%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">Promoter</div></div>
+  <div><div style="font-family:monospace;font-size:16px;font-weight:700;color:#58a6ff">3.5%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">FII</div></div>
+  <div><div style="font-family:monospace;font-size:16px;font-weight:700;color:#3fb950">1.5%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">DII</div></div>
+  <div><div style="font-family:monospace;font-size:16px;font-weight:700;color:#3fb950">0.0%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">Pledged</div></div>
+</div>
+<div style="font-size:11px;color:#3fb950;margin-bottom:8px">Promoter activity: buying</div>
+<div style="font-size:11px;color:#f0883e;margin-bottom:8px">⚠ KMP exits: 4 resignation(s)</div>
+<div class="mini-label" style="margin-bottom:6px;margin-top:8px">Board  (8 directors · 50% independent ✓)</div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #21262d30"><span style="font-size:11px;color:#ffa657">RASHID AHMED MIRZA</span><span style="font-size:9px;color:#484f58;font-family:monospace">Chairperson & Executive Director</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #21262d30"><span style="font-size:11px;color:#ffa657">SHUJA MIRZA</span><span style="font-size:9px;color:#484f58;font-family:monospace">Executive Director-MD</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #21262d30"><span style="font-size:11px;color:#ffa657">ARVIND VERMA</span><span style="font-size:9px;color:#484f58;font-family:monospace">Executive Director</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #21262d30"><span style="font-size:11px;color:#ffa657">SUNANDA</span><span style="font-size:9px;color:#484f58;font-family:monospace">Executive Director</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #21262d30"><span style="font-size:11px;color:#8b949e">SANJAY BHALLA</span><span style="font-size:9px;color:#484f58;font-family:monospace">Independent Director</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #21262d30"><span style="font-size:11px;color:#8b949e">SUBHASH CHANDER SAPRA</span><span style="font-size:9px;color:#484f58;font-family:monospace">Independent Director</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #21262d30"><span style="font-size:11px;color:#8b949e">YASHVIR SINGH</span><span style="font-size:9px;color:#484f58;font-family:monospace">Independent Director</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #21262d30"><span style="font-size:11px;color:#8b949e">RAJSHREE SAXENA</span><span style="font-size:9px;color:#484f58;font-family:monospace">Independent Director</span></div></div>
+  <div>
+<div class="mini-label" style="margin-bottom:8px">
+  Smart Money
+  <span style="background:#58a6ff22;color:#58a6ff;padding:2px 10px;border-radius:10px;font-size:10px;margin-left:8px">Stable Conviction</span>
+  <span style="font-family:monospace;font-size:10px;color:#484f58;margin-left:6px">score 3 · latest Mar '26</span>
+</div>
+<div style="display:flex;gap:20px;margin-bottom:10px">
+  <div><div style="font-family:monospace;font-size:11px;color:#ffa657">0↑ entering  1● stable  0↓ exiting</div></div>
+</div>
+<div style="margin-top:6px">
+  <div style="display:flex;gap:8px;margin-left:252px;margin-bottom:2px"><div style="width:22px;font-size:8px;color:#484f58;text-align:center">MAR'25</div><div style="width:22px;font-size:8px;color:#484f58;text-align:center">JUN'25</div><div style="width:22px;font-size:8px;color:#484f58;text-align:center">SEP'25</div><div style="width:22px;font-size:8px;color:#484f58;text-align:center">DEC'25</div><div style="width:22px;font-size:8px;color:#484f58;text-align:center">MAR'26</div></div>
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><div style="min-width:170px;font-size:11px;color:#58a6ff;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">ICICI Prudential MF</div><div style="min-width:42px;font-size:9px;color:#484f58;font-family:monospace;text-transform:uppercase">strong</div><span style="color:#58a6ff;font-size:9px;min-width:36px">5/5Q</span><div style="display:flex"><div title="31-MAR-2025" style="width:22px;height:16px;background:#3fb950;border-radius:2px;margin:1px;display:inline-block;opacity:0.85"></div><div title="30-JUN-2025" style="width:22px;height:16px;background:#3fb950;border-radius:2px;margin:1px;display:inline-block;opacity:0.85"></div><div title="30-SEP-2025" style="width:22px;height:16px;background:#3fb950;border-radius:2px;margin:1px;display:inline-block;opacity:0.85"></div><div title="31-DEC-2025" style="width:22px;height:16px;background:#3fb950;border-radius:2px;margin:1px;display:inline-block;opacity:0.85"></div><div title="31-MAR-2026" style="width:22px;height:16px;background:#3fb950;border-radius:2px;margin:1px;display:inline-block;opacity:0.85"></div></div></div>
+</div>
+<div style="display:flex;gap:20px;margin-top:14px;border-top:1px solid #21262d;padding-top:10px">
+  <div style="font-size:11px;font-family:monospace">
+    <span style="color:#ffa657">P</span> 71.83% <span style="color:#8b949e;font-size:10px;font-family:monospace">+0.0pp</span>
+  </div>
+  <div style="font-size:11px;font-family:monospace">
+    <span style="color:#58a6ff">F</span> 3.81% <span style="color:#3fb950;font-size:10px;font-family:monospace">+0.6pp</span>
+  </div>
+  <div style="font-size:11px;font-family:monospace">
+    <span style="color:#3fb950">D</span> 11.01% <span style="color:#3fb950;font-size:10px;font-family:monospace">+2.1pp</span>
+  </div>
+  <div style="font-family:monospace;font-size:11px;color:#8b949e">(11 quarters)</div>
+</div></div>
+</div></div><div class="card">
+<div class="section-title">Financials · Peer Comparison<span style="font-size:9px;color:#484f58;font-family:monospace;font-weight:400;letter-spacing:0"> · screener as of Jun 04, 2026</span></div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px">
+
+  <div class="mini-card">
+    <div class="mini-label" style="margin-bottom:8px"><span class="tip" data-tip="How efficiently the company converts revenue to profit">Profitability</span> &amp; Revenue Growth</div>
+    <table class="fin-table">
+      <thead><tr><th>Year</th><th>Revenue</th><th>∆%</th><th><span class="tip" data-tip="Operating Profit Margin — revenue minus operating costs. Higher = better cost control">OPM%</span></th><th>PAT</th><th>PAT ∆%</th></tr></thead>
+      <tbody><tr><td>Mar 2022
+            
+            
+              3m</td><td>₹303</td><td style="color:#8b949e">—</td><td style="color:#3fb950">16.0%</td><td>₹29</td><td style="color:#8b949e">—</td></tr><tr><td>Mar 2023</td><td>₹1,468</td><td style="color:#3fb950">+384%</td><td style="color:#3fb950">17.0%</td><td>₹142</td><td style="color:#3fb950">+390%</td></tr><tr><td>Mar 2024</td><td>₹1,843</td><td style="color:#3fb950">+26%</td><td style="color:#3fb950">17.0%</td><td>₹176</td><td style="color:#3fb950">+24%</td></tr><tr><td>Mar 2025</td><td>₹2,021</td><td style="color:#3fb950">+10%</td><td style="color:#3fb950">17.0%</td><td>₹170</td><td style="color:#f85149">-3%</td></tr><tr style="background:#1c2128"><td>Mar 2026</td><td>₹2,419</td><td style="color:#3fb950">+20%</td><td style="color:#d29922">14.0%</td><td>₹241</td><td style="color:#3fb950">+42%</td></tr></tbody>
+    </table>
+    <div style="margin-top:10px"><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Revenue +20% in last 12m — growth accelerating (prior year +10%)</div><div class="takeaway" style="border-color:#f8514944;color:#f85149">OPM contracted 3.0pp over 2 years → 14.0%</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">PAT +42% in last 12m — profit growth ahead of revenue</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Peers: trades at 54% discount to sector PE (31.6× vs 68.4×)</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">ROCE 24.0% vs sector median 20.2% (+3.8pp)</div></div>
+  </div>
+
+  <div class="mini-card">
+    <div class="mini-label" style="margin-bottom:8px">Cash Management · <span class="tip" data-tip="How efficiently the business collects from customers, manages inventory, and pays suppliers">Working Capital</span></div>
+    <table class="fin-table">
+      <thead><tr><th>Year</th><th><span class="tip" data-tip="Cash Flow from Operations — actual cash generated (vs accounting profit). Healthy if CFO/Revenue > 8%">CFO</span></th><th><span class="tip" data-tip="Cash Conversion Cycle = Debtor days + Inventory days − Payable days. Lower = faster cash recovery">CCC</span></th><th>Deb.d</th><th>Inv.d</th><th>Pay.d</th></tr></thead>
+      <tbody><tr><td>Mar 2022
+            
+            
+              3m</td><td style="color:#3fb950">₹44</td><td style="color:#f85149">623d</td><td>68d</td><td>963d</td><td>407d</td></tr><tr><td>Mar 2023</td><td style="color:#3fb950">₹127</td><td style="color:#f85149">164d</td><td>21d</td><td>308d</td><td>164d</td></tr><tr><td>Mar 2024</td><td style="color:#3fb950">₹84</td><td style="color:#f85149">208d</td><td>18d</td><td>298d</td><td>108d</td></tr><tr><td>Mar 2025</td><td style="color:#3fb950">₹4</td><td style="color:#f85149">264d</td><td>20d</td><td>415d</td><td>171d</td></tr><tr style="background:#1c2128"><td>Mar 2026</td><td style="color:#3fb950">₹174</td><td style="color:#f85149">240d</td><td>32d</td><td>305d</td><td>97d</td></tr></tbody>
+    </table>
+    <div style="margin-top:10px"><div class="takeaway" style="border-color:#d2992244;color:#d29922">CFO/Revenue 7.2% — moderate conversion</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">CCC improved from 623d → 240d (-383d over 4 yrs)</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Debtor days 32d (+12d YoY) — fast collections</div></div>
+  </div>
+
+  <div class="mini-card">
+    <div class="mini-label" style="margin-bottom:8px">Balance Sheet · <span class="tip" data-tip="How much debt the company carries relative to equity. Lower D/E and higher interest coverage = safer">Leverage</span></div>
+    <table class="fin-table">
+      <thead><tr><th>Year</th><th><span class="tip" data-tip="Debt-to-Equity — total debt divided by shareholder equity. Below 0.3× = conservative">D/E</span></th><th><span class="tip" data-tip="Interest Coverage = EBIT ÷ Interest expense. Above 4× means comfortable debt servicing">Int.Cov.</span></th><th>Net Worth</th><th>Total Debt</th></tr></thead>
+      <tbody><tr><td>Mar 2022
+            
+            
+              3m</td><td style="color:#3fb950">0.08×</td><td style="color:#8b949e">—</td><td>₹336</td><td>₹28</td></tr><tr><td>Mar 2023</td><td style="color:#d29922">0.55×</td><td style="color:#8b949e">—</td><td>₹477</td><td>₹260</td></tr><tr><td>Mar 2024</td><td style="color:#d29922">0.74×</td><td style="color:#8b949e">—</td><td>₹649</td><td>₹480</td></tr><tr><td>Mar 2025</td><td style="color:#d29922">0.92×</td><td style="color:#8b949e">—</td><td>₹789</td><td>₹724</td></tr><tr style="background:#1c2128"><td>Mar 2026</td><td style="color:#d29922">0.70×</td><td style="color:#8b949e">—</td><td>₹1,022</td><td>₹720</td></tr></tbody>
+    </table>
+    <div style="margin-top:10px"><div class="takeaway" style="border-color:#d2992244;color:#d29922">D/E 0.70× — moderate leverage (-0.21× YoY)</div><div class="takeaway" style="border-color:#d2992244;color:#d29922">FCF yield 1.2% on mktcap ₹7,601Cr</div></div>
+  </div>
+
+</div>
+
+<div>
+  <div class="mini-label" style="margin-bottom:8px">Peer Comparison · ROCE ranked #1 of 8</div>
+  <table class="peer-table">
+    <thead><tr><th>Company</th><th>P/E</th><th>ROCE</th><th>Sales ∆ QoQ</th><th>Profit ∆ QoQ</th><th>Mkt Cap</th></tr></thead>
+    <tbody><tr style="background:#1c2128;"><td style="font-weight:700;color:#58a6ff">REDTAPE  ←</td><td><span style="font-family:monospace;font-size:11px">32×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:32px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">24%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:69px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#8b949e">—</td><td style="font-family:monospace;font-size:11px;color:#8b949e">—</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹7,601</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">Metro Brands</td><td><span style="font-family:monospace;font-size:11px">68×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:70px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">20%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:58px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">+20%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+23%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹28,128</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">Bata India</td><td><span style="font-family:monospace;font-size:11px">51×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:52px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">12%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:35px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">+5%</td><td style="font-family:monospace;font-size:11px;color:#f85149">-59%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹8,510</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">Relaxo Footwear</td><td><span style="font-family:monospace;font-size:11px">47×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:48px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">11%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:32px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">+8%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+20%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹8,409</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">Campus Activewe.</td><td><span style="font-family:monospace;font-size:11px">51×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:52px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">21%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:61px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">+12%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+26%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹7,638</td></tr><tr style="background:#1c2128;"><td style="font-weight:700;color:#58a6ff">Redtape  ←</td><td><span style="font-family:monospace;font-size:11px">32×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:32px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">24%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:70px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">+34%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+70%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹7,601</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">Sreeleathers</td><td><span style="font-family:monospace;font-size:11px">16×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:16px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">8%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:23px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">+18%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+83%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹465</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">Lehar Footwears</td><td><span style="font-family:monospace;font-size:11px">22×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:22px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">18%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:52px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#f85149">-17%</td><td style="font-family:monospace;font-size:11px;color:#f85149">-18%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹465</td></tr><tr style="border-top:1px solid #30363d"><td style="color:#484f58;font-size:10px;font-family:monospace">Sector median</td><td style="font-family:monospace;font-size:10px;color:#484f58">68×</td><td style="font-family:monospace;font-size:10px;color:#484f58">20%</td><td colspan="3"></td></tr></tbody>
+  </table>
+</div></div><div class="card">
+<div class="section-title">Technical Analysis<span style="font-size:9px;color:#484f58;font-family:monospace;font-weight:400;letter-spacing:0"> · price data as of Jun 04, 2026</span></div>
+
+<div style="display:grid;grid-template-columns:280px 1fr;gap:24px">
+  <div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+      <span style="font-family:monospace;font-size:30px;font-weight:800;color:#d29922">5</span>
+      <span style="color:#484f58;font-size:16px">/8</span>
+      <span style="font-family:monospace;font-size:14px;letter-spacing:3px;margin-left:6px"><span style="color:#d29922">●</span><span style="color:#d29922">●</span><span style="color:#d29922">●</span><span style="color:#d29922">●</span><span style="color:#d29922">●</span><span style="color:#d29922">○</span><span style="color:#d29922">○</span><span style="color:#d29922">○</span></span>
+    </div>
+    <div style="font-size:12px;font-weight:600;color:#3fb950;margin-bottom:12px">Stage 2 Advancing ▲</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#3fb950;font-size:13px;width:14px;font-weight:700">✓</span><span style="font-size:11px;color:#c9d1d9">Price > 150 & 200 DMA</span><span style='font-size:10px;color:#484f58;font-family:monospace'>₹137 vs D150 ₹126 / D200 ₹129</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">150 DMA > 200 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#3fb950;font-size:13px;width:14px;font-weight:700">✓</span><span style="font-size:11px;color:#c9d1d9">200 DMA trending up (1m)</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">50 DMA > 150 & 200 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#3fb950;font-size:13px;width:14px;font-weight:700">✓</span><span style="font-size:11px;color:#c9d1d9">Price > 50 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">Price ≥30% above 52w low</span><span style='font-size:10px;color:#484f58;font-family:monospace'>27.4% above 52w low</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#3fb950;font-size:13px;width:14px;font-weight:700">✓</span><span style="font-size:11px;color:#c9d1d9">Within 25% of 52w high</span><span style='font-size:10px;color:#484f58;font-family:monospace'>-16.2% vs 52w high</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#3fb950;font-size:13px;width:14px;font-weight:700">✓</span><span style="font-size:11px;color:#c9d1d9">RS beats Nifty (1yr)</span><span style='font-size:10px;color:#484f58;font-family:monospace'>Stock -1.7% vs Nifty -5.6%</span></div>
+    <div style="margin-top:10px;padding-top:8px;border-top:1px solid #21262d"><span style="font-family:monospace;font-size:10px;margin-right:14px"><span style="color:#484f58">50DMA</span> ₹127 <span style="color:#3fb950">+8.2%</span></span><span style="font-family:monospace;font-size:10px;margin-right:14px"><span style="color:#484f58">150DMA</span> ₹126 <span style="color:#3fb950">+8.9%</span></span><span style="font-family:monospace;font-size:10px;margin-right:14px"><span style="color:#484f58">200DMA</span> ₹129 <span style="color:#3fb950">+6.6%</span></span></div>
+    <div style="margin:10px 0"><div style="font-size:9px;color:#484f58;font-family:monospace;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">52-week range</div><div style="position:relative;height:6px;background:#21262d;border-radius:3px;width:260px"><div style="position:absolute;left:53%;top:-3px;width:12px;height:12px;background:#d29922;border-radius:50%;transform:translateX(-50%)"></div></div><div style="display:flex;justify-content:space-between;width:260px;margin-top:4px"><span style="font-family:monospace;font-size:9px;color:#484f58">₹108</span><span style="font-family:monospace;font-size:10px;color:#d29922;font-weight:600">₹137 (53%)</span><span style="font-family:monospace;font-size:9px;color:#484f58">₹164</span></div></div>
+    <div style="font-family:monospace;font-size:10px;color:#8b949e;margin-top:6px">ATR% 6.4%  (14-day volatility)</div>
+  </div>
+  <div>
+    <div style="margin-bottom:6px;font-size:9px;color:#484f58;font-family:monospace;text-transform:uppercase;letter-spacing:.08em">
+      Price · 50DMA<span style="color:#f0883e">●</span>  150DMA<span style="color:#d29922">●</span>  200DMA<span style="color:#a371f7">●</span>  Volume
+    </div>
+    <div style="position:relative;height:300px;margin-top:4px">
+  <canvas id="price_REDTAPE_9632"></canvas>
+</div>
+<script>
+(function(){
+  var D={labels:["2025-05-29", "2025-05-30", "2025-06-02", "2025-06-03", "2025-06-04", "2025-06-05", "2025-06-06", "2025-06-09", "2025-06-10", "2025-06-11", "2025-06-12", "2025-06-13", "2025-06-16", "2025-06-17", "2025-06-18", "2025-06-19", "2025-06-20", "2025-06-23", "2025-06-24", "2025-06-25", "2025-06-26", "2025-06-27", "2025-06-30", "2025-07-01", "2025-07-02", "2025-07-03", "2025-07-04", "2025-07-07", "2025-07-08", "2025-07-09", "2025-07-10", "2025-07-11", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-21", "2025-07-22", "2025-07-23", "2025-07-24", "2025-07-25", "2025-07-28", "2025-07-29", "2025-07-30", "2025-07-31", "2025-08-01", "2025-08-04", "2025-08-05", "2025-08-06", "2025-08-07", "2025-08-08", "2025-08-11", "2025-08-12", "2025-08-13", "2025-08-14", "2025-08-18", "2025-08-19", "2025-08-20", "2025-08-21", "2025-08-22", "2025-08-25", "2025-08-26", "2025-08-28", "2025-08-29", "2025-09-01", "2025-09-02", "2025-09-03", "2025-09-04", "2025-09-05", "2025-09-08", "2025-09-09", "2025-09-10", "2025-09-11", "2025-09-12", "2025-09-15", "2025-09-16", "2025-09-17", "2025-09-18", "2025-09-19", "2025-09-22", "2025-09-23", "2025-09-24", "2025-09-25", "2025-09-26", "2025-09-29", "2025-09-30", "2025-10-01", "2025-10-03", "2025-10-06", "2025-10-07", "2025-10-08", "2025-10-09", "2025-10-10", "2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-23", "2025-10-24", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-01", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-01", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13", "2026-02-16", "2026-02-17", "2026-02-18", "2026-02-19", "2026-02-20", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27", "2026-03-02", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-27", "2026-03-30", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-04", "2026-05-05", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22", "2026-05-25", "2026-05-26", "2026-05-27", "2026-05-29", "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04"],price:[139.41, 134.15, 132.7, 133.87, 132.12, 132.59, 133.41, 133.04, 133.98, 133.07, 131.7, 129.89, 129.66, 129.24, 126.99, 125.51, 127.1, 125.69, 125.59, 129.35, 127.87, 129.35, 130.73, 130.68, 128.28, 126.37, 131.39, 140.46, 137.03, 133.52, 137.96, 137.47, 134.75, 138.43, 138.72, 138.47, 136.63, 134.82, 133.08, 130.06, 130.11, 133.11, 130.64, 131.86, 130.13, 128.88, 126.34, 127.69, 125.57, 124.1, 123.93, 121.24, 120.54, 120.92, 121.79, 120.56, 124.64, 122.87, 122.75, 124.69, 124.41, 125.25, 120.49, 121.4, 122.1, 123.25, 133.63, 135.35, 135.22, 146.65, 146.96, 144.72, 139.4, 138.92, 138.71, 137.43, 140.7, 151.75, 159.81, 161.12, 154.85, 157.8, 153.99, 150.19, 146.49, 143.52, 143.58, 146.2, 144.49, 138.54, 137.5, 136.02, 134.96, 136.66, 132.66, 130.78, 132.26, 135.0, 139.36, 138.79, 137.4, 136.96, 133.97, 132.83, 131.28, 133.84, 136.18, 137.34, 141.08, 136.98, 136.31, 134.49, 132.6, 134.22, 134.09, 134.98, 137.19, 132.72, 131.58, 130.65, 127.27, 128.13, 131.18, 132.64, 133.32, 129.71, 131.09, 131.23, 130.82, 129.24, 127.66, 126.39, 124.75, 127.53, 125.99, 125.14, 124.01, 126.4, 125.36, 123.62, 122.75, 122.9, 124.06, 124.25, 123.95, 123.18, 122.36, 121.93, 123.92, 124.2, 124.22, 122.93, 119.33, 120.05, 117.64, 116.35, 116.25, 129.12, 125.67, 124.32, 124.44, 118.23, 117.39, 116.19, 111.92, 109.76, 126.34, 119.01, 123.68, 124.45, 124.91, 125.23, 126.94, 124.66, 124.44, 131.19, 128.73, 127.84, 130.48, 133.43, 128.03, 128.71, 126.25, 125.15, 125.94, 124.59, 124.9, 124.14, 122.11, 117.39, 116.34, 121.74, 119.56, 118.51, 114.68, 116.2, 114.42, 113.99, 114.76, 113.53, 116.22, 118.84, 119.37, 117.2, 112.62, 115.78, 115.18, 112.95, 109.93, 114.87, 114.25, 114.37, 114.02, 121.23, 122.47, 122.85, 120.47, 122.2, 122.18, 122.3, 121.36, 122.61, 123.55, 126.38, 127.19, 130.72, 129.93, 130.18, 128.48, 127.32, 125.71, 127.03, 130.58, 133.83, 135.03, 135.0, 136.0, 133.38, 129.36, 127.18, 128.39, 128.31, 128.5, 134.07, 133.17, 148.49, 141.37, 139.52, 138.91, 137.99, 137.03, 137.0],d50:[144.29, 143.91, 143.42, 142.95, 142.37, 141.81, 141.25, 140.63, 140.1, 139.68, 139.35, 139.03, 138.71, 138.35, 137.96, 137.66, 137.44, 137.15, 136.9, 136.61, 136.18, 135.87, 135.6, 135.32, 135.01, 134.65, 134.43, 134.47, 134.42, 134.33, 134.46, 134.59, 134.61, 134.75, 134.84, 135.0, 135.07, 134.97, 134.84, 134.64, 134.44, 134.3, 134.0, 133.81, 133.54, 133.24, 132.84, 132.49, 132.0, 131.67, 131.36, 131.1, 130.86, 130.6, 130.39, 130.15, 129.98, 129.78, 129.55, 129.38, 129.24, 129.14, 128.96, 128.8, 128.71, 128.66, 128.79, 128.99, 129.18, 129.52, 129.91, 130.21, 130.39, 130.55, 130.76, 130.98, 131.17, 131.39, 131.85, 132.4, 132.74, 133.14, 133.53, 133.76, 133.92, 134.02, 134.16, 134.39, 134.62, 134.79, 134.93, 134.99, 135.08, 135.17, 135.22, 135.26, 135.38, 135.53, 135.8, 136.1, 136.37, 136.68, 136.95, 137.19, 137.38, 137.64, 137.87, 138.16, 138.53, 138.78, 139.01, 139.2, 139.44, 139.7, 139.94, 140.17, 140.24, 140.19, 140.12, 139.8, 139.4, 139.07, 138.91, 138.78, 138.67, 138.52, 138.33, 137.92, 137.34, 136.7, 136.16, 135.53, 134.94, 134.49, 134.08, 133.71, 133.32, 132.92, 132.54, 132.24, 131.95, 131.69, 131.47, 131.22, 131.05, 130.89, 130.7, 130.43, 130.13, 129.83, 129.57, 129.29, 129.0, 128.74, 128.47, 128.12, 127.72, 127.56, 127.25, 126.99, 126.76, 126.43, 126.13, 125.77, 125.32, 124.82, 124.6, 124.33, 124.17, 124.05, 124.0, 123.94, 123.86, 123.7, 123.52, 123.55, 123.5, 123.43, 123.43, 123.51, 123.52, 123.56, 123.59, 123.55, 123.55, 123.53, 123.55, 123.51, 123.44, 123.32, 123.19, 123.17, 123.08, 122.96, 122.78, 122.64, 122.48, 122.32, 122.14, 121.92, 121.76, 121.68, 121.68, 121.62, 121.52, 121.51, 121.49, 121.17, 120.85, 120.66, 120.46, 120.38, 120.31, 120.42, 120.63, 120.89, 120.77, 120.83, 120.8, 120.76, 120.69, 120.64, 120.57, 120.61, 120.66, 120.65, 120.67, 120.72, 120.68, 120.56, 120.51, 120.48, 120.57, 120.74, 120.92, 121.13, 121.35, 121.54, 121.68, 121.88, 122.12, 122.25, 122.43, 122.74, 123.11, 123.75, 124.29, 124.8, 125.29, 125.78, 126.19, 126.56],d150:[null, 177.0, 176.37, 175.73, 175.13, 174.58, 173.98, 173.42, 172.83, 172.1, 171.37, 170.7, 170.04, 169.33, 168.6, 167.88, 167.17, 166.52, 165.89, 165.38, 164.88, 164.39, 163.92, 163.45, 162.91, 162.4, 161.93, 161.52, 161.07, 160.6, 160.14, 159.66, 159.16, 158.72, 158.25, 157.81, 157.35, 156.87, 156.39, 155.83, 155.29, 154.75, 154.18, 153.63, 153.07, 152.48, 151.84, 151.22, 150.59, 149.96, 149.32, 148.66, 148.03, 147.47, 146.92, 146.38, 145.9, 145.46, 145.08, 144.68, 144.28, 143.88, 143.43, 142.94, 142.49, 142.06, 141.71, 141.38, 141.1, 140.92, 140.77, 140.62, 140.42, 140.14, 139.85, 139.48, 139.16, 138.96, 138.9, 138.88, 138.74, 138.64, 138.56, 138.51, 138.44, 138.37, 138.25, 138.17, 138.06, 137.93, 137.78, 137.68, 137.61, 137.62, 137.61, 137.56, 137.49, 137.43, 137.44, 137.45, 137.34, 137.23, 137.08, 136.91, 136.71, 136.54, 136.37, 136.19, 136.06, 135.95, 135.87, 135.79, 135.7, 135.62, 135.53, 135.5, 135.49, 135.44, 135.4, 135.31, 135.16, 135.05, 134.97, 134.88, 134.81, 134.72, 134.64, 134.59, 134.54, 134.48, 134.45, 134.42, 134.36, 134.34, 134.28, 134.24, 134.18, 134.09, 134.0, 133.89, 133.77, 133.66, 133.52, 133.4, 133.27, 133.13, 132.97, 132.82, 132.64, 132.53, 132.43, 132.36, 132.27, 132.18, 132.08, 131.97, 131.86, 131.83, 131.78, 131.72, 131.67, 131.59, 131.51, 131.42, 131.32, 131.22, 131.21, 131.17, 131.15, 131.12, 131.1, 131.07, 131.05, 131.01, 130.98, 131.02, 131.0, 130.91, 130.87, 130.87, 130.8, 130.75, 130.69, 130.6, 130.51, 130.42, 130.34, 130.27, 130.2, 130.12, 130.02, 129.95, 129.87, 129.78, 129.68, 129.6, 129.52, 129.43, 129.35, 129.28, 129.23, 129.22, 129.21, 129.18, 129.12, 129.09, 129.03, 128.96, 128.88, 128.81, 128.74, 128.67, 128.63, 128.63, 128.63, 128.63, 128.54, 128.45, 128.36, 128.2, 128.03, 127.88, 127.78, 127.69, 127.62, 127.57, 127.5, 127.36, 127.15, 126.92, 126.73, 126.52, 126.37, 126.26, 126.18, 126.12, 126.07, 125.99, 125.89, 125.81, 125.75, 125.7, 125.66, 125.64, 125.64, 125.76, 125.82, 125.85, 125.85, 125.84, 125.84, 125.84],d200:[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 165.53, 164.99, 164.45, 163.95, 163.47, 162.98, 162.51, 162.01, 161.42, 160.84, 160.31, 159.77, 159.2, 158.63, 158.07, 157.58, 157.14, 156.71, 156.41, 156.13, 155.85, 155.54, 155.23, 154.87, 154.55, 154.24, 153.99, 153.77, 153.55, 153.29, 153.03, 152.75, 152.48, 152.17, 151.86, 151.55, 151.25, 150.94, 150.57, 150.2, 149.81, 149.41, 149.02, 148.61, 148.18, 147.73, 147.29, 146.89, 146.49, 146.08, 145.67, 145.26, 144.9, 144.54, 144.2, 143.89, 143.64, 143.44, 143.2, 142.96, 142.71, 142.43, 142.13, 141.85, 141.59, 141.35, 141.08, 140.85, 140.64, 140.43, 140.23, 140.04, 139.8, 139.56, 139.24, 138.95, 138.7, 138.51, 138.33, 138.09, 137.86, 137.66, 137.5, 137.35, 137.21, 137.02, 136.86, 136.68, 136.51, 136.32, 136.18, 136.08, 136.02, 135.97, 135.89, 135.79, 135.68, 135.61, 135.55, 135.4, 135.24, 135.06, 134.87, 134.65, 134.43, 134.21, 134.03, 133.86, 133.71, 133.59, 133.45, 133.31, 133.15, 132.98, 132.83, 132.77, 132.66, 132.59, 132.49, 132.37, 132.27, 132.19, 132.09, 131.99, 131.92, 131.86, 131.8, 131.76, 131.74, 131.72, 131.71, 131.67, 131.64, 131.6, 131.57, 131.52, 131.45, 131.36, 131.25, 131.13, 131.04, 130.91, 130.79, 130.65, 130.51, 130.35, 130.19, 130.02, 129.88, 129.76, 129.69, 129.62, 129.54, 129.44, 129.36, 129.27, 129.17, 129.04, 128.95, 128.87, 128.79, 128.71, 128.67, 128.65, 128.63, 128.6, 128.58, 128.57, 128.53, 128.5, 128.47, 128.43, 128.41, 128.4, 128.42, 128.42, 128.37, 128.32, 128.29, 128.23, 128.18, 128.16, 128.13, 128.12, 128.1, 128.1, 128.09, 128.07, 128.06, 128.05, 128.02, 128.01, 128.02, 128.04, 128.14, 128.21, 128.27, 128.34, 128.41, 128.47, 128.55],vol:[574123, 659919, 525729, 313586, 296006, 167080, 159296, 473033, 283356, 324954, 367821, 242224, 163987, 184877, 227916, 344555, 295191, 334025, 212532, 298740, 218046, 317049, 232363, 220206, 273367, 326506, 1571814, 2114763, 610835, 419450, 810909, 377852, 298945, 631678, 259133, 257729, 151395, 140253, 851838, 1369797, 1758913, 2033631, 384161, 214666, 603012, 246442, 182012, 187798, 193998, 175563, 186392, 181201, 206944, 191151, 235703, 321741, 290881, 396828, 189622, 335242, 181359, 112237, 292570, 178771, 156136, 153744, 1586270, 874166, 993519, 2762358, 1062668, 482884, 715290, 329940, 318749, 360738, 778147, 6515826, 5506398, 1803214, 1313858, 919654, 452576, 375874, 631669, 1793040, 330550, 254049, 329720, 562241, 267196, 339499, 272220, 276133, 343272, 378095, 194084, 292863, 937940, 293677, 169915, 236023, 268349, 207963, 214343, 784527, 727747, 412480, 610600, 807105, 318025, 290980, 198431, 172447, 146005, 346697, 1173915, 469339, 268968, 296740, 468631, 514732, 394839, 403452, 210947, 323661, 288220, 120032, 137395, 158351, 101896, 201507, 872406, 311284, 139521, 131540, 210504, 142622, 103078, 124947, 108828, 158075, 189807, 146122, 164156, 123100, 136709, 134462, 205397, 113758, 151440, 156858, 336153, 289893, 195354, 314718, 342436, 2802042, 2321453, 479592, 246447, 375026, 342141, 173209, 308391, 392021, 6624261, 940223, 923433, 831955, 272330, 435000, 373706, 191154, 605811, 833000, 348036, 360972, 5719671, 2763054, 658104, 397029, 473761, 614624, 340661, 274830, 209767, 232140, 272051, 418063, 487596, 638451, 224537, 115903, 320537, 202813, 176349, 243281, 533945, 383718, 264939, 223788, 447041, 195682, 269365, 493753, 439225, 1320934, 496406, 320692, 236889, 279156, 165578, 512889, 1303251, 216080, 437178, 223423, 266471, 206708, 352316, 224949, 178526, 619282, 432330, 551512, 198886, 289604, 129471, 254939, 254574, 141468, 508517, 638868, 529392, 656298, 403762, 852615, 263140, 569630, 397834, 143448, 420075, 1479987, 1113377, 15411741, 6834243, 4811170, 1836433, 1101878, 770730, 693347],w52h:163.5,w52l:107.53};
+  var ctx=document.getElementById('price_REDTAPE_9632');
+  var ann=[];
+  if(D.w52h)ann.push({type:'line',yMin:D.w52h,yMax:D.w52h,borderColor:'#d2992288',borderWidth:1,borderDash:[4,3],label:{content:'52W High ₹'+D.w52h,display:true,color:'#d29922',font:{size:9},position:'end'}});
+  if(D.w52l)ann.push({type:'line',yMin:D.w52l,yMax:D.w52l,borderColor:'#8b949e66',borderWidth:1,borderDash:[4,3],label:{content:'52W Low ₹'+D.w52l,display:true,color:'#8b949e',font:{size:9},position:'start'}});
+  var maxVol=Math.max.apply(null,D.vol)||1;
+  new Chart(ctx,{
+    data:{
+      labels:D.labels,
+      datasets:[
+        {type:'line',label:'Price (CMP)',data:D.price,borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,0.06)',borderWidth:2,pointRadius:0,fill:true,yAxisID:'y',order:1,tension:0.1},
+        {type:'line',label:'50 DMA',data:D.d50,borderColor:'#f0883e',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:2,spanGaps:true,tension:0.1},
+        {type:'line',label:'150 DMA',data:D.d150,borderColor:'#d29922',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:3,spanGaps:true,tension:0.1},
+        {type:'line',label:'200 DMA',data:D.d200,borderColor:'#a371f7',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:4,spanGaps:true,tension:0.1},
+        {type:'bar',label:'Volume',data:D.vol,backgroundColor:D.price.map((v,i)=>i>0&&v>=D.price[i-1]?'rgba(63,185,80,0.3)':'rgba(248,81,73,0.3)'),yAxisID:'y2',order:5}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{labels:{color:'#8b949e',font:{size:10},boxWidth:14,padding:12}},
+        tooltip:{
+          backgroundColor:'#161b22',borderColor:'#30363d',borderWidth:1,
+          titleColor:'#c9d1d9',bodyColor:'#8b949e',padding:10,
+          callbacks:{
+            label:function(c){
+              if(c.datasetIndex===4)return'Vol: '+(c.parsed.y/1e5).toFixed(1)+'L shares';
+              if(c.parsed.y==null)return null;
+              return c.dataset.label+': ₹'+c.parsed.y.toLocaleString('en-IN');
+            }
+          }
+        },
+        annotation:{annotations:ann}
+      },
+      scales:{
+        x:{grid:{color:'#21262d40',drawTicks:false},ticks:{color:'#484f58',maxTicksLimit:8,font:{size:9},callback:function(v,i){var d=this.getLabelForValue(v);return d?d.substring(0,7):'';} }},
+        y:{position:'left',grid:{color:'#21262d30'},ticks:{color:'#484f58',font:{size:9},callback:function(v){return'₹'+v.toLocaleString('en-IN');}}},
+        y2:{position:'right',grid:{display:false},max:maxVol*5,ticks:{color:'#484f58',font:{size:8},callback:function(v){return(v/1e5).toFixed(0)+'L';}}}
+      }
+    }
+  });
+})();
+</script>
+  </div>
+</div>
+
+<div style="margin-top:18px;padding:14px;background:#0d1117;border-radius:8px;border-left:3px solid #d29922">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <span style="font-family:monospace;font-size:13px;font-weight:700;color:#d29922">WATCH</span>
+    <span style="font-size:10px;color:#484f58;font-family:monospace">3-month · 6-month outlook</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+    <div><div style="font-family:monospace;font-size:11px;margin-bottom:4px"><span style="color:#484f58">Entry zone:</span> <span style="color:#3fb950">₹127 – ₹140</span></div><div style="font-family:monospace;font-size:11px;margin-bottom:4px"><span style="color:#484f58">Stop loss:</span> <span style="color:#f85149">₹115</span> (-15.9% from CMP)</div></div>
+    <div><div style="font-family:monospace;font-size:11px;margin-bottom:4px"><span style="color:#484f58">3m target:</span> <span style="color:#58a6ff">₹164</span> (+19%)</div><div style="font-size:10px;color:#8b949e;margin-bottom:8px">Stage 2 but TT 5/8 — wait for TT≥6 before adding</div></div>
+    <div><div style="font-family:monospace;font-size:11px;margin-bottom:4px"><span style="color:#484f58">6m target:</span> <span style="color:#a371f7">₹204</span> (+49%)</div><div style="font-size:10px;color:#8b949e;margin-bottom:4px">Enter fully on TT upgrade above 6/8</div></div>
+  </div>
+</div></div><div class="card">
+<div class="section-title">Portfolio Analytics</div>
+<div style="display:grid;grid-template-columns:260px 1fr 280px;gap:24px">
+
+  <div>
+    <div style="font-family:monospace;font-size:42px;font-weight:800;color:#484f58;line-height:1">—</div>
+    <div style="font-size:10px;color:#484f58;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Portfolio Weight</div>
+    <div style="font-size:13px;font-weight:600;color:#484f58;margin-bottom:10px">—</div>
+    <div style="font-size:11px;color:#484f58">Not selected for portfolio (top 12 filter)</div>
+    <div style="font-size:10px;color:#484f58;font-family:monospace;margin-top:6px">Ranked #24 of 105</div>
+  </div>
+
+  <div>
+    <div class="mini-label" style="margin-bottom:10px">Composite Score = 6.89</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:110px;font-size:11px;color:#8b949e">Smart Money</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:67px;height:6px;background:#3fb950;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#3fb950;min-width:28px">4.2</span><span style="font-size:10px;color:#484f58">× 35% = <span style="color:#8b949e">1.47</span></span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:110px;font-size:11px;color:#8b949e">TA Headroom</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:144px;height:6px;background:#58a6ff;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#58a6ff;min-width:28px">9.0</span><span style="font-size:10px;color:#484f58">× 20% = <span style="color:#8b949e">1.80</span></span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:110px;font-size:11px;color:#8b949e">Valuation</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:80px;height:6px;background:#ffa657;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#ffa657;min-width:28px">5.0</span><span style="font-size:10px;color:#484f58">× 15% = <span style="color:#8b949e">0.75</span></span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:110px;font-size:11px;color:#8b949e">Growth</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:120px;height:6px;background:#79c0ff;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#79c0ff;min-width:28px">7.5</span><span style="font-size:10px;color:#484f58">× 15% = <span style="color:#8b949e">1.12</span></span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:110px;font-size:11px;color:#8b949e">Stage/TT</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:80px;height:6px;background:#a371f7;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#a371f7;min-width:28px">5.0</span><span style="font-size:10px;color:#484f58">× 10% = <span style="color:#8b949e">0.50</span></span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:110px;font-size:11px;color:#8b949e">Elite bonus</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:80px;height:6px;background:#d29922;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#d29922;min-width:28px">5.0</span><span style="font-size:10px;color:#484f58">× 5% = <span style="color:#8b949e">0.25</span></span></div>
+    <div style="font-family:monospace;font-size:20px;font-weight:700;color:#e6edf3;margin-top:12px;border-top:1px solid #21262d;padding-top:10px">
+      6.89
+      <span style="font-size:11px;color:#484f58;font-weight:400"> / 10</span>
+    </div>
+  </div>
+
+  <div>
+    <div class="mini-label" style="margin-bottom:8px">Ranking Inputs</div>
+    <span style="background:#58a6ff22;color:#58a6ff;padding:2px 8px;border-radius:6px;font-size:10px;margin:2px;display:inline-block;font-family:monospace">Signal: stable conviction</span><span style="background:#3fb95022;color:#3fb950;padding:2px 8px;border-radius:6px;font-size:10px;margin:2px;display:inline-block;font-family:monospace">Stage 2</span><span style="background:#d2992222;color:#d29922;padding:2px 8px;border-radius:6px;font-size:10px;margin:2px;display:inline-block;font-family:monospace">TT 5/8</span><span style="background:#d2992222;color:#d29922;padding:2px 8px;border-radius:6px;font-size:10px;margin:2px;display:inline-block;font-family:monospace">vs 52w High: -16.2%</span><span style="background:#3fb95022;color:#3fb950;padding:2px 8px;border-radius:6px;font-size:10px;margin:2px;display:inline-block;font-family:monospace">CAGR 18%</span><span style="background:#3fb95022;color:#3fb950;padding:2px 8px;border-radius:6px;font-size:10px;margin:2px;display:inline-block;font-family:monospace">ROCE 24%</span>
+  </div>
+
+</div></div><div class="card">
+<div class="section-title">Investor Network · <span class="tip" data-tip="Shows which fund houses hold this company and what other companies in our universe they also hold — reveals shared institutional conviction">Cross-Holdings</span></div>
+<div style="font-size:10px;color:#8b949e;margin-bottom:10px">
+  <span style="color:#3fb950">●</span> Entering &nbsp;
+  <span style="color:#58a6ff">●</span> Stable &nbsp;
+  <span style="color:#f85149">●</span> Exiting &nbsp;
+  <span style="color:#8b949e;margin-left:8px">■</span> Fund house (square) &nbsp;
+  <span style="color:#484f58">—</span> Solid = active · Dashed = exiting &nbsp;
+  Hover nodes for details
+</div>
+<div id="net_REDTAPE_9632" style="height:420px;background:#0d1117;border-radius:8px;border:1px solid #21262d"></div>
+<script>
+(function(){
+  if(typeof vis==='undefined')return;
+  var N=new vis.DataSet([{"id": 0, "label": "REDTAPE", "shape": "dot", "color": {"background": "#58a6ff", "border": "#ffffff"}, "size": 26, "font": {"color": "#e6edf3", "size": 13, "bold": true, "face": "monospace"}, "title": "<b>REDTAPE</b><br>Subject company"}, {"id": 1, "label": "ICICI Prudential MF", "shape": "square", "color": {"background": "#58a6ff22", "border": "#58a6ff"}, "size": 24, "font": {"color": "#58a6ff", "size": 9, "face": "sans-serif"}, "title": "<b>ICICI Prudential MF</b><br>Tier: strong<br>Category: stable<br>Holds 56 other universe companies"}, {"id": 2, "label": "KEI", "shape": "dot", "color": {"background": "#58a6ff55", "border": "#58a6ff"}, "size": 15, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>KEI</b><br>Composite: 7.8<br>Portfolio weight: 11.0%"}, {"id": 3, "label": "SONACOMS", "shape": "dot", "color": {"background": "#58a6ff55", "border": "#58a6ff"}, "size": 16, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>SONACOMS</b><br>Composite: 8.2<br>Portfolio weight: 11.7%"}, {"id": 4, "label": "BHARATFORG", "shape": "dot", "color": {"background": "#58a6ff55", "border": "#58a6ff"}, "size": 15, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>BHARATFORG</b><br>Composite: 7.4<br>Portfolio weight: 11.9%"}, {"id": 5, "label": "NYKAA", "shape": "dot", "color": {"background": "#58a6ff55", "border": "#58a6ff"}, "size": 16, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>NYKAA</b><br>Composite: 8.0<br>Portfolio weight: 11.6%"}, {"id": 6, "label": "ASTRAMICRO", "shape": "dot", "color": {"background": "#58a6ff55", "border": "#58a6ff"}, "size": 15, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ASTRAMICRO</b><br>Composite: 7.7<br>Portfolio weight: 6.3%"}, {"id": 7, "label": "MEDPLUS", "shape": "dot", "color": {"background": "#58a6ff55", "border": "#58a6ff"}, "size": 15, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>MEDPLUS</b><br>Composite: 7.9<br>Portfolio weight: 5.9%"}]);
+  var E=new vis.DataSet([{"from": 0, "to": 1, "color": {"color": "#58a6ffbb", "highlight": "#58a6ff"}, "width": 2, "dashes": false, "title": "stable"}, {"from": 2, "to": 1, "color": {"color": "#58a6ff44"}, "width": 1, "dashes": false, "title": "KEI \u2014 stable"}, {"from": 3, "to": 1, "color": {"color": "#58a6ff44"}, "width": 1, "dashes": false, "title": "SONACOMS \u2014 stable"}, {"from": 4, "to": 1, "color": {"color": "#58a6ff44"}, "width": 1, "dashes": false, "title": "BHARATFORG \u2014 stable"}, {"from": 5, "to": 1, "color": {"color": "#58a6ff44"}, "width": 1, "dashes": false, "title": "NYKAA \u2014 stable"}, {"from": 6, "to": 1, "color": {"color": "#3fb95044"}, "width": 1, "dashes": false, "title": "ASTRAMICRO \u2014 entering"}, {"from": 7, "to": 1, "color": {"color": "#58a6ff44"}, "width": 1, "dashes": false, "title": "MEDPLUS \u2014 stable"}]);
+  new vis.Network(
+    document.getElementById('net_REDTAPE_9632'),
+    {nodes:N,edges:E},
+    {
+      nodes:{shadow:{enabled:true,color:'rgba(0,0,0,0.5)',size:8},borderWidth:1},
+      edges:{smooth:{type:'continuous'}},
+      physics:{
+        barnesHut:{gravitationalConstant:-5000,centralGravity:0.25,springLength:130,springConstant:0.05},
+        stabilization:{iterations:120}
+      },
+      interaction:{hover:true,tooltipDelay:100,navigationButtons:false,keyboard:false},
+      configure:{enabled:false}
+    }
+  );
+})();
+</script></div>
+<div style="font-family:monospace;font-size:9px;color:#30363d;margin-top:28px;text-align:center">
+  NAV Framework · 2026-06-06 · REDTAPE · Private research only
+</div>
+</body>
+</html>

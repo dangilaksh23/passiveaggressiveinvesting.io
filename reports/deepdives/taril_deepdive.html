@@ -1,531 +1,276 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TARIL · Deep Dive · PAI</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TARIL — Deep Dive</title>
 <style>
-:root {
-  --paper: #f5f2eb; --paper2: #ede9e0; --card: #ffffff; --rule: #d4cfc4;
-  --ink: #0d0d0d; --muted: #7a7060; --green: #1a5c38; --green-pale: #d4edd8;
-  --green-bright: #00c853; --amber: #b35a00; --amber-pale: #fdefd8;
-  --red: #8b1a1a; --red-pale: #fde0e0; --blue: #1a3a6b; --blue-pale: #dde5f5;
-  --serif: 'Fraunces', serif; --sans: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
-}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--sans); background: var(--paper); color: var(--ink); font-size: 14px; line-height: 1.6; }
-.disclaimer-banner { background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 10.5px; padding: 8px 24px; text-align: center; letter-spacing: 0.02em; }
-.disclaimer-banner a { color: var(--paper); text-decoration: underline; }
-.masthead { border-bottom: 1px solid var(--rule); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; background: var(--paper); }
-.logo-block { display: flex; align-items: baseline; gap: 10px; text-decoration: none; color: var(--ink); }
-.logo-pi { font-family: var(--serif); font-size: 30px; font-weight: 700; color: var(--green); line-height: 1; letter-spacing: -1.5px; }
-.logo-name { font-family: var(--serif); font-size: 14px; font-weight: 300; letter-spacing: 0.06em; text-transform: uppercase; }
-.report-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
-.report-type { color: var(--green); font-weight: 500; }
-.page { max-width: 900px; margin: 0 auto; }
-.report-head { padding: 36px 36px 28px; background: var(--card); border-bottom: 1px solid var(--rule); }
-.head-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
-.pill { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
-.pill.bz { background: var(--green-pale); color: var(--green); }
-.pill.stage-4 { background: var(--red-pale); color: var(--red); }
-.pill.neutral { background: var(--paper2); color: var(--muted); }
-.pill.warn { background: #fff8e6; color: var(--amber); border: 1px solid #f0c060; }
-.pill.verified { background: var(--green); color: #fff; }
-.head-title { font-family: var(--serif); font-size: 38px; font-weight: 500; line-height: 1.15; letter-spacing: -0.5px; margin-bottom: 6px; }
-.head-subtitle { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 18px; }
-.head-tagline { font-size: 14px; color: #444; line-height: 1.7; max-width: 700px; }
-.content { padding: 0 36px 40px; }
-.section { padding: 32px 0; border-bottom: 1px solid var(--paper2); }
-.section:last-child { border-bottom: none; }
-.section-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
-.section-num { font-family: var(--mono); font-size: 11px; font-weight: 500; color: #fff; background: var(--ink); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; letter-spacing: 0.05em; }
-.section-title { font-family: var(--serif); font-size: 24px; font-weight: 500; letter-spacing: -0.3px; line-height: 1.2; }
-.thesis-box { background: var(--paper); border-left: 3px solid var(--green); border-radius: 4px; padding: 22px 26px; }
-.th-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-.th-call { font-family: var(--serif); font-size: 18px; font-weight: 300; line-height: 1.5; color: var(--ink); }
-.alert-box { background: var(--red-pale); border-left: 4px solid var(--red); border-radius: 6px; padding: 18px 22px; margin: 18px 0; }
-.alert-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-bottom: 8px; font-weight: 600; }
-.alert-text { font-size: 14px; line-height: 1.7; color: #3a0000; }
-.alert-text strong { color: var(--red); }
-.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 22px 0; }
-.kpi-cell { background: var(--paper); border-radius: 8px; padding: 14px 16px; }
-.kpi-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-.kpi-value { font-family: var(--serif); font-size: 22px; font-weight: 700; line-height: 1.1; }
-.kpi-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 4px; }
-.kpi-cell.green { background: var(--green-pale); }
-.kpi-cell.green .kpi-value { color: var(--green); }
-.kpi-cell.amber { background: var(--amber-pale); }
-.kpi-cell.amber .kpi-value { color: var(--amber); }
-.kpi-cell.red { background: var(--red-pale); }
-.kpi-cell.red .kpi-value { color: var(--red); }
-.pai-score-block { background: var(--card); border: 1px solid var(--rule); border-radius: 12px; padding: 28px; margin-bottom: 24px; }
-.pai-score-block.retrofit::before { content: 'Retro-scored from original report date'; display: block; font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed var(--rule); }
-.score-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
-.score-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
-.score-date { font-family: var(--mono); font-size: 10px; color: var(--muted); }
-.score-total { display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px solid var(--paper2); }
-.score-num-big { font-family: var(--serif); font-size: 56px; font-weight: 700; color: var(--green); line-height: 1; letter-spacing: -2px; }
-.score-denom { font-family: var(--mono); font-size: 16px; color: var(--muted); }
-.tier-badge { margin-left: auto; font-family: var(--mono); font-size: 10px; padding: 5px 14px; border-radius: 20px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
-.tier-sp { background: #2d6a4f; color: #fff; }
-.score-components { display: flex; flex-direction: column; gap: 14px; }
-.component { display: grid; grid-template-columns: 160px 1fr 56px; align-items: center; gap: 12px; }
-.component label { font-family: var(--mono); font-size: 10px; color: var(--ink); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
-.component .bar { height: 8px; background: var(--paper2); border-radius: 4px; overflow: hidden; }
-.component .fill { height: 100%; border-radius: 4px; }
-.component .value { font-family: var(--mono); font-size: 12px; color: var(--ink); text-align: right; font-weight: 500; }
-.component-rationale { font-family: var(--sans); font-size: 12px; color: var(--muted); padding-left: 172px; margin-top: -8px; line-height: 1.6; }
-.layer-strip { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 18px; }
-.layer-chip { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.04em; text-transform: uppercase; }
-.lc-strong { background: var(--green-pale); color: var(--green); }
-.lc-moderate { background: var(--amber-pale); color: var(--amber); }
-.lc-cheap { background: var(--green-pale); color: var(--green); }
-.lc-clean { background: var(--green-pale); color: var(--green); }
-.lc-stage4 { background: var(--red-pale); color: var(--red); }
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 18px 0; }
-.info-block { background: var(--paper); border-radius: 8px; padding: 18px 20px; }
-.ib-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-.ib-content { font-size: 13px; line-height: 1.7; color: #333; }
-.ib-content strong { color: var(--ink); font-weight: 600; }
-.para { font-size: 14px; line-height: 1.75; color: #333; margin-bottom: 14px; }
-.para strong { color: var(--ink); font-weight: 600; }
-.para em { color: var(--green); font-style: italic; }
-.peer-table { width: 100%; border-collapse: collapse; margin: 18px 0; background: var(--paper); border-radius: 8px; overflow: hidden; }
-.peer-table th { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); font-weight: 500; }
-.peer-table td { padding: 10px 12px; font-size: 12px; border-bottom: 1px solid var(--paper2); }
-.peer-table tbody tr:last-child td { border-bottom: none; }
-.peer-table .highlight { background: var(--green-pale); }
-.peer-table .highlight td:first-child { font-weight: 600; }
-.tech-citation { background: var(--paper); border-radius: 6px; padding: 14px 18px; font-family: var(--sans); font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 18px; font-style: italic; }
-.tech-citation strong { color: var(--ink); font-style: normal; font-weight: 600; }
-.tt-summary { font-family: var(--mono); font-size: 13px; color: var(--ink); padding: 12px 16px; background: var(--red-pale); border-radius: 6px; margin-top: 10px; }
-.tt-summary strong { color: var(--red); font-weight: 600; }
-.risk-list { list-style: none; padding: 0; margin: 14px 0; }
-.risk-list li { background: var(--paper); border-left: 3px solid var(--red); border-radius: 4px; padding: 12px 18px; margin-bottom: 8px; font-size: 13px; line-height: 1.6; }
-.risk-list li strong { color: var(--red); font-weight: 600; display: block; margin-bottom: 3px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
-.risk-list.watch li { border-left-color: var(--amber); }
-.risk-list.watch li strong { color: var(--amber); }
-.action-box { background: var(--ink); color: #fff; border-radius: 12px; padding: 28px; margin: 24px 0; }
-.action-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #999; margin-bottom: 16px; }
-.action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.action-cell { padding: 14px 16px; background: rgba(255,255,255,0.05); border-radius: 8px; }
-.action-cell .ac-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-bottom: 6px; }
-.action-cell .ac-value { font-family: var(--mono); font-size: 18px; font-weight: 500; }
-.action-cell.entry .ac-value { color: var(--green-bright); }
-.action-cell.stop .ac-value { color: #ff6b6b; }
-.action-cell.target .ac-value { color: #6bb6ff; }
-.exits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
-.exits-block { padding: 16px 20px; background: rgba(255,255,255,0.03); border-radius: 8px; }
-.exits-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #999; margin-bottom: 10px; }
-.exits-block ul { list-style: none; padding: 0; margin: 0; }
-.exits-block li { font-family: var(--sans); font-size: 12px; color: #ccc; padding: 6px 0 6px 18px; line-height: 1.5; position: relative; }
-.exits-block li::before { content: '−'; position: absolute; left: 0; color: #888; font-family: var(--mono); }
-.sources { padding: 24px 36px; background: var(--paper); border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 10px; color: var(--muted); line-height: 1.8; letter-spacing: 0.02em; }
-.sources strong { color: var(--ink); display: block; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: 500; }
-.report-foot { padding: 24px 36px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; background: var(--paper); }
-.summary-link { font-family: var(--mono); font-size: 11px; color: var(--blue); text-decoration: none; padding: 8px 14px; background: var(--blue-pale); border-radius: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
-.foot-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.04em; }
-@media (max-width: 700px) {
-  .report-head { padding: 24px 20px; } .head-title { font-size: 28px; }
-  .content { padding: 0 20px 30px; } .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-  .two-col { grid-template-columns: 1fr; } .action-grid { grid-template-columns: repeat(2, 1fr); }
-  .exits-grid { grid-template-columns: 1fr; } .component { grid-template-columns: 110px 1fr 50px; }
-  .component-rationale { padding-left: 0; }
-}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #0d1117; color: #c9d1d9; padding: 28px 32px; font-size: 13px; line-height: 1.5; }
+.card { background: #161b22; border-radius: 10px; padding: 22px 24px;
+        box-shadow: 0 1px 6px rgba(0,0,0,.25); margin-bottom: 16px; }
+.section-title { font-family: monospace; font-size: 10px; letter-spacing: .14em;
+                 text-transform: uppercase; color: #8b949e; margin-bottom: 14px;
+                 display: flex; align-items: center; gap: 8px; }
+.metrics-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.metric-box { background: #0d1117; border-radius: 6px; padding: 10px 14px; min-width: 115px; }
+.metric-label { font-family: monospace; font-size: 9px; letter-spacing: .1em;
+                text-transform: uppercase; color: #484f58; margin-bottom: 4px; }
+.metric-val { font-family: monospace; font-size: 18px; font-weight: 700; }
+.metric-sub { font-family: monospace; font-size: 9px; color: #8b949e; margin-top: 3px; }
+.mini-card { background: #0d1117; border-radius: 6px; padding: 12px; }
+.mini-label { font-family: monospace; font-size: 9px; letter-spacing: .1em;
+              text-transform: uppercase; color: #484f58; }
+.mini-metric { display: inline-flex; flex-direction: column; margin-right: 16px; margin-bottom: 8px; }
+.mini-metrics-row { display: flex; flex-wrap: wrap; }
+.ml { font-size: 9px; color: #484f58; font-family: monospace; text-transform: uppercase; letter-spacing: .06em; }
+.mv { font-family: monospace; font-size: 14px; font-weight: 700; color: #e6edf3; }
+.ms { font-size: 9px; color: #8b949e; font-family: monospace; }
+.peer-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.peer-table th { font-family: monospace; font-size: 9px; letter-spacing: .08em;
+                 text-transform: uppercase; color: #484f58; padding: 6px 10px;
+                 text-align: left; border-bottom: 1px solid #21262d; white-space: nowrap; }
+.peer-table td { padding: 8px 10px; border-bottom: 1px solid #161b22; vertical-align: middle; }
+.peer-table tr:hover td { background: #1c2128; }
+.tip { border-bottom: 1px dashed #484f58; cursor: help; position: relative; }
+.tip:hover::after { content: attr(data-tip); position: absolute; bottom: 120%; left: 0;
+  background: #161b22; border: 1px solid #30363d; border-radius: 6px;
+  padding: 6px 10px; font-size: 11px; color: #c9d1d9; white-space: nowrap;
+  z-index: 10; min-width: 180px; max-width: 300px; white-space: normal; line-height: 1.5; }
+.takeaway { font-size: 11px; border-left: 2px solid; padding: 3px 8px; margin-bottom: 5px; }
+.fin-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.fin-table th { font-family: monospace; font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
+  color: #484f58; padding: 5px 8px; border-bottom: 1px solid #21262d; text-align: right; }
+.fin-table th:first-child { text-align: left; }
+.fin-table td { padding: 5px 8px; border-bottom: 1px solid #0d1117; font-family: monospace; font-size: 11px;
+  text-align: right; color: #c9d1d9; }
+.fin-table td:first-child { text-align: left; color: #8b949e; font-size: 10px; white-space: nowrap; }
+.fin-table tr:hover td { background: #161b22; }
+.fin-table .hl td { font-weight: 700; color: #e6edf3; }
+@media (max-width: 800px) { body { padding: 16px; } }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
-
-<div class="disclaimer-banner">
-  ⚠️ Personal research only. Not SEBI-registered investment advice. Not a buy/sell recommendation. <a href="/#disclaimer">Full disclaimer</a>
+<div class="card" style="margin-bottom:16px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap"><div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px"><span style="font-family:monospace;font-size:24px;font-weight:800;color:#e6edf3">TARIL</span><span style="font-size:15px;color:#8b949e">TARIL</span><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:6px;font-size:10px">Energy | Infrastructure</span></div><div style="margin-bottom:12px"><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">NN clean</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#484f5822;color:#484f58;margin-right:4px">no data</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#79c0ff22;color:#79c0ff;margin-right:4px">Stage 1_to_2_transition</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8514922;color:#f85149;margin-right:4px">TT 2/8</span></div><p style='font-size:12px;color:#8b949e;max-width:720px;line-height:1.7;margin:0'>Transformers and Rectifiers (India) Limited is a leading asset-heavy manufacturer of a wide range of transformers and reactors globally. It generates revenue primarily from product sales and services, catering to domestic and international markets, including government, corporate B2B, and institutional customers. The company distinguishes itself with its large scale, advanced…</p></div><div style="text-align:right"><div style="margin-top:10px"><span style="font-family:monospace;font-size:22px;font-weight:700;color:#58a6ff">₹317</span>&ensp;<span class="tip" data-tip="Current Market Price — the last traded price of this stock on NSE">CMP</span><div style='font-family:monospace;font-size:9px;color:#484f58;margin-top:2px'>as of Jun 04, 2026</div></div></div></div></div><div class="card">
+<div class="section-title">Business Model
+  <span style="font-size:10px;color:#8b949e">· Transformer manufacturing company</span>
 </div>
 
-<header class="masthead">
-  <a href="/" class="logo-block">
-    <span class="logo-pi">π</span>
-    <span class="logo-name">Passive Aggressive Investing</span>
-  </a>
-  <div class="report-meta">
-    <span class="report-type">Deep Dive</span> · April 2026
-  </div>
-</header>
+<div style="margin-bottom:12px"><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">Asset Heavy Manufacturer</span><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">Product Sale</span><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">Service Provider</span><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">manufacturer</span><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">pan-India | export-heavy</span></div>
 
-<div class="page">
-
-<div class="report-head">
-  <div class="head-pills">
-    <span class="pill bz">Buy Zone</span>
-    <span class="pill stage-4">Stage 4 — Hold Only</span>
-    <span class="pill neutral">Capital Goods — Power Transformers</span>
-    <span class="pill warn">⚠ C4 = 0 · Do Not Add</span>
-    <span class="pill verified">✓ Step 6 Verified · Apr 25 2026</span>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">
+  <div>
+    <div class="mini-label" style="margin-bottom:6px">Competitive Moat</div><div style="margin-bottom:12px"><span style="background:#3fb95022;color:#3fb950;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">scale</span><span style="background:#3fb95022;color:#3fb950;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">technology</span><span style="background:#3fb95022;color:#3fb950;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">cost_advantage</span></div>
+    <div class="mini-label" style="margin-bottom:4px">Government Proximity</div><div style="font-size:12px;color:#58a6ff;font-weight:600;margin-bottom:12px;text-transform:capitalize">moderate</div>
+    <div class="mini-label" style="margin-bottom:4px">Key Customers</div><div style="line-height:1.8;margin-bottom:12px"><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">Power Grid Corporation</span><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">Arcelor Mittal Mexico</span><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">GETCO</span><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">One customer contributed 10% or more to the company’s revenue for FY 2024-25 amounting to `649.65 crores</span></div>
+    <div class="mini-label" style="margin-bottom:6px">Operational Metrics</div><div class="mini-metrics-row"><div class="mini-metric"><span class="ml">Order Book</span><span class="mv">₹5,133Cr</span><span class="ms">2.5× revenue coverage</span></div><div class="mini-metric"><span class="ml">Debtor Days</span><span class="mv" style="color:#f85149">129d</span></div><div class="mini-metric"><span class="ml">CapEx (latest)</span><span class="mv">₹235Cr</span></div><div class="mini-metric"><span class="ml">Employees</span><span class="mv">1,752</span></div><div class="mini-metric"><span class="ml">Contingent Liab.</span><span class="mv" style="color:#8b949e">₹80Cr</span></div><div class="mini-metric"><span class="ml">Govt Revenue %</span><span class="mv">52%</span></div></div>
   </div>
-  <h1 class="head-title">Transformers &amp; Rectifiers (India)</h1>
-  <div class="head-subtitle">NSE: TARIL · Power Transformers · Small-Cap · PGCIL Anchor</div>
-  <p class="head-tagline">
-    India's first domestic winner of a PGCIL HVDC transformer repair order — previously the exclusive domain of ABB, Siemens, and Alstom. FY26 PAT +20% YoY. Order book ₹5,005 Cr = 2x annual revenue. Inquiry pipeline ₹23,000 Cr. The business is accelerating. The stock is 52% below its 52-week high. Stage 4 technical is the only gate. Hold existing; do not add.
-  </p>
+  <div>
+    <div class="mini-label" style="margin-bottom:6px">Key Risks</div><div style="margin-bottom:12px"><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>supply chain management (raw materials, components, logistics, geopolitical)</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>market price movements of raw materials (Copper, CRGO)</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>foreign exchange rate fluctuations</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>changes in market interest rates</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>contingent litigations and claims</div></div>
+    <div class="mini-label" style="margin-bottom:6px">Key Initiatives</div><div style="margin-bottom:12px"><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#58a6ff;font-size:10px;margin-top:1px">→</span>Backward integration (CRGO steel processing, radiator facility, fabrication)</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#58a6ff;font-size:10px;margin-top:1px">→</span>Capacity expansion for renewable energy and EHV transformers</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#58a6ff;font-size:10px;margin-top:1px">→</span>Technological collaborations</div></div>
+  </div>
+</div></div><div class="card">
+<div class="section-title">KYC — Company · Individuals · Investors</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:20px">
+  <div>
+<div class="mini-label" style="margin-bottom:8px">Company Integrity</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
+  <div style="background:#0d1117;border-radius:6px;padding:10px">
+    <div style="font-family:monospace;font-size:20px;font-weight:700;color:#3fb950">0</div>
+    <div style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.08em">Contagion</div>
+    <div style="font-size:9px;color:#3fb950;margin-top:2px">0 severe DIN links</div>
+  </div>
+  <div style="background:#0d1117;border-radius:6px;padding:10px">
+    <div style="font-size:14px;font-weight:600;color:#3fb950">CLEAN</div>
+    <div style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.08em;margin-top:2px">News flag</div>
+    <div style="font-size:9px;color:#3fb950;margin-top:2px">No adverse findings specifically about this company; annual </div>
+  </div>
+  <div style="background:#0d1117;border-radius:6px;padding:10px">
+    <div style="font-size:11px;font-weight:600;color:#d29922">Concern</div>
+    <div style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Governance</div>
+  </div>
+</div>
+<div style="margin-bottom:10px">
+  <div style="font-size:11px;color:#3fb950;margin-bottom:4px">
+    <span style="color:#484f58">Auditor:</span> Manubhai & Shah LLP
+    
+    
+  </div>
+  <div style="margin-left:8px"><div style="font-size:10px;color:#8b949e;margin-bottom:2px">· Revenue recognition</div><div style="font-size:10px;color:#8b949e;margin-bottom:2px">· Recoverability of assessment of trade receivables</div><div style="font-size:10px;color:#8b949e;margin-bottom:2px">· Contingent Liabilities</div></div>
 </div>
 
-<div class="content">
+</div>
+  <div>
+<div class="mini-label" style="margin-bottom:8px">Promoters & Management</div>
+<div style="margin-bottom:8px">
+  <div style="font-size:13px;color:#e6edf3;font-weight:600">Mr. Jitendra U. Mamtora</div>
+  <div style="font-size:10px;color:#8b949e;text-transform:capitalize;margin-bottom:4px">family promoter</div>
+  <div style="font-size:11px;color:#c9d1d9;line-height:1.6;margin-bottom:8px">Mr. Jitendra U. Mamtora, founder of the company, holds a Bachelor’s Degree in Electrical Engineering and has over 40 years of experience in the transformer industry, specializing in design and…</div>
+</div>
+<div style="display:flex;gap:16px;margin-bottom:10px;flex-wrap:wrap">
+  <div><div style="font-family:monospace;font-size:16px;font-weight:700;color:#ffa657">64.4%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">Promoter</div></div>
+  <div><div style="font-family:monospace;font-size:16px;font-weight:700;color:#58a6ff">11.3%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">FII</div></div>
+  <div><div style="font-family:monospace;font-size:16px;font-weight:700;color:#3fb950">7.2%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">DII</div></div>
+  <div><div style="font-family:monospace;font-size:16px;font-weight:700;color:#3fb950">0.0%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">Pledged</div></div>
+</div>
+<div style="font-size:11px;color:#f85149;margin-bottom:8px">Promoter activity: selling</div>
 
-  <!-- SECTION 00 -->
-  <div class="section">
-    <div class="section-head">
-      <span class="section-num">00</span>
-      <span class="section-title">Why TARIL — The Core Thesis</span>
-    </div>
-
-    <div class="alert-box">
-      <div class="alert-label">⚠ Stage 4 — Do Not Add to Existing Position</div>
-      <div class="alert-text">
-        C4 = 0. Stage 4 confirmed: CMP is 52% below the 52-week high. Framework rule: <strong>do not add to Stage 4 positions regardless of score.</strong> Hold existing shares. Stop at ₹270. Score would jump to 83+ once Stage 2 confirms — that is the re-entry trigger.
-      </div>
-    </div>
-
-    <div class="thesis-box">
-      <div class="th-label">The Call</div>
-      <div class="th-call">
-        TARIL is the RDSS grid upgrade story in transformer form. DISCOMs buy transformers directly as the primary equipment for grid modernisation. The HVDC milestone — first domestic company to qualify for PGCIL HVDC transformer repair — is a qualification gateway that competitors ABB, Siemens, and Alstom spent decades establishing. FY26 revenue +23% YoY, PAT +20% YoY, order book 2x revenue. The sell-off is retail misreading a single quarter (Q4 PAT -5% on full-year +20%). The thesis is intact. The technical is the problem.
-      </div>
-    </div>
-
-    <div class="kpi-grid">
-      <div class="kpi-cell green">
-        <div class="kpi-label">FY26 Revenue</div>
-        <div class="kpi-value">₹2,395 Cr</div>
-        <div class="kpi-sub">+23% YoY</div>
-      </div>
-      <div class="kpi-cell green">
-        <div class="kpi-label">FY26 PAT</div>
-        <div class="kpi-value">₹225 Cr</div>
-        <div class="kpi-sub">+20% YoY</div>
-      </div>
-      <div class="kpi-cell green">
-        <div class="kpi-label">Order Book</div>
-        <div class="kpi-value">₹5,005 Cr</div>
-        <div class="kpi-sub">2x annual revenue</div>
-      </div>
-      <div class="kpi-cell green">
-        <div class="kpi-label">Inquiry Pipeline</div>
-        <div class="kpi-value">₹23,000 Cr</div>
-        <div class="kpi-sub">4.6x order book</div>
-      </div>
-      <div class="kpi-cell amber">
-        <div class="kpi-label">Q4 FY26 PAT</div>
-        <div class="kpi-value">₹89 Cr</div>
-        <div class="kpi-sub">−5% YoY (one quarter)</div>
-      </div>
-      <div class="kpi-cell">
-        <div class="kpi-label">EBITDA Margin</div>
-        <div class="kpi-value">~15.1%</div>
-        <div class="kpi-sub">FY26</div>
-      </div>
-      <div class="kpi-cell red">
-        <div class="kpi-label">Below 52w High</div>
-        <div class="kpi-value">−52%</div>
-        <div class="kpi-sub">Stage 4 confirmed</div>
-      </div>
-      <div class="kpi-cell">
-        <div class="kpi-label">FII Holding</div>
-        <div class="kpi-value">8.33%</div>
-        <div class="kpi-sub">DII only 0.04%</div>
-      </div>
-    </div>
+<div class="mini-label" style="margin-bottom:6px;margin-top:8px">Board  (6 directors · 50% independent ✓)</div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #21262d30"><span style="font-size:11px;color:#ffa657">Jitendra U. Mamtora</span><span style="font-size:9px;color:#484f58;font-family:monospace">Chairperson & Executive Director</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #21262d30"><span style="font-size:11px;color:#ffa657">Karuna J. Mamtora</span><span style="font-size:9px;color:#484f58;font-family:monospace">Executive Director</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #21262d30"><span style="font-size:11px;color:#ffa657">Satyen J. Mamtora</span><span style="font-size:9px;color:#484f58;font-family:monospace">Executive Director-MD</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #21262d30"><span style="font-size:11px;color:#8b949e">Subir Kumar Das</span><span style="font-size:9px;color:#484f58;font-family:monospace">Independent Director</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #21262d30"><span style="font-size:11px;color:#8b949e">Rajendra S. Shah</span><span style="font-size:9px;color:#484f58;font-family:monospace">Independent Director</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #21262d30"><span style="font-size:11px;color:#8b949e">Tanvi V. Rangwala</span><span style="font-size:9px;color:#484f58;font-family:monospace">Independent Director</span></div></div>
+  <div>
+<div class="mini-label" style="margin-bottom:8px">
+  Smart Money
+  <span style="background:#484f5822;color:#484f58;padding:2px 10px;border-radius:10px;font-size:10px;margin-left:8px">No Data</span>
+  <span style="font-family:monospace;font-size:10px;color:#484f58;margin-left:6px">score 0</span>
+</div>
+<div style="display:flex;gap:20px;margin-bottom:10px">
+  <div><div style="font-family:monospace;font-size:11px;color:#ffa657">0↑ entering  0● stable  0↓ exiting</div></div>
+</div>
+<div style="margin-top:6px">
+  <div style="display:flex;gap:8px;margin-left:252px;margin-bottom:2px"></div>
+  <div style="color:#484f58;font-size:11px">No notable institutional data in XBRL</div>
+</div>
+<div style="display:flex;gap:20px;margin-top:14px;border-top:1px solid #21262d;padding-top:10px">
+  <div style="font-size:11px;font-family:monospace">
+    <span style="color:#ffa657">P</span> 64.36% <span style="color:#f85149;font-size:10px;font-family:monospace">-1.8pp</span>
   </div>
-
-  <!-- SECTION 01 -->
-  <div class="section">
-    <div class="section-head">
-      <span class="section-num">01</span>
-      <span class="section-title">PAI Score &amp; NAV Framework Scorecard</span>
-    </div>
-
-    <div class="pai-score-block retrofit">
-      <div class="score-header">
-        <span class="score-label">PAI Priority Score</span>
-        <span class="score-date">Original report: Apr 2026 · Retro-scored Apr 25 2026</span>
-      </div>
-      <div class="score-total">
-        <span class="score-num-big">67</span>
-        <span class="score-denom">/ 100</span>
-        <span class="tier-badge tier-sp">Standard — Hold, Do Not Add</span>
-      </div>
-      <div class="score-components">
-        <div class="component">
-          <label>C1 Regulatory</label>
-          <div class="bar"><div class="fill" style="width:100%; background:var(--green);"></div></div>
-          <span class="value">25/25</span>
-        </div>
-        <div class="component-rationale">L1 Strong. RDSS scheme + PGCIL direct procurement. DISCOMs purchase transformers directly as primary RDSS grid equipment. Government is the paying customer — full C1.</div>
-
-        <div class="component">
-          <label>C2 Network</label>
-          <div class="bar"><div class="fill" style="width:76%; background:#2d6a4f;"></div></div>
-          <span class="value">19/25</span>
-        </div>
-        <div class="component-rationale">C2A 9/10 — PGCIL anchor, HVDC milestone qualification. C2B 4/8 — FII 8.33%, DII only 0.04% (very low institutional, retail-dominated sell). C2C 6/7 — management track record. Governance: clean. QIP ₹205 Cr undeployed — monitor.</div>
-
-        <div class="component">
-          <label>C3 Valuation + Upside</label>
-          <div class="bar"><div class="fill" style="width:77%; background:#2d6a4f;"></div></div>
-          <span class="value">23/30</span>
-        </div>
-        <div class="component-rationale">Cheap at ~35x P/E with +23% revenue growth. Order book 2x revenue = earnings visibility. No formal 6M target set — C3_upside defaults to 8/15. C3_valuation 15/15 (cheap classification holds).</div>
-
-        <div class="component">
-          <label>C4 Technical</label>
-          <div class="bar"><div class="fill" style="width:0%; background:var(--red);"></div></div>
-          <span class="value">0/20</span>
-        </div>
-        <div class="component-rationale">Stage 4 — HARD ZERO. CMP 52% below 52w high of ~₹635. Framework rule: hold existing, do not add. Score jumps to 83+ when Stage 2 confirms.</div>
-      </div>
-    </div>
-
-    <div class="layer-strip">
-      <span class="layer-chip lc-strong">L1 Regulatory: Strong (RDSS+PGCIL)</span>
-      <span class="layer-chip lc-strong">L2 Commercial: Strong</span>
-      <span class="layer-chip lc-moderate">L2 Investor: Weak (FII 8.3%, DII 0.04%)</span>
-      <span class="layer-chip lc-cheap">L3 Valuation: Cheap (~35x, 23% growth)</span>
-      <span class="layer-chip lc-clean">Governance: Clean</span>
-      <span class="layer-chip lc-stage4">C4: Stage 4 — Hold Only</span>
-    </div>
-
-    <div class="two-col">
-      <div class="info-block">
-        <div class="ib-label">The HVDC Milestone</div>
-        <div class="ib-content">
-          <strong>First Indian company to win a PGCIL HVDC transformer repair order.</strong> HVDC (High Voltage Direct Current) transformer repair was previously the exclusive domain of ABB, Siemens, and Alstom globally. TARIL qualifying for this work is a gateway event — once you are on the PGCIL approved vendor list for HVDC, the follow-on orders compound. This is not captured in current earnings and represents a structural long-term upgrade to TARIL's competitive moat.
-        </div>
-      </div>
-      <div class="info-block">
-        <div class="ib-label">Why the Q4 Sell-Off Is Misread</div>
-        <div class="ib-content">
-          <strong>Q4 FY26 PAT ₹89 Cr (-5% YoY) triggered an ~8% sell-off.</strong> Retail reading a single quarter as evidence of deterioration. Full-year FY26 PAT is ₹225 Cr (+20% YoY) — the quarter is noise within an accelerating annual trend. FII selling is macro-driven (broad FII outflow from India), not TARIL-specific. DII at 0.04% means there is no domestic institutional base to absorb FII selling — this creates the retail-dominated downdraft. The business has not changed.
-        </div>
-      </div>
-    </div>
+  <div style="font-size:11px;font-family:monospace">
+    <span style="color:#58a6ff">F</span> 8.33% <span style="color:#3fb950;font-size:10px;font-family:monospace">+0.3pp</span>
   </div>
+  <div style="font-size:11px;font-family:monospace">
+    <span style="color:#3fb950">D</span> 1.77% <span style="color:#f85149;font-size:10px;font-family:monospace">-4.6pp</span>
+  </div>
+  <div style="font-family:monospace;font-size:11px;color:#8b949e">(12 quarters)</div>
+</div></div>
+</div></div><div class="card">
+<div class="section-title">Financials · Peer Comparison<span style="font-size:9px;color:#484f58;font-family:monospace;font-weight:400;letter-spacing:0"> · screener as of Jun 04, 2026</span></div>
 
-  <!-- SECTION 02 -->
-  <div class="section">
-    <div class="section-head">
-      <span class="section-num">02</span>
-      <span class="section-title">Valuation — Cheap at 35x with 23% Revenue Growth</span>
-    </div>
-    <p class="para">
-      TARIL trades at approximately <strong>35x P/E on FY26 earnings (₹225 Cr PAT on ~₹2,400 Cr revenue)</strong>. For a capital goods company with 23% revenue growth, 2x order book coverage, and a newly qualified HVDC product line, 35x is not expensive — it is cheap. Comparable transformer companies in India trade at 40–55x on lower growth rates.
-    </p>
-    <p class="para">
-      The complication is the absence of a formally published 6M price target in this report. The order book and inquiry pipeline (₹23,000 Cr) suggest FY28E PAT of ₹350–400 Cr is achievable if conversion rates hold. At 35x forward P/E on ₹375 Cr, that implies a fair value of ~₹750–800 Cr PAT × 35x = <em>market cap of ₹13,000–14,000 Cr</em>. TARIL's current market cap at ₹305 CMP implies meaningful upside — but this requires a formal deep dive to set a defensible target price.
-    </p>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px">
 
-    <table class="peer-table">
-      <thead>
-        <tr>
-          <th>Company</th>
-          <th>P/E (TTM)</th>
-          <th>Revenue Growth</th>
-          <th>Order Book / Rev</th>
-          <th>HVDC Qualified</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="highlight">
-          <td>TARIL</td>
-          <td>~35x</td>
-          <td>+23% YoY</td>
-          <td>2.0x</td>
-          <td>Yes (new)</td>
-        </tr>
-        <tr>
-          <td>Trafigura (TRAFCO)</td>
-          <td>~42x</td>
-          <td>+18% YoY</td>
-          <td>1.8x</td>
-          <td>Partial</td>
-        </tr>
-        <tr>
-          <td>CG Power</td>
-          <td>~55x</td>
-          <td>+15% YoY</td>
-          <td>1.5x</td>
-          <td>No</td>
-        </tr>
-      </tbody>
+  <div class="mini-card">
+    <div class="mini-label" style="margin-bottom:8px"><span class="tip" data-tip="How efficiently the company converts revenue to profit">Profitability</span> &amp; Revenue Growth</div>
+    <table class="fin-table">
+      <thead><tr><th>Year</th><th>Revenue</th><th>∆%</th><th><span class="tip" data-tip="Operating Profit Margin — revenue minus operating costs. Higher = better cost control">OPM%</span></th><th>PAT</th><th>PAT ∆%</th></tr></thead>
+      <tbody><tr><td>Mar 2022</td><td>₹1,158</td><td style="color:#8b949e">—</td><td style="color:#f85149">6.0%</td><td>₹14</td><td style="color:#8b949e">—</td></tr><tr><td>Mar 2023</td><td>₹1,396</td><td style="color:#3fb950">+21%</td><td style="color:#d29922">9.0%</td><td>₹42</td><td style="color:#3fb950">+200%</td></tr><tr><td>Mar 2024</td><td>₹1,291</td><td style="color:#f85149">-8%</td><td style="color:#d29922">10.0%</td><td>₹47</td><td style="color:#3fb950">+12%</td></tr><tr><td>Mar 2025</td><td>₹2,017</td><td style="color:#3fb950">+56%</td><td style="color:#3fb950">16.0%</td><td>₹216</td><td style="color:#3fb950">+360%</td></tr><tr style="background:#1c2128"><td>Mar 2026</td><td>₹2,509</td><td style="color:#3fb950">+24%</td><td style="color:#3fb950">15.0%</td><td>₹272</td><td style="color:#3fb950">+26%</td></tr></tbody>
     </table>
+    <div style="margin-top:10px"><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Revenue +24% in last 12m — growth decelerating (prior year +56%)</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">OPM expanded 5.0pp over 2 years → 15.0%</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">PAT +26% in last 12m — profit growth ahead of revenue</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Peers: trades at 77% discount to sector PE (36.1× vs 159.4×)</div><div class="takeaway" style="border-color:#f8514944;color:#f85149">ROCE 23.0% vs sector median 29.0% (-6.0pp)</div></div>
   </div>
 
-  <!-- SECTION 03 -->
-  <div class="section">
-    <div class="section-head">
-      <span class="section-num">03</span>
-      <span class="section-title">Technical Setup — Stage 4, Hold Existing</span>
-    </div>
-
-    <div class="tech-citation">
-      Technical analysis follows the SEPA methodology described in <strong>Trade Like a Stock Market Wizard</strong> by Mark Minervini (McGraw-Hill, 2013). Stage 4 identification and hold/exit rules are applied as defined in that work.
-    </div>
-
-    <div class="kpi-grid">
-      <div class="kpi-cell">
-        <div class="kpi-label">Owner Entry</div>
-        <div class="kpi-value">₹290</div>
-        <div class="kpi-sub">Apr 13 2026</div>
-      </div>
-      <div class="kpi-cell amber">
-        <div class="kpi-label">CMP (Apr 25)</div>
-        <div class="kpi-value">~₹305</div>
-        <div class="kpi-sub">+5% from entry</div>
-      </div>
-      <div class="kpi-cell red">
-        <div class="kpi-label">52w High</div>
-        <div class="kpi-value">~₹635</div>
-        <div class="kpi-sub">CMP −52% from high</div>
-      </div>
-      <div class="kpi-cell">
-        <div class="kpi-label">Stop Loss</div>
-        <div class="kpi-value">₹270</div>
-        <div class="kpi-sub">7% below entry</div>
-      </div>
-    </div>
-
-    <p class="para">
-      CMP is 52% below the 52-week high. This is the textbook definition of Stage 4 in the SEPA framework. The sell-off has been retail-driven with minimal institutional support (DII only 0.04%). The absence of a domestic institutional base means there is no natural buying floor when FII sells — hence the sharp 52% decline despite strong FY26 financials.
-    </p>
-    <p class="para">
-      <strong>The hold signal:</strong> The stock was purchased at ₹290 (near the 52-week low area), which provides a thin but positive P&amp;L buffer. The stop at ₹270 is 7% below entry. Hold until Q1 FY27 results — if new capacity contribution and margin expansion show in that quarter, the stock may begin forming a Stage 1 base. That base, once complete, leads to the Stage 2 confirmation and a re-score to 83+.
-    </p>
-
-    <div class="tt-summary">
-      <strong>Stage 4 at scoring.</strong> Hold existing 100 shares (entry ₹290, stop ₹270). Do not add. Re-score after Stage 2 confirmation — expected score 83+, which would justify full position entry.
-    </div>
-  </div>
-
-  <!-- SECTION 04 -->
-  <div class="section">
-    <div class="section-head">
-      <span class="section-num">04</span>
-      <span class="section-title">Risks &amp; What Would Invalidate the Thesis</span>
-    </div>
-
-    <h3 style="font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--red); margin: 14px 0 10px;">Hard Invalidators (Exit Triggers)</h3>
-    <ul class="risk-list">
-      <li>
-        <strong>Stop ₹270 hit</strong>
-        Close below ₹270 — exit the position. No exceptions. Stage 4 stocks can trend lower for extended periods; the stop protects against a value trap scenario.
-      </li>
-      <li>
-        <strong>QIP funds diverted from stated capex</strong>
-        ₹205 Cr of the ₹500 Cr QIP raise is still undeployed. If deployment is delayed beyond Q2 FY27 or directed to purposes other than the announced capacity expansion, governance flag is triggered.
-      </li>
-      <li>
-        <strong>RDSS scheme budget cut or delayed disbursement &gt;2 quarters</strong>
-        TARIL's order book depends on DISCOMs having RDSS funds. A central government cut or state-level disbursement freeze directly reduces new order flow.
-      </li>
-    </ul>
-
-    <h3 style="font-family:var(--mono); font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--amber); margin: 22px 0 10px;">Soft Watch Points (Re-evaluate, Don't Exit)</h3>
-    <ul class="risk-list watch">
-      <li>
-        <strong>DII holding stays at 0.04%</strong>
-        Without domestic institutional support, any FII selling creates outsized price impact. Watch quarterly shareholding patterns — DII rising above 2% would indicate institutional recognition and provide a price floor.
-      </li>
-      <li>
-        <strong>HVDC order follow-on timeline</strong>
-        The PGCIL HVDC milestone is a qualification, not a revenue event yet. Monitor whether follow-on HVDC orders are announced within 12 months. If not, the strategic value of the milestone remains theoretical.
-      </li>
-    </ul>
-  </div>
-
-  <!-- SECTION 05 -->
-  <div class="section">
-    <div class="section-head">
-      <span class="section-num">05</span>
-      <span class="section-title">Action Plan — Hold, Stop, Re-entry Trigger</span>
-    </div>
-
-    <div class="action-box">
-      <div class="action-label">Levels to Track</div>
-      <div class="action-grid">
-        <div class="action-cell entry">
-          <div class="ac-label">Owner Entry</div>
-          <div class="ac-value">₹290</div>
-        </div>
-        <div class="action-cell stop">
-          <div class="ac-label">Stop Loss</div>
-          <div class="ac-value">₹270</div>
-        </div>
-        <div class="action-cell target">
-          <div class="ac-label">Hold Target</div>
-          <div class="ac-value">Q1 FY27</div>
-        </div>
-        <div class="action-cell target">
-          <div class="ac-label">Add Trigger</div>
-          <div class="ac-value">Stage 2 ✓</div>
-        </div>
-      </div>
-      <div class="exits-grid">
-        <div class="exits-block">
-          <div class="exits-label">Hard Exits</div>
-          <ul>
-            <li>Stop ₹270 hit — exit without exception</li>
-            <li>QIP funds diverted from stated capex</li>
-            <li>RDSS disbursements frozen &gt;2 quarters</li>
-          </ul>
-        </div>
-        <div class="exits-block">
-          <div class="exits-label">Add Signals (Stage 2 required first)</div>
-          <ul>
-            <li>50-DMA crosses above 200-DMA (golden cross)</li>
-            <li>Trend Template 6/8 confirmed on volume</li>
-            <li>Q1 FY27 PAT confirms margin expansion</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SECTION 06 -->
-  <div class="section">
-    <div class="section-head">
-      <span class="section-num">06</span>
-      <span class="section-title">Live Verification — Step 6</span>
-    </div>
-    <p class="para">All price and financial data verified Apr 25 2026 before publication.</p>
-    <table class="peer-table">
-      <thead>
-        <tr><th>Field</th><th>Report Value</th><th>Verified Source</th><th>Verified On</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Owner Entry</td><td>₹290</td><td>Trade confirmation</td><td>Apr 13 2026</td></tr>
-        <tr><td>CMP</td><td>~₹305</td><td>NSE live</td><td>Apr 25 2026</td></tr>
-        <tr><td>52w High</td><td>~₹635</td><td>NSE historical</td><td>Apr 25 2026</td></tr>
-        <tr><td>FY26 PAT</td><td>₹225 Cr</td><td>BSE annual results</td><td>Apr 2026</td></tr>
-        <tr><td>FY26 Revenue</td><td>₹2,395 Cr</td><td>BSE annual results</td><td>Apr 2026</td></tr>
-        <tr><td>Order Book</td><td>₹5,005 Cr</td><td>Company investor presentation</td><td>Q4 FY26</td></tr>
-        <tr><td>FII Holding</td><td>8.33%</td><td>BSE shareholding</td><td>Q4 FY26</td></tr>
-        <tr><td>DII Holding</td><td>0.04%</td><td>BSE shareholding</td><td>Q4 FY26</td></tr>
-      </tbody>
+  <div class="mini-card">
+    <div class="mini-label" style="margin-bottom:8px">Cash Management · <span class="tip" data-tip="How efficiently the business collects from customers, manages inventory, and pays suppliers">Working Capital</span></div>
+    <table class="fin-table">
+      <thead><tr><th>Year</th><th><span class="tip" data-tip="Cash Flow from Operations — actual cash generated (vs accounting profit). Healthy if CFO/Revenue > 8%">CFO</span></th><th><span class="tip" data-tip="Cash Conversion Cycle = Debtor days + Inventory days − Payable days. Lower = faster cash recovery">CCC</span></th><th>Deb.d</th><th>Inv.d</th><th>Pay.d</th></tr></thead>
+      <tbody><tr><td>Mar 2022</td><td style="color:#3fb950">₹2</td><td style="color:#f85149">139d</td><td>164d</td><td>104d</td><td>129d</td></tr><tr><td>Mar 2023</td><td style="color:#3fb950">₹28</td><td style="color:#f85149">141d</td><td>166d</td><td>93d</td><td>118d</td></tr><tr><td>Mar 2024</td><td style="color:#3fb950">₹29</td><td style="color:#f85149">188d</td><td>174d</td><td>109d</td><td>95d</td></tr><tr><td>Mar 2025</td><td style="color:#3fb950">₹157</td><td style="color:#f85149">94d</td><td>85d</td><td>118d</td><td>109d</td></tr><tr style="background:#1c2128"><td>Mar 2026</td><td style="color:#f85149">₹-105</td><td style="color:#f85149">199d</td><td>129d</td><td>133d</td><td>62d</td></tr></tbody>
     </table>
+    <div style="margin-top:10px"><div class="takeaway" style="border-color:#f8514944;color:#f85149">CFO/Revenue -4.2% — weak — check working capital build-up</div><div class="takeaway" style="border-color:#f8514944;color:#f85149">CCC worsened from 139d → 199d (+60d over 4 yrs)</div><div class="takeaway" style="border-color:#f8514944;color:#f85149">Debtor days 129d (+44d YoY) — slow receivables, credit risk</div></div>
+  </div>
+
+  <div class="mini-card">
+    <div class="mini-label" style="margin-bottom:8px">Balance Sheet · <span class="tip" data-tip="How much debt the company carries relative to equity. Lower D/E and higher interest coverage = safer">Leverage</span></div>
+    <table class="fin-table">
+      <thead><tr><th>Year</th><th><span class="tip" data-tip="Debt-to-Equity — total debt divided by shareholder equity. Below 0.3× = conservative">D/E</span></th><th><span class="tip" data-tip="Interest Coverage = EBIT ÷ Interest expense. Above 4× means comfortable debt servicing">Int.Cov.</span></th><th>Net Worth</th><th>Total Debt</th></tr></thead>
+      <tbody><tr><td>Mar 2022</td><td style="color:#d29922">0.91×</td><td style="color:#8b949e">—</td><td>₹356</td><td>₹325</td></tr><tr><td>Mar 2023</td><td style="color:#d29922">0.84×</td><td style="color:#8b949e">—</td><td>₹394</td><td>₹330</td></tr><tr><td>Mar 2024</td><td style="color:#d29922">0.46×</td><td style="color:#8b949e">—</td><td>₹554</td><td>₹256</td></tr><tr><td>Mar 2025</td><td style="color:#3fb950">0.23×</td><td style="color:#8b949e">—</td><td>₹1,252</td><td>₹283</td></tr><tr style="background:#1c2128"><td>Mar 2026</td><td style="color:#d29922">0.30×</td><td style="color:#8b949e">—</td><td>₹1,515</td><td>₹457</td></tr></tbody>
+    </table>
+    <div style="margin-top:10px"><div class="takeaway" style="border-color:#d2992244;color:#d29922">D/E 0.30× — moderate leverage (+0.08× YoY)</div></div>
   </div>
 
 </div>
 
-<div class="sources">
-  <strong>Sources</strong>
-  Company filings · BSE FY26 annual results · Quarterly results (Q3/Q4 FY26) ·
-  screener.in · tickertape.in · Yahoo Finance (price &amp; moving averages) ·
-  PGCIL tender announcements · RDSS scheme documents (mnre.gov.in) ·
-  Technical methodology: SEPA framework as described in Trade Like a Stock Market Wizard by Mark Minervini, McGraw-Hill 2013.
+<div>
+  <div class="mini-label" style="margin-bottom:8px">Peer Comparison · ROCE ranked #6 of 8</div>
+  <table class="peer-table">
+    <thead><tr><th>Company</th><th>P/E</th><th>ROCE</th><th>Sales ∆ QoQ</th><th>Profit ∆ QoQ</th><th>Mkt Cap</th></tr></thead>
+    <tbody><tr style="background:#1c2128;"><td style="font-weight:700;color:#58a6ff">TARIL  ←</td><td><span style="font-family:monospace;font-size:11px">36×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:15px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">23%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:21px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#8b949e">—</td><td style="font-family:monospace;font-size:11px;color:#8b949e">—</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹9,545</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">Hitachi Energy</td><td><span style="font-family:monospace;font-size:11px">159×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:70px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">29%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:26px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">+46%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+80%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹163,784</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">A B B</td><td><span style="font-family:monospace;font-size:11px">100×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:44px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">30%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:27px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">+6%</td><td style="font-family:monospace;font-size:11px;color:#f85149">-25%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹153,019</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">CG Power &amp; Ind</td><td><span style="font-family:monospace;font-size:11px">120×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:52px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">27%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:24px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">+25%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+34%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹147,763</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">B H E L</td><td><span style="font-family:monospace;font-size:11px">88×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:38px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">9%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:7px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">+37%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+156%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹140,397</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">Siemens Ener.Ind</td><td><span style="font-family:monospace;font-size:11px">99×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:43px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">68%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:62px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">+27%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+52%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹133,068</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">Siemens</td><td><span style="font-family:monospace;font-size:11px">56×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:24px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">21%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:19px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">+15%</td><td style="font-family:monospace;font-size:11px;color:#f85149">-10%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹131,968</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">GE Vernova T&amp;D</td><td><span style="font-family:monospace;font-size:11px">102×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:44px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">76%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:70px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">+42%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+86%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹130,214</td></tr><tr style="border-top:1px solid #30363d"><td style="color:#484f58;font-size:10px;font-family:monospace">Sector median</td><td style="font-family:monospace;font-size:10px;color:#484f58">159×</td><td style="font-family:monospace;font-size:10px;color:#484f58">29%</td><td colspan="3"></td></tr></tbody>
+  </table>
+</div></div><div class="card">
+<div class="section-title">Technical Analysis<span style="font-size:9px;color:#484f58;font-family:monospace;font-weight:400;letter-spacing:0"> · price data as of Jun 04, 2026</span></div>
+
+<div style="display:grid;grid-template-columns:280px 1fr;gap:24px">
+  <div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+      <span style="font-family:monospace;font-size:30px;font-weight:800;color:#f85149">2</span>
+      <span style="color:#484f58;font-size:16px">/8</span>
+      <span style="font-family:monospace;font-size:14px;letter-spacing:3px;margin-left:6px"><span style="color:#f85149">●</span><span style="color:#f85149">●</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span></span>
+    </div>
+    <div style="font-size:12px;font-weight:600;color:#79c0ff;margin-bottom:12px">Stage 1_to_2_transition</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">Price > 150 & 200 DMA</span><span style='font-size:10px;color:#484f58;font-family:monospace'>₹317 vs D150 ₹299 / D200 ₹350</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">150 DMA > 200 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">200 DMA trending up (1m)</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">50 DMA > 150 & 200 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#3fb950;font-size:13px;width:14px;font-weight:700">✓</span><span style="font-size:11px;color:#c9d1d9">Price > 50 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#3fb950;font-size:13px;width:14px;font-weight:700">✓</span><span style="font-size:11px;color:#c9d1d9">Price ≥30% above 52w low</span><span style='font-size:10px;color:#484f58;font-family:monospace'>41.7% above 52w low</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">Within 25% of 52w high</span><span style='font-size:10px;color:#484f58;font-family:monospace'>-45.1% vs 52w high</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">RS beats Nifty (1yr)</span><span style='font-size:10px;color:#484f58;font-family:monospace'>Stock -39.7% vs Nifty -5.6%</span></div>
+    <div style="margin-top:10px;padding-top:8px;border-top:1px solid #21262d"><span style="font-family:monospace;font-size:10px;margin-right:14px"><span style="color:#484f58">50DMA</span> ₹305 <span style="color:#3fb950">+4.2%</span></span><span style="font-family:monospace;font-size:10px;margin-right:14px"><span style="color:#484f58">150DMA</span> ₹299 <span style="color:#3fb950">+6.2%</span></span><span style="font-family:monospace;font-size:10px;margin-right:14px"><span style="color:#484f58">200DMA</span> ₹350 <span style="color:#f85149">-9.2%</span></span></div>
+    <div style="margin:10px 0"><div style="font-size:9px;color:#484f58;font-family:monospace;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">52-week range</div><div style="position:relative;height:6px;background:#21262d;border-radius:3px;width:260px"><div style="position:absolute;left:26%;top:-3px;width:12px;height:12px;background:#f85149;border-radius:50%;transform:translateX(-50%)"></div></div><div style="display:flex;justify-content:space-between;width:260px;margin-top:4px"><span style="font-family:monospace;font-size:9px;color:#484f58">₹224</span><span style="font-family:monospace;font-size:10px;color:#f85149;font-weight:600">₹317 (26%)</span><span style="font-family:monospace;font-size:9px;color:#484f58">₹578</span></div></div>
+    <div style="font-family:monospace;font-size:10px;color:#8b949e;margin-top:6px">ATR% 3.8%  (14-day volatility)</div>
+  </div>
+  <div>
+    <div style="margin-bottom:6px;font-size:9px;color:#484f58;font-family:monospace;text-transform:uppercase;letter-spacing:.08em">
+      Price · 50DMA<span style="color:#f0883e">●</span>  150DMA<span style="color:#d29922">●</span>  200DMA<span style="color:#a371f7">●</span>  Volume
+    </div>
+    <div style="position:relative;height:300px;margin-top:4px">
+  <canvas id="price_TARIL_46163"></canvas>
+</div>
+<script>
+(function(){
+  var D={labels:["2025-05-29", "2025-05-30", "2025-06-02", "2025-06-03", "2025-06-04", "2025-06-05", "2025-06-06", "2025-06-09", "2025-06-10", "2025-06-11", "2025-06-12", "2025-06-13", "2025-06-16", "2025-06-17", "2025-06-18", "2025-06-19", "2025-06-20", "2025-06-23", "2025-06-24", "2025-06-25", "2025-06-26", "2025-06-27", "2025-06-30", "2025-07-01", "2025-07-02", "2025-07-03", "2025-07-04", "2025-07-07", "2025-07-08", "2025-07-09", "2025-07-10", "2025-07-11", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-21", "2025-07-22", "2025-07-23", "2025-07-24", "2025-07-25", "2025-07-28", "2025-07-29", "2025-07-30", "2025-07-31", "2025-08-01", "2025-08-04", "2025-08-05", "2025-08-06", "2025-08-07", "2025-08-08", "2025-08-11", "2025-08-12", "2025-08-13", "2025-08-14", "2025-08-18", "2025-08-19", "2025-08-20", "2025-08-21", "2025-08-22", "2025-08-25", "2025-08-26", "2025-08-28", "2025-08-29", "2025-09-01", "2025-09-02", "2025-09-03", "2025-09-04", "2025-09-05", "2025-09-08", "2025-09-09", "2025-09-10", "2025-09-11", "2025-09-12", "2025-09-15", "2025-09-16", "2025-09-17", "2025-09-18", "2025-09-19", "2025-09-22", "2025-09-23", "2025-09-24", "2025-09-25", "2025-09-26", "2025-09-29", "2025-09-30", "2025-10-01", "2025-10-03", "2025-10-06", "2025-10-07", "2025-10-08", "2025-10-09", "2025-10-10", "2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-23", "2025-10-24", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-01", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-01", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13", "2026-02-16", "2026-02-17", "2026-02-18", "2026-02-19", "2026-02-20", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27", "2026-03-02", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-27", "2026-03-30", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-04", "2026-05-05", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22", "2026-05-25", "2026-05-26", "2026-05-27", "2026-05-29", "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04"],price:[526.5, 521.6, 528.8, 525.15, 533.8, 530.5, 516.0, 517.8, 518.45, 513.45, 504.0, 496.6, 494.4, 491.65, 487.35, 474.0, 492.85, 492.3, 487.75, 487.7, 486.85, 490.8, 489.05, 471.3, 469.3, 470.3, 471.2, 488.2, 492.8, 517.05, 510.75, 500.65, 507.95, 512.25, 513.35, 515.3, 512.45, 512.2, 507.1, 504.15, 495.6, 491.25, 482.45, 509.25, 511.9, 511.2, 515.05, 558.9, 543.8, 507.8, 506.2, 491.2, 526.15, 507.3, 513.55, 505.7, 502.85, 502.0, 496.6, 499.5, 498.95, 506.6, 500.05, 491.5, 490.2, 500.0, 500.95, 506.6, 500.75, 503.65, 496.5, 496.4, 515.9, 504.45, 498.15, 504.8, 523.35, 529.15, 520.25, 533.8, 535.9, 536.25, 524.2, 508.0, 498.3, 489.1, 486.5, 490.5, 497.05, 494.05, 494.05, 488.5, 490.0, 491.35, 492.65, 481.55, 486.9, 484.6, 484.15, 482.05, 482.5, 482.1, 481.0, 472.2, 455.55, 459.45, 452.75, 445.4, 444.8, 418.85, 404.5, 391.9, 313.55, 282.2, 296.65, 289.3, 318.2, 333.35, 307.9, 303.3, 313.15, 304.75, 287.55, 298.85, 291.0, 283.35, 271.05, 264.5, 259.45, 247.85, 244.4, 236.9, 240.25, 245.3, 240.55, 239.15, 280.2, 306.3, 290.65, 282.75, 282.1, 293.95, 298.0, 301.55, 296.15, 288.6, 285.65, 283.5, 285.25, 307.9, 336.4, 324.55, 315.45, 321.2, 291.5, 274.3, 267.5, 271.3, 265.9, 260.3, 253.8, 242.2, 243.4, 241.95, 232.5, 231.15, 241.95, 233.1, 236.15, 237.17, 229.58, 245.82, 255.86, 252.3, 247.97, 285.65, 281.98, 286.78, 280.71, 271.11, 270.56, 274.03, 299.81, 304.22, 313.86, 304.41, 302.52, 296.08, 311.88, 310.14, 304.2, 289.8, 293.8, 293.65, 277.5, 289.0, 289.4, 292.4, 276.85, 266.05, 283.4, 288.85, 274.3, 285.15, 269.4, 279.85, 282.9, 272.15, 254.35, 274.3, 273.1, 274.45, 268.45, 281.5, 277.15, 281.45, 291.25, 308.85, 319.75, 322.3, 321.35, 333.3, 309.6, 319.9, 323.45, 342.65, 337.8, 323.5, 334.2, 332.6, 322.15, 312.85, 328.25, 324.6, 313.75, 298.1, 311.8, 304.8, 300.8, 292.45, 297.4, 304.75, 306.0, 310.6, 314.0, 321.0, 322.1, 320.55, 311.6, 312.35, 311.75, 317.4],d50:[503.12, 506.06, 508.84, 510.91, 512.68, 514.43, 515.03, 515.24, 515.33, 515.8, 515.63, 514.84, 514.53, 514.13, 513.58, 513.15, 513.59, 513.55, 512.93, 511.8, 510.2, 509.06, 508.24, 506.72, 504.63, 502.83, 501.57, 501.12, 500.88, 501.15, 501.46, 501.56, 501.58, 502.17, 502.6, 503.26, 503.94, 504.14, 504.06, 503.96, 503.91, 503.65, 502.71, 502.63, 502.87, 502.93, 502.99, 503.75, 504.3, 504.22, 503.81, 503.2, 503.15, 502.79, 502.39, 501.89, 501.63, 501.31, 500.88, 500.6, 500.5, 500.7, 500.81, 500.81, 500.86, 501.38, 501.55, 501.83, 502.09, 502.41, 502.6, 502.71, 503.25, 503.92, 504.49, 505.18, 506.23, 507.04, 507.59, 507.93, 508.43, 509.14, 509.47, 509.38, 509.08, 508.56, 508.04, 507.61, 507.4, 507.2, 507.17, 507.12, 507.27, 506.91, 506.52, 505.93, 505.37, 503.88, 502.69, 502.17, 501.7, 501.52, 500.62, 499.91, 498.75, 497.83, 496.83, 495.69, 494.66, 493.05, 491.16, 488.86, 485.13, 480.95, 477.07, 472.86, 469.21, 465.74, 461.88, 457.88, 454.21, 450.38, 445.81, 441.7, 437.56, 433.13, 428.08, 422.79, 417.57, 411.85, 406.02, 400.04, 394.36, 389.1, 383.95, 378.95, 374.82, 371.14, 367.01, 362.78, 358.55, 354.65, 350.81, 347.02, 343.09, 339.23, 335.2, 331.18, 327.2, 323.72, 320.8, 317.65, 314.34, 311.32, 308.04, 304.33, 300.63, 297.15, 293.57, 290.4, 287.38, 284.39, 282.99, 282.18, 280.9, 279.74, 278.21, 276.2, 274.77, 273.45, 271.78, 270.6, 269.96, 269.03, 268.17, 268.22, 268.44, 268.88, 269.31, 269.77, 270.3, 271.04, 272.23, 273.41, 274.87, 276.18, 276.63, 276.42, 276.85, 277.39, 277.84, 277.75, 277.67, 277.51, 277.14, 277.15, 277.22, 277.4, 277.23, 276.39, 275.33, 274.62, 273.8, 273.08, 272.63, 272.74, 273.05, 273.07, 272.84, 273.12, 273.5, 274.15, 274.65, 275.44, 276.33, 277.34, 278.33, 279.84, 281.51, 283.22, 285.05, 286.8, 287.88, 289.23, 290.74, 291.88, 292.99, 293.73, 294.8, 296.03, 297.06, 297.84, 298.41, 298.81, 298.81, 298.68, 298.87, 299.04, 298.82, 298.47, 298.33, 298.63, 298.88, 299.21, 299.94, 300.58, 301.24, 301.8, 302.5, 303.42, 303.99, 304.56],d150:[null, 486.96, 487.69, 488.32, 489.09, 489.85, 490.49, 491.04, 491.56, 491.89, 492.21, 492.32, 492.44, 492.48, 492.38, 492.13, 492.13, 492.29, 492.58, 492.96, 493.19, 493.35, 493.58, 493.65, 493.55, 493.42, 493.37, 493.37, 493.31, 493.46, 493.59, 493.53, 493.49, 493.46, 493.4, 493.38, 493.17, 492.84, 492.47, 491.96, 491.39, 490.78, 490.2, 489.93, 489.74, 489.61, 489.47, 489.56, 489.51, 489.1, 488.49, 487.64, 487.02, 486.38, 485.69, 484.93, 484.36, 483.97, 483.73, 483.64, 483.71, 483.68, 483.61, 483.32, 483.14, 483.1, 483.12, 483.34, 483.68, 484.19, 484.51, 484.8, 485.27, 485.82, 486.47, 487.25, 488.02, 488.7, 489.24, 489.78, 490.49, 491.32, 491.99, 492.69, 493.46, 494.27, 494.94, 495.51, 495.99, 496.32, 496.77, 497.29, 497.98, 498.84, 499.53, 500.08, 500.59, 501.01, 501.61, 502.22, 502.88, 503.6, 504.2, 504.54, 504.61, 504.72, 504.5, 504.08, 503.62, 503.15, 502.43, 501.46, 500.16, 498.63, 497.17, 495.8, 494.78, 493.71, 492.3, 490.69, 489.0, 487.38, 485.77, 484.11, 482.22, 480.38, 478.62, 476.98, 475.35, 473.64, 471.97, 470.25, 468.47, 466.89, 465.21, 463.59, 462.27, 460.96, 459.49, 457.98, 456.54, 455.14, 453.6, 452.19, 450.83, 449.36, 447.85, 446.27, 444.73, 443.37, 442.1, 440.79, 439.37, 438.01, 436.39, 434.68, 433.03, 431.38, 429.7, 428.01, 426.35, 424.65, 422.98, 421.31, 419.61, 417.99, 416.32, 414.59, 412.92, 411.24, 409.53, 407.9, 406.34, 404.88, 403.41, 402.18, 400.91, 399.57, 398.16, 396.52, 394.92, 393.41, 392.02, 390.63, 389.3, 387.9, 386.5, 385.05, 383.75, 382.46, 381.18, 379.84, 378.58, 377.15, 375.58, 374.1, 372.6, 370.82, 369.04, 367.43, 365.94, 364.6, 362.92, 361.44, 359.81, 358.3, 356.84, 355.3, 353.69, 352.19, 350.68, 349.13, 347.59, 346.19, 344.77, 343.31, 341.91, 340.6, 339.39, 338.18, 337.01, 335.93, 334.55, 333.32, 332.15, 331.07, 329.84, 328.47, 327.23, 325.88, 324.46, 322.97, 321.66, 320.44, 319.21, 317.94, 316.77, 315.53, 314.23, 312.88, 311.57, 310.35, 309.12, 307.91, 306.72, 305.65, 304.55, 303.46, 302.31, 301.18, 300.04, 298.94],d200:[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 491.02, 491.56, 491.94, 492.41, 492.86, 493.28, 493.61, 493.89, 494.07, 494.28, 494.42, 494.54, 494.56, 494.5, 494.45, 494.49, 494.68, 494.96, 495.32, 495.54, 495.69, 496.0, 496.21, 496.28, 496.36, 496.59, 496.79, 496.88, 497.07, 497.3, 497.43, 497.48, 497.44, 497.32, 497.17, 496.89, 496.53, 496.21, 495.77, 495.33, 494.86, 494.46, 494.17, 493.93, 493.69, 493.45, 493.14, 492.81, 492.37, 491.8, 491.11, 490.42, 489.77, 488.95, 488.16, 487.47, 486.9, 486.46, 485.99, 485.57, 484.97, 483.99, 482.73, 481.63, 480.54, 479.64, 478.94, 478.23, 477.61, 476.93, 476.19, 475.41, 474.79, 474.24, 473.72, 473.04, 472.22, 471.32, 470.3, 469.37, 468.5, 467.58, 466.79, 466.08, 465.44, 464.91, 464.42, 463.75, 462.94, 462.22, 461.63, 461.19, 460.89, 460.42, 459.87, 459.24, 458.55, 458.01, 457.6, 457.36, 457.11, 456.73, 456.23, 455.46, 454.62, 453.53, 452.35, 451.11, 449.96, 448.67, 447.2, 445.87, 444.52, 443.1, 441.78, 440.64, 439.33, 437.92, 436.38, 434.7, 433.19, 431.82, 430.34, 428.71, 427.34, 426.08, 424.96, 423.84, 422.67, 421.55, 420.44, 419.41, 418.52, 417.63, 416.74, 415.86, 414.83, 413.83, 412.84, 411.87, 410.79, 409.61, 408.52, 407.4, 406.31, 405.19, 404.05, 402.86, 401.63, 400.41, 399.25, 397.97, 396.77, 395.45, 394.2, 393.03, 391.81, 390.49, 389.29, 388.13, 387.02, 385.89, 384.84, 383.79, 382.83, 381.82, 380.9, 380.06, 379.24, 378.41, 377.62, 376.73, 375.97, 375.24, 374.6, 373.93, 373.11, 372.32, 371.4, 370.45, 369.51, 368.61, 367.68, 366.68, 365.59, 364.59, 363.55, 362.52, 361.46, 360.47, 359.54, 358.66, 357.66, 356.67, 355.72, 354.76, 353.57, 352.41, 351.43, 350.46, 349.59],vol:[1247274, 705254, 1014477, 756636, 732157, 414876, 700269, 553600, 437362, 576272, 619846, 850722, 589734, 447196, 329902, 642972, 1158227, 488489, 925627, 474248, 810365, 1045418, 830649, 2458909, 633824, 500869, 448531, 1604110, 814582, 3495497, 951901, 588693, 814726, 676033, 465203, 841790, 422078, 367675, 328392, 661304, 568516, 622211, 487646, 955881, 535206, 775757, 3864562, 4859066, 2230835, 2600557, 1802318, 631077, 3607194, 1341054, 577006, 299373, 736322, 460374, 452935, 444546, 244063, 699740, 482027, 488164, 376256, 508970, 332486, 446226, 398276, 358535, 503129, 443855, 1553592, 1532945, 581047, 568886, 2402627, 842215, 525250, 1119920, 1443362, 1849452, 549120, 683650, 622270, 708935, 624022, 387418, 394378, 363559, 288591, 327165, 370567, 245814, 470577, 400020, 272082, 409949, 439779, 276220, 133723, 319932, 200423, 508829, 1216274, 1065169, 773376, 652818, 591606, 2013351, 3035634, 2573238, 3229314, 24924553, 11795217, 4285292, 4682514, 12335045, 4751638, 2656907, 3138003, 1417509, 2716202, 5250123, 3250649, 2244207, 4591101, 3225709, 2656477, 3503830, 3311668, 2989627, 7235000, 3529226, 2081726, 3435975, 62399322, 52992431, 17837038, 8544739, 4663446, 4610896, 3279053, 2851165, 2201031, 1533828, 1355753, 949539, 971228, 23960953, 39183009, 8693459, 14045747, 8375688, 19710201, 24229215, 9691560, 4785544, 2556068, 3059468, 2618934, 4056712, 4724858, 2158842, 2520464, 3459685, 3167452, 2942567, 3245111, 1972451, 3588471, 7469532, 3534827, 1894714, 1931133, 32408079, 7936809, 14791774, 2450979, 2179375, 3316381, 1804263, 36452560, 14404835, 20331197, 5400075, 4174802, 2611806, 11331491, 4038571, 6926929, 4168329, 3732499, 2483278, 3224985, 2603881, 2235135, 3128659, 2707663, 3646232, 9744656, 4600630, 1901060, 4133994, 3166655, 3878420, 2972673, 2893621, 3632545, 5299656, 2649923, 2417799, 2236559, 5209511, 4408567, 3937249, 7635457, 6805426, 7355634, 5131744, 5480711, 7758577, 26742230, 10122668, 7090647, 21523911, 5087085, 4776636, 6434456, 2408691, 3172113, 5405623, 5402369, 1983527, 3446133, 2704317, 2970239, 1896273, 1399623, 2065179, 2048693, 3174167, 3083742, 2012525, 1923356, 2933289, 1820417, 2042988, 1653287, 1104964, 976076, 2075064],w52h:578.5,w52l:224.05};
+  var ctx=document.getElementById('price_TARIL_46163');
+  var ann=[];
+  if(D.w52h)ann.push({type:'line',yMin:D.w52h,yMax:D.w52h,borderColor:'#d2992288',borderWidth:1,borderDash:[4,3],label:{content:'52W High ₹'+D.w52h,display:true,color:'#d29922',font:{size:9},position:'end'}});
+  if(D.w52l)ann.push({type:'line',yMin:D.w52l,yMax:D.w52l,borderColor:'#8b949e66',borderWidth:1,borderDash:[4,3],label:{content:'52W Low ₹'+D.w52l,display:true,color:'#8b949e',font:{size:9},position:'start'}});
+  var maxVol=Math.max.apply(null,D.vol)||1;
+  new Chart(ctx,{
+    data:{
+      labels:D.labels,
+      datasets:[
+        {type:'line',label:'Price (CMP)',data:D.price,borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,0.06)',borderWidth:2,pointRadius:0,fill:true,yAxisID:'y',order:1,tension:0.1},
+        {type:'line',label:'50 DMA',data:D.d50,borderColor:'#f0883e',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:2,spanGaps:true,tension:0.1},
+        {type:'line',label:'150 DMA',data:D.d150,borderColor:'#d29922',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:3,spanGaps:true,tension:0.1},
+        {type:'line',label:'200 DMA',data:D.d200,borderColor:'#a371f7',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:4,spanGaps:true,tension:0.1},
+        {type:'bar',label:'Volume',data:D.vol,backgroundColor:D.price.map((v,i)=>i>0&&v>=D.price[i-1]?'rgba(63,185,80,0.3)':'rgba(248,81,73,0.3)'),yAxisID:'y2',order:5}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{labels:{color:'#8b949e',font:{size:10},boxWidth:14,padding:12}},
+        tooltip:{
+          backgroundColor:'#161b22',borderColor:'#30363d',borderWidth:1,
+          titleColor:'#c9d1d9',bodyColor:'#8b949e',padding:10,
+          callbacks:{
+            label:function(c){
+              if(c.datasetIndex===4)return'Vol: '+(c.parsed.y/1e5).toFixed(1)+'L shares';
+              if(c.parsed.y==null)return null;
+              return c.dataset.label+': ₹'+c.parsed.y.toLocaleString('en-IN');
+            }
+          }
+        },
+        annotation:{annotations:ann}
+      },
+      scales:{
+        x:{grid:{color:'#21262d40',drawTicks:false},ticks:{color:'#484f58',maxTicksLimit:8,font:{size:9},callback:function(v,i){var d=this.getLabelForValue(v);return d?d.substring(0,7):'';} }},
+        y:{position:'left',grid:{color:'#21262d30'},ticks:{color:'#484f58',font:{size:9},callback:function(v){return'₹'+v.toLocaleString('en-IN');}}},
+        y2:{position:'right',grid:{display:false},max:maxVol*5,ticks:{color:'#484f58',font:{size:8},callback:function(v){return(v/1e5).toFixed(0)+'L';}}}
+      }
+    }
+  });
+})();
+</script>
+  </div>
 </div>
 
-<div class="report-foot">
-  <a href="/reports/summaries/taril_summary.html" class="summary-link">← View 1-Page Summary</a>
-  <div class="foot-meta">Published Apr 2026 · Last verified Apr 25 2026 · Author: PAI</div>
-</div>
-
+<div style="margin-top:18px;padding:14px;background:#0d1117;border-radius:8px;border-left:3px solid #79c0ff">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <span style="font-family:monospace;font-size:13px;font-weight:700;color:#79c0ff">BASING</span>
+    <span style="font-size:10px;color:#484f58;font-family:monospace">3-month · 6-month outlook</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+    <div><div style="font-family:monospace;font-size:11px;margin-bottom:4px"><span style="color:#484f58">Buy above:</span> <span style="color:#79c0ff">₹578</span> (pivot)</div><div style="font-family:monospace;font-size:11px;margin-bottom:4px"><span style="color:#484f58">Stop loss:</span> <span style="color:#f85149">₹318</span> (+0.2% from CMP)</div></div>
+    <div><div style="font-size:11px;color:#8b949e;margin-bottom:8px">No entry yet — forming base. Buy above pivot ₹578</div></div>
+    <div><div style="font-family:monospace;font-size:11px;margin-bottom:4px"><span style="color:#484f58">6m target:</span> <span style="color:#a371f7">₹706</span> (+122%)</div><div style="font-size:10px;color:#8b949e;margin-bottom:4px">Pivot breakout targets ₹706 (+122%)</div></div>
+  </div>
+</div></div><div class="card"><div class="section-title">Portfolio Analytics</div><div style="color:#484f58;font-size:12px">Not in ranked candidate list. Run rank_candidates.py to score.</div></div><div class="card"><div class="section-title">Investor Network</div><div style="color:#484f58;font-size:11px;padding:10px 0">No institutional holder data — run analyze_smart_money_trends.py</div></div>
+<div style="font-family:monospace;font-size:9px;color:#30363d;margin-top:28px;text-align:center">
+  NAV Framework · 2026-06-07 · TARIL · Private research only
 </div>
 </body>
 </html>
