@@ -55,6 +55,122 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
+
+<!-- ── HOW TO READ ─────────────────────────────────────────────────────────── -->
+<div style="background:#161b22;border:1px solid #30363d;border-radius:10px;margin-bottom:16px;overflow:hidden">
+  <button id="guide-btn" onclick="(function(){var g=document.getElementById('guide-body'),a=document.getElementById('guide-arr');if(g.style.display==='none'){g.style.display='block';a.textContent='▴';}else{g.style.display='none';a.textContent='▾';}})()" style="width:100%;background:none;border:none;color:#8b949e;font-family:monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:14px 20px;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
+    <span>📖 &nbsp;How to read this report</span>
+    <span id="guide-arr" style="color:#484f58;font-size:12px">▾</span>
+  </button>
+  <div id="guide-body" style="display:none;padding:6px 20px 20px;border-top:1px solid #21262d">
+
+    <p style="font-size:12px;color:#8b949e;line-height:1.7;margin:12px 0 16px">
+      This report scores a company across three pillars — <strong style="color:#c9d1d9">Fundamentals</strong>,
+      <strong style="color:#c9d1d9">Network</strong>, and <strong style="color:#c9d1d9">Technicals</strong> — and combines them
+      into a single composite score. Here is what each section tells you and what to look for:
+    </p>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+
+      <!-- Section 1 -->
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="min-width:28px;height:28px;background:#21262d;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:11px;color:#58a6ff;font-weight:700;flex-shrink:0">1</div>
+        <div>
+          <div style="font-family:monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#58a6ff;margin-bottom:3px">Header — Composite Score &amp; Badges</div>
+          <div style="font-size:11px;color:#8b949e;line-height:1.6">
+            The large number top-right is the <strong style="color:#c9d1d9">composite score (0–10)</strong>.
+            Above 7 = strong candidate; 5–7 = watchlist; below 5 = avoid.
+            Badges tell you at a glance: <span style="color:#3fb950">NN Clean</span> = no governance red flags;
+            <span style="color:#58a6ff">Stable Conviction</span> = smart money is holding and not selling;
+            <span style="color:#3fb950">Stage 2</span> = stock is in an advancing uptrend (Minervini framework);
+            <span style="color:#3fb950">TT 8/8</span> = perfect Trend Template score (all 8 conditions met).
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="min-width:28px;height:28px;background:#21262d;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:11px;color:#58a6ff;font-weight:700;flex-shrink:0">2</div>
+        <div>
+          <div style="font-family:monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#58a6ff;margin-bottom:3px">Business Model — What Does the Company Actually Do?</div>
+          <div style="font-size:11px;color:#8b949e;line-height:1.6">
+            Look at the <strong style="color:#c9d1d9">competitive moat</strong> (technology, brand, regulatory licence = durable advantage),
+            <strong style="color:#c9d1d9">key customers</strong> (government or blue-chip customers = sticky revenue),
+            and <strong style="color:#c9d1d9">Government Proximity</strong> (High = structural tailwind from policy or procurement).
+            Also check debtor days — above 90 days is a yellow flag on cash collection.
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3 -->
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="min-width:28px;height:28px;background:#21262d;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:11px;color:#58a6ff;font-weight:700;flex-shrink:0">3</div>
+        <div>
+          <div style="font-family:monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#58a6ff;margin-bottom:3px">KYC — Who Owns It, Who Runs It, Who Is Buying It?</div>
+          <div style="font-size:11px;color:#8b949e;line-height:1.6">
+            <strong style="color:#c9d1d9">Contagion score</strong>: director network links to other companies with fraud or regulatory issues. Lower is cleaner — 0–2 is fine, 7+ is a concern.
+            <strong style="color:#c9d1d9">Promoter activity</strong>: are insiders buying or selling? Selling = caution.
+            <strong style="color:#c9d1d9">Smart Money grid</strong>: shows which quality funds (Nalanda, First Sentier, Norges) hold the stock — and whether they are entering, stable, or exiting over the last 5 quarters. Green blocks = held that quarter. More consecutive green = stronger conviction.
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4 -->
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="min-width:28px;height:28px;background:#21262d;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:11px;color:#58a6ff;font-weight:700;flex-shrink:0">4</div>
+        <div>
+          <div style="font-family:monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#58a6ff;margin-bottom:3px">Financials — Is the Business Actually Good?</div>
+          <div style="font-size:11px;color:#8b949e;line-height:1.6">
+            Three sub-tables: <strong style="color:#c9d1d9">Profitability</strong> (revenue growth + OPM margin + PAT — look for expanding margins and consistent profit growth),
+            <strong style="color:#c9d1d9">Cash Management</strong> (CFO = actual cash generated; CCC = how fast cash is recovered — lower is better),
+            <strong style="color:#c9d1d9">Balance Sheet</strong> (D/E below 0.5× = safe; near zero = debt-free).
+            Colored takeaway lines below each table: <span style="color:#3fb950">green</span> = positive signal, <span style="color:#d29922">amber</span> = watch, <span style="color:#f85149">red</span> = concern.
+            The peer comparison table shows how this company stacks up on PE and ROCE vs sector competitors.
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5 -->
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="min-width:28px;height:28px;background:#21262d;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:11px;color:#58a6ff;font-weight:700;flex-shrink:0">5</div>
+        <div>
+          <div style="font-family:monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#58a6ff;margin-bottom:3px">Technical Analysis — Is the Price Set Up to Move?</div>
+          <div style="font-size:11px;color:#8b949e;line-height:1.6">
+            <strong style="color:#c9d1d9">Stage 2</strong> means the stock is in a confirmed uptrend (price above all moving averages, 200 DMA rising).
+            The <strong style="color:#c9d1d9">Trend Template score (TT)</strong> counts how many of 8 Minervini conditions are met — 8/8 is ideal.
+            The <strong style="color:#c9d1d9">price chart</strong> shows 1 year of price with 50/150/200 day moving averages and volume.
+            Look for the stock to be sitting above all three moving averages and within 25% of its 52-week high — that is the sweet spot for entry.
+          </div>
+        </div>
+      </div>
+
+      <!-- How targets are set -->
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="min-width:28px;height:28px;background:#21262d;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:11px;color:#ffa657;font-weight:700;flex-shrink:0">₹</div>
+        <div>
+          <div style="font-family:monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#ffa657;margin-bottom:3px">Price Targets — How Are They Derived?</div>
+          <div style="font-size:11px;color:#8b949e;line-height:1.6">
+            Targets are mechanical, not analyst forecasts. If the stock is below its 52-week high by more than 3%:
+            <strong style="color:#c9d1d9">3M target = CMP + 40% of the gap to 52w high</strong>,
+            <strong style="color:#c9d1d9">6M target = the 52-week high itself</strong>,
+            <strong style="color:#c9d1d9">12M target = 52w high × 1.15</strong>.
+            If the stock is already near its high, targets are set at ×1.05 / ×1.12 / ×1.25.
+            The strategy is to exit at 15–20% gain and rotate — not to hold forever.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:18px;padding:10px 14px;background:#0d1117;border-radius:6px;border-left:2px solid #484f58">
+      <span style="font-family:monospace;font-size:9px;color:#484f58;letter-spacing:.08em;text-transform:uppercase">Disclaimer · </span>
+      <span style="font-size:11px;color:#484f58">This is personal research. Not SEBI-registered advice. All data from public NSE filings, annual reports, and XBRL disclosures. Do your own due diligence before investing.</span>
+    </div>
+
+  </div>
+</div>
+<!-- END HOW TO READ -->
+
 <div class="card" style="margin-bottom:16px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap"><div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px"><span style="font-family:monospace;font-size:24px;font-weight:800;color:#e6edf3">TRITURBINE</span><span style="font-size:15px;color:#8b949e">TRITURBINE</span><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:6px;font-size:10px">Energy</span></div><div style="margin-bottom:12px"><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">NN clean</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#58a6ff22;color:#58a6ff;margin-right:4px">stable conviction</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">Stage 2</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">TT 8/8</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8514922;color:#f85149;margin-right:4px">Contagion 4</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#d2992222;color:#d29922;margin-right:4px">Portfolio 5.1% · Pilot</span></div><p style='font-size:12px;color:#8b949e;max-width:720px;line-height:1.7;margin:0'>Triveni Turbine Limited is a leading global manufacturer and service provider of industrial steam turbines (5 kW to 100 MW) and related turbomachinery solutions, with a focus on heat & power, renewable energy, and energy storage. The company leverages its advanced technology, manufacturing capabilities, and extensive aftermarket services to cater to diverse industries across…</p></div><div style="text-align:right"><div style="font-family:monospace;font-size:38px;font-weight:800;color:#e6edf3;line-height:1">8.0</div><div style="font-size:9px;color:#484f58;letter-spacing:.1em;text-transform:uppercase;margin-top:2px">Composite #5</div><div style="margin-top:10px"><span style="font-family:monospace;font-size:22px;font-weight:700;color:#58a6ff">₹689</span>&ensp;<span class="tip" data-tip="Current Market Price — the last traded price of this stock on NSE">CMP</span><div style='font-family:monospace;font-size:9px;color:#484f58;margin-top:2px'>as of Jun 04, 2026</div></div></div></div></div><div class="card">
 <div class="section-title">Business Model
   <span style="font-size:10px;color:#8b949e">· Industrial Turbines, Renewable Energy, Energy Storage Solutions</span>
