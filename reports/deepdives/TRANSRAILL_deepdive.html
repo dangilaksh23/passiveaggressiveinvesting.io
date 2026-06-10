@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRANSRAILL — Deep Dive · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f5f2eb;--paper2:#ede9e0;--card:#fff;--rule:#d4cfc4;--ink:#0d0d0d;--muted:#7a7060;--green:#1a5c38;--green-pale:#d4edd8;--amber:#b35a00;--amber-pale:#fdefd8;--red:#8b1a1a;--red-pale:#fde0e0;--blue:#1a3a6b;--blue-pale:#dde5f5;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6}
+.disclaimer-banner{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:10.5px;padding:8px 24px;text-align:center;letter-spacing:.02em}
+.disclaimer-banner a{color:var(--paper);text-decoration:underline}
+.masthead{border-bottom:1px solid var(--rule);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--paper)}
+.logo-block{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink)}
+.logo-pi{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-1.5px}
+.logo-name{font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:.06em;text-transform:uppercase}
+.report-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.report-type{color:var(--green);font-weight:500}
+.page{max-width:900px;margin:0 auto}
+.report-head{padding:36px 36px 28px;background:var(--card);border-bottom:1px solid var(--rule)}
+.head-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.pill{font-family:var(--mono);font-size:9px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.pill.stage-2{background:var(--green-pale);color:var(--green)}
+.pill.stage-3{background:var(--amber-pale);color:var(--amber)}
+.pill.stage-4{background:var(--red-pale);color:var(--red)}
+.pill.transition{background:#fff3e0;color:#e65100}
+.pill.neutral{background:var(--paper2);color:var(--muted)}
+.pill.warn{background:#fff8e6;color:var(--amber);border:1px solid #f0c060}
+.head-title{font-family:var(--serif);font-size:38px;font-weight:500;line-height:1.15;letter-spacing:-.5px;margin-bottom:6px}
+.head-subtitle{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:18px}
+.head-tagline{font-size:14px;color:#444;line-height:1.7;max-width:700px}
+.content{padding:0 36px 40px}
+.section{padding:32px 0;border-bottom:1px solid var(--paper2)}
+.section:last-child{border-bottom:none}
+.section-head{display:flex;align-items:baseline;gap:16px;margin-bottom:22px}
+.section-num{font-family:var(--mono);font-size:11px;font-weight:500;color:#fff;background:var(--ink);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.05em}
+.section-title{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-.3px;line-height:1.2}
+.thesis-box{background:var(--paper);border-left:3px solid var(--green);border-radius:4px;padding:22px 26px}
+.th-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.th-call{font-family:var(--serif);font-size:18px;font-weight:300;line-height:1.5;color:var(--ink)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+.kpi-cell{background:var(--paper);border-radius:8px;padding:14px 16px}
+.kpi-label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.kpi-value{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.1}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
+.kpi-cell.green{background:var(--green-pale)}.kpi-cell.green .kpi-value{color:var(--green)}
+.kpi-cell.amber{background:var(--amber-pale)}.kpi-cell.amber .kpi-value{color:var(--amber)}
+.kpi-cell.red{background:var(--red-pale)}.kpi-cell.red .kpi-value{color:var(--red)}
+.score-block{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:28px;margin-bottom:24px}
+.score-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.score-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.score-date{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.score-total{display:flex;align-items:baseline;gap:12px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--paper2)}
+.score-num-big{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-2px}
+.score-denom{font-family:var(--mono);font-size:16px;color:var(--muted)}
+.tier-badge{margin-left:auto;font-family:var(--mono);font-size:10px;padding:5px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.tier-watch{background:#fff8e6;color:var(--amber);border:1px solid #f0c060}
+.score-components{display:flex;flex-direction:column;gap:14px}
+.component{display:grid;grid-template-columns:160px 1fr 56px;align-items:center;gap:12px}
+.component label{font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.component .bar{height:8px;background:var(--paper2);border-radius:4px;overflow:hidden}
+.component .fill{height:100%;border-radius:4px}
+.component .value{font-family:var(--mono);font-size:12px;color:var(--ink);text-align:right;font-weight:500}
+.component-rationale{font-family:var(--sans);font-size:12px;color:var(--muted);padding-left:172px;margin-top:-8px;line-height:1.6}
+.layer-strip{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 18px}
+.layer-chip{font-family:var(--mono);font-size:9px;font-weight:500;padding:4px 10px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
+.lc-strong{background:var(--green-pale);color:var(--green)}
+.lc-moderate{background:var(--amber-pale);color:var(--amber)}
+.lc-weak{background:var(--red-pale);color:var(--red)}
+.lc-clean{background:var(--green-pale);color:var(--green)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}
+.info-block{background:var(--paper);border-radius:8px;padding:18px 20px}
+.ib-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.ib-content{font-size:13px;line-height:1.7;color:#333}
+.ib-content strong{color:var(--ink);font-weight:600}
+.warn-strip{background:#fff8e6;border-left:3px solid var(--amber);border-radius:4px;padding:14px 18px;display:flex;gap:12px;margin:18px 0}
+.ws-icon{font-size:20px;line-height:1;flex-shrink:0;color:var(--amber)}
+.ws-text{font-size:13px;line-height:1.6;color:#4a3a00}
+.ws-text strong{color:var(--amber)}
+.para{font-size:14px;line-height:1.75;color:#333;margin-bottom:14px}
+.para strong{color:var(--ink);font-weight:600}
+.para em{color:var(--green);font-style:italic}
+.peer-table{width:100%;border-collapse:collapse;margin:18px 0;background:var(--paper);border-radius:8px;overflow:hidden}
+.peer-table th{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);font-weight:500}
+.peer-table td{padding:10px 12px;font-size:12px;border-bottom:1px solid var(--paper2)}
+.peer-table tbody tr:last-child td{border-bottom:none}
+.peer-table .highlight{background:var(--green-pale)}
+.peer-table .highlight td:first-child{font-weight:600}
+.tech-citation{background:var(--paper);border-radius:6px;padding:14px 18px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:18px;font-style:italic}
+.tech-citation strong{color:var(--ink);font-style:normal;font-weight:600}
+.risk-list{list-style:none;padding:0;margin:14px 0}
+.risk-list li{background:var(--paper);border-left:3px solid var(--red);border-radius:4px;padding:12px 18px;margin-bottom:8px;font-size:13px;line-height:1.6}
+.risk-list li strong{color:var(--red);font-weight:600;display:block;margin-bottom:3px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.risk-list.watch li{border-left-color:var(--amber)}
+.risk-list.watch li strong{color:var(--amber)}
+.stand-box{background:var(--paper);border-left:3px solid var(--blue);border-radius:4px;padding:22px 26px;margin:18px 0}
+.sb-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+.sb-text{font-size:14px;line-height:1.75;color:#333}
+.sources{padding:24px 36px;background:var(--paper);border-top:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.8;letter-spacing:.02em}
+.sources strong{color:var(--ink);display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;font-weight:500}
+.report-foot{padding:24px 36px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--paper)}
+.foot-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.04em}
+.back-link{font-family:var(--mono);font-size:11px;color:var(--blue);text-decoration:none;padding:8px 14px;background:var(--blue-pale);border-radius:6px;letter-spacing:.06em;text-transform:uppercase}
+h3.sub-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
+@media(max-width:700px){.report-head{padding:24px 20px}.head-title{font-size:28px}.content{padding:0 20px 30px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}.component{grid-template-columns:110px 1fr 50px}.component-rationale{padding-left:0}.report-foot{flex-direction:column;gap:12px;align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="disclaimer-banner">⚠️ Personal investment journal entry. Not SEBI-registered advice. Not a buy/sell recommendation. <a href="/#disclaimer">Full disclaimer</a></div>
+<header class="masthead">
+  <a href="/" class="logo-block"><span class="logo-pi">π</span><span class="logo-name">Passive Aggressive Investing</span></a>
+  <div class="report-meta"><span class="report-type">Deep Dive</span> · 10 Jun 2026</div>
+</header>
+<div class="page">
+<div class="report-head">
+  <div class="head-pills">
+    <span class="pill stage-4">Stage 4 — Watch</span>
+    <span class="pill neutral">Avoid</span>
+    <span class="pill neutral">Infrastructure | Energy</span>
+  </div>
+  <h1 class="head-title">TRANSRAIL LIGHTING LIMITED</h1>
+  <div class="head-subtitle">NSE: TRANSRAILL · Infrastructure | Energy · CMP ₹498.15</div>
+  <p class="head-tagline">Transrail Lighting Limited is a leading engineering, procurement, and construction (EPC) company with over four decades of experience in the power transmission and distribution sector. The company provides turnkey solutions and manufactures infrastructure components for power transmission, substatio</p>
+</div>
+<div class="content">
+<!-- SECTION 00 -->
+<div class="section">
+  <div class="section-head"><span class="section-num">00</span><span class="section-title">Why I'm Watching Transrail Lighting</span></div>
+  <div class="thesis-box"><div class="th-label">My Thesis</div><div class="th-call">Transrail Lighting, despite currently being in a price downtrend, operates in critical infrastructure sectors with a substantial order book and significant government revenue. My interest lies in its potential for a structural turnaround, driven by strong underlying business fundamentals if its current technical weakness resolves. I am monitoring for signs of price stabilization and improving sentiment.</div></div>
+  <div class="kpi-grid">
+    <div class="kpi-cell green">Order Book: ₹15915.0 Cr</div>
+    <div class="kpi-cell green">Promoter Holding: 71.12%</div>
+    <div class="kpi-cell amber">FY25 Revenue: Not Reported</div>
+    <div class="kpi-cell red">1yr Market Return: -19.93%</div>
+  </div>
+</div>
+
+<!-- SECTION 01: FRAMEWORK SCORECARD -->
+<div class="section">
+  <div class="section-head"><span class="section-num">01</span><span class="section-title">How My Framework Scores This</span></div>
+  <div class="score-block">
+    <div class="score-header"><span class="score-label">NAV Stage 4 Watch Score</span><span class="score-date">10 Jun 2026</span></div>
+    <div class="score-total"><span class="score-num-big">7.5</span><span class="score-denom">/ 12</span><span class="tier-badge tier-watch">Stage 4 — Watching</span></div>
+    <div class="score-components">
+      <div class="score-component"><span>Sector Tailwind</span><span class="score-val">3.0/3</span><span>Strong demand for infrastructure and power transmission.</span></div>
+      <div class="score-component"><span>Investor Network</span><span class="score-val">0.0/3</span><span>No elite or strong institutional investor presence.</span></div>
+      <div class="score-component"><span>Financial Momentum</span><span class="score-val">2.5/3</span><span>Healthy ROE/ROCE and robust order book, but recent revenue data is missing.</span></div>
+      <div class="score-component"><span>Promoter Conviction</span><span class="score-val">2.0/3</span><span>High holding and no pledge, but governance concerns are noted.</span></div>
+    </div>
+  </div>
+  <div class="layer-strip"><span class="layer-chip">Strong Order Book</span><span class="layer-chip">High Promoter Holding</span><span class="layer-chip">Infrastructure Tailwinds</span><span class="layer-chip">Governance Watch</span><span class="layer-chip">No Elite Investors</span><span class="layer-chip">Stage 4 Downtrend</span></div>
+  <div class="two-col">
+    <div class="info-block"><div class="ib-label">Commercial Network</div><div class="ib-content">Transrail Lighting relies heavily on government contracts, with Government Companies accounting for nearly 75% of its standalone revenue. This concentration, while providing stability from large projects, also means exposure to government policy and budget cycles. I note the absence of specified key suppliers, which could imply a diversified supply chain or simply not reported data.</div></div>
+    <div class="info-block"><div class="ib-label">Investor Quality</div><div class="ib-content">The promoter holds a significant 71.12% stake with no pledged shares, indicating strong conviction. However, the absence of elite or strong institutional investors is a notable gap in its investor profile. The "governance watch" status and the SEBI penalty are significant concerns that weigh on my perception of investor quality and confidence.</div></div>
+  </div>
+</div>
+
+<!-- SECTION 02: FINANCIAL PICTURE -->
+<div class="section">
+  <div class="section-head"><span class="section-num">02</span><span class="section-title">The Financial Picture</span></div>
+  <p class="para">My analysis of Transrail Lighting's financial picture reveals a mix of strengths and areas for observation. The current fiscal year revenue is reported as 'None Cr', which I interpret as the latest figures not being available for this snapshot, rather than a literal zero revenue. However, the prior year's revenue stood at a healthy ₹4076.0 Cr, indicating a significant operational scale. This lack of current revenue data is a key concern for me.</p>
+  <p class="para">On a positive note, the company boasts a robust order book of ₹15915.0 Cr, providing strong revenue visibility for the coming years. This is a significant multiple of its prior year's revenue, suggesting continued growth potential. The company's profitability metrics are also impressive, with a Return on Equity (ROE) of 20.0% and Return on Capital Employed (ROCE) of 29.2%, indicating efficient capital deployment. The PE ratio of 16.1 suggests a reasonable valuation given these profitability figures. I also observe a Capex of ₹140.69 Cr with 95.0% utilization, reflecting ongoing investment in capacity expansion to support future growth, which aligns with management's bullish tone and guidance for strong growth.</p>
+  <p class="para">The Debt-to-Equity (D/E) ratio is listed as 'None', which I'm taking to mean negligible or very low debt, which is generally a positive. However, the "governance watch" flag and the significant SEBI penalty of ` 50,01,172/- for violation of Section 42 of the Companies Act 2013 are serious concerns that demand close attention. These issues could overshadow the otherwise strong operational and financial metrics.</p>
+  <div class="warn-strip">
+    <span class="ws-icon">!</span>
+    <span class="ws-text">Governance under watch due to SEBI penalty on company and promoters.</span>
+  </div>
+</div>
+
+<!-- SECTION 03: WHY IT IS STAGE 4 — AND WHAT WOULD CHANGE THAT -->
+<div class="section">
+  <div class="section-head"><span class="section-num">03</span><span class="section-title">Why It's Stage 4 — And What Would Change That</span></div>
+  <div class="tech-citation">Technical analysis follows the stage analysis approach described in <strong>Trade Like a Stock Market Wizard</strong> by Mark Minervini (McGraw-Hill, 2013), adapted for Indian market data.</div>
+  <p class="para">Transrail Lighting is currently in a clear Stage 4 downtrend, as evidenced by its -19.93% return over the past year. This sustained price decline indicates that the stock is under significant selling pressure, with price trading below key moving averages and typically exhibiting lower lows and lower highs. While the broader market sentiment or sector rotation could be contributing factors, I believe the "governance watch" status and the recent SEBI penalty are likely weighing heavily on investor confidence, exacerbating the downtrend. The missing current fiscal year revenue data also creates uncertainty, which investors tend to shy away from, especially in a weak technical setup.</p>
+  <h3 class="sub-label">What Would Move This to My Active List</h3>
+  <ul class="risk-list watch">
+    <li>I would need to see clear evidence of the stock transitioning out of Stage 4, with price establishing a base, crossing key moving averages, and showing signs of accumulation.</li>
+    <li>Resolution of the governance concerns and a clear explanation or positive outcome regarding the SEBI penalty would be crucial for restoring investor trust.</li>
+    <li>Consistent and positive revenue reporting for the current fiscal year, demonstrating strong execution on the robust order book.</li>
+    <li>Confirmation of continued strong growth momentum from management, backed by tangible results and improved market perception.</li>
+  </ul>
+  <h3 class="sub-label">What Would Make Me Stop Watching</h3>
+  <ul class="risk-list">
+    <li>Any further deterioration in governance standards or new, more severe regulatory actions against the company or its promoters.</li>
+    <li>A significant and sustained decline in the order book, or a clear inability to convert existing orders into revenue effectively, suggesting operational issues.</li>
+    <li>Any signs of promoter selling, pledging of shares, or other activities that indicate a lack of conviction from the core management.</li>
+    <li>A structural shift in demand for its infrastructure services, making its business model less viable in the long term.</li>
+  </ul>
+</div>
+
+<!-- SECTION 04: WHERE I STAND TODAY -->
+<div class="section">
+  <div class="section-head"><span class="section-num">04</span><span class="section-title">Where I Stand Today</span></div>
+  <div class="stand-box">
+    <div class="sb-label">Personal Stance</div>
+    <div class="sb-text">As of today, I do not hold any position in Transrail Lighting. It is firmly on my "watching" list, reflecting its current Stage 4 technical status and the notable governance concerns. While the underlying business fundamentals, such as a strong order book and healthy profitability metrics, are compelling, the price action and regulatory issues prevent me from considering it for an active position at this time.</div>
+    <div class="sb-text">My approach is to observe from the sidelines. I am looking for a clear shift in its technical posture, specifically a sustained move out of Stage 4, which would signal a potential turnaround in market sentiment. This, coupled with positive developments on the governance front and consistent financial reporting, would be the catalysts required for me to consider moving this company to my active interest list. Until then, it remains a valuable case study for understanding how strong fundamentals can be overshadowed by other factors.</div>
+  </div>
+  <p class="para" style="font-size:12px;color:var(--muted);font-style:italic;margin-top:14px;">DISCLOSURE: I do not currently hold this position. This note is for my personal research record only — not investment advice.</p>
+</div>
+</div>
+</div>
+<div class="sources"><strong>Sources</strong>Annual Report FY25 · NSE XBRL filings · screener.in · BSE shareholding pattern · NAV Framework signals extraction (Gemini 2.5 Flash) · Price data: Zerodha Kite · Technical methodology: SEPA framework (Minervini, 2013)</div>
+<div class="report-foot">
+  <a href="/" class="back-link">← All Reports</a>
+  <div class="foot-meta">Published 10 Jun 2026 · Author: PAI</div>
+</div>
+</body>
+</html>

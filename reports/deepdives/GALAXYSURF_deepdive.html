@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GALAXYSURF — Deep Dive · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f5f2eb;--paper2:#ede9e0;--card:#fff;--rule:#d4cfc4;--ink:#0d0d0d;--muted:#7a7060;--green:#1a5c38;--green-pale:#d4edd8;--amber:#b35a00;--amber-pale:#fdefd8;--red:#8b1a1a;--red-pale:#fde0e0;--blue:#1a3a6b;--blue-pale:#dde5f5;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6}
+.disclaimer-banner{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:10.5px;padding:8px 24px;text-align:center;letter-spacing:.02em}
+.disclaimer-banner a{color:var(--paper);text-decoration:underline}
+.masthead{border-bottom:1px solid var(--rule);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--paper)}
+.logo-block{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink)}
+.logo-pi{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-1.5px}
+.logo-name{font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:.06em;text-transform:uppercase}
+.report-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.report-type{color:var(--green);font-weight:500}
+.page{max-width:900px;margin:0 auto}
+.report-head{padding:36px 36px 28px;background:var(--card);border-bottom:1px solid var(--rule)}
+.head-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.pill{font-family:var(--mono);font-size:9px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.pill.stage-2{background:var(--green-pale);color:var(--green)}
+.pill.stage-3{background:var(--amber-pale);color:var(--amber)}
+.pill.stage-4{background:var(--red-pale);color:var(--red)}
+.pill.transition{background:#fff3e0;color:#e65100}
+.pill.neutral{background:var(--paper2);color:var(--muted)}
+.pill.warn{background:#fff8e6;color:var(--amber);border:1px solid #f0c060}
+.head-title{font-family:var(--serif);font-size:38px;font-weight:500;line-height:1.15;letter-spacing:-.5px;margin-bottom:6px}
+.head-subtitle{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:18px}
+.head-tagline{font-size:14px;color:#444;line-height:1.7;max-width:700px}
+.content{padding:0 36px 40px}
+.section{padding:32px 0;border-bottom:1px solid var(--paper2)}
+.section:last-child{border-bottom:none}
+.section-head{display:flex;align-items:baseline;gap:16px;margin-bottom:22px}
+.section-num{font-family:var(--mono);font-size:11px;font-weight:500;color:#fff;background:var(--ink);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.05em}
+.section-title{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-.3px;line-height:1.2}
+.thesis-box{background:var(--paper);border-left:3px solid var(--green);border-radius:4px;padding:22px 26px}
+.th-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.th-call{font-family:var(--serif);font-size:18px;font-weight:300;line-height:1.5;color:var(--ink)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+.kpi-cell{background:var(--paper);border-radius:8px;padding:14px 16px}
+.kpi-label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.kpi-value{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.1}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
+.kpi-cell.green{background:var(--green-pale)}.kpi-cell.green .kpi-value{color:var(--green)}
+.kpi-cell.amber{background:var(--amber-pale)}.kpi-cell.amber .kpi-value{color:var(--amber)}
+.kpi-cell.red{background:var(--red-pale)}.kpi-cell.red .kpi-value{color:var(--red)}
+.score-block{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:28px;margin-bottom:24px}
+.score-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.score-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.score-date{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.score-total{display:flex;align-items:baseline;gap:12px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--paper2)}
+.score-num-big{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-2px}
+.score-denom{font-family:var(--mono);font-size:16px;color:var(--muted)}
+.tier-badge{margin-left:auto;font-family:var(--mono);font-size:10px;padding:5px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.tier-watch{background:#fff8e6;color:var(--amber);border:1px solid #f0c060}
+.score-components{display:flex;flex-direction:column;gap:14px}
+.component{display:grid;grid-template-columns:160px 1fr 56px;align-items:center;gap:12px}
+.component label{font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.component .bar{height:8px;background:var(--paper2);border-radius:4px;overflow:hidden}
+.component .fill{height:100%;border-radius:4px}
+.component .value{font-family:var(--mono);font-size:12px;color:var(--ink);text-align:right;font-weight:500}
+.component-rationale{font-family:var(--sans);font-size:12px;color:var(--muted);padding-left:172px;margin-top:-8px;line-height:1.6}
+.layer-strip{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 18px}
+.layer-chip{font-family:var(--mono);font-size:9px;font-weight:500;padding:4px 10px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
+.lc-strong{background:var(--green-pale);color:var(--green)}
+.lc-moderate{background:var(--amber-pale);color:var(--amber)}
+.lc-weak{background:var(--red-pale);color:var(--red)}
+.lc-clean{background:var(--green-pale);color:var(--green)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}
+.info-block{background:var(--paper);border-radius:8px;padding:18px 20px}
+.ib-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.ib-content{font-size:13px;line-height:1.7;color:#333}
+.ib-content strong{color:var(--ink);font-weight:600}
+.warn-strip{background:#fff8e6;border-left:3px solid var(--amber);border-radius:4px;padding:14px 18px;display:flex;gap:12px;margin:18px 0}
+.ws-icon{font-size:20px;line-height:1;flex-shrink:0;color:var(--amber)}
+.ws-text{font-size:13px;line-height:1.6;color:#4a3a00}
+.ws-text strong{color:var(--amber)}
+.para{font-size:14px;line-height:1.75;color:#333;margin-bottom:14px}
+.para strong{color:var(--ink);font-weight:600}
+.para em{color:var(--green);font-style:italic}
+.peer-table{width:100%;border-collapse:collapse;margin:18px 0;background:var(--paper);border-radius:8px;overflow:hidden}
+.peer-table th{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);font-weight:500}
+.peer-table td{padding:10px 12px;font-size:12px;border-bottom:1px solid var(--paper2)}
+.peer-table tbody tr:last-child td{border-bottom:none}
+.peer-table .highlight{background:var(--green-pale)}
+.peer-table .highlight td:first-child{font-weight:600}
+.tech-citation{background:var(--paper);border-radius:6px;padding:14px 18px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:18px;font-style:italic}
+.tech-citation strong{color:var(--ink);font-style:normal;font-weight:600}
+.risk-list{list-style:none;padding:0;margin:14px 0}
+.risk-list li{background:var(--paper);border-left:3px solid var(--red);border-radius:4px;padding:12px 18px;margin-bottom:8px;font-size:13px;line-height:1.6}
+.risk-list li strong{color:var(--red);font-weight:600;display:block;margin-bottom:3px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.risk-list.watch li{border-left-color:var(--amber)}
+.risk-list.watch li strong{color:var(--amber)}
+.stand-box{background:var(--paper);border-left:3px solid var(--blue);border-radius:4px;padding:22px 26px;margin:18px 0}
+.sb-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+.sb-text{font-size:14px;line-height:1.75;color:#333}
+.sources{padding:24px 36px;background:var(--paper);border-top:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.8;letter-spacing:.02em}
+.sources strong{color:var(--ink);display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;font-weight:500}
+.report-foot{padding:24px 36px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--paper)}
+.foot-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.04em}
+.back-link{font-family:var(--mono);font-size:11px;color:var(--blue);text-decoration:none;padding:8px 14px;background:var(--blue-pale);border-radius:6px;letter-spacing:.06em;text-transform:uppercase}
+h3.sub-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
+@media(max-width:700px){.report-head{padding:24px 20px}.head-title{font-size:28px}.content{padding:0 20px 30px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}.component{grid-template-columns:110px 1fr 50px}.component-rationale{padding-left:0}.report-foot{flex-direction:column;gap:12px;align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="disclaimer-banner">⚠️ Personal investment journal entry. Not SEBI-registered advice. Not a buy/sell recommendation. <a href="/#disclaimer">Full disclaimer</a></div>
+<header class="masthead">
+  <a href="/" class="logo-block"><span class="logo-pi">π</span><span class="logo-name">Passive Aggressive Investing</span></a>
+  <div class="report-meta"><span class="report-type">Deep Dive</span> · 10 Jun 2026</div>
+</header>
+<div class="page">
+<div class="report-head">
+  <div class="head-pills">
+    <span class="pill stage-4">Stage 4 — Watch</span>
+    <span class="pill neutral">Avoid</span>
+    <span class="pill neutral">Chemicals</span>
+  </div>
+  <h1 class="head-title">Galaxy Surfactants Limited</h1>
+  <div class="head-subtitle">NSE: GALAXYSURF · Chemicals · CMP ₹1755.3</div>
+  <p class="head-tagline">Galaxy Surfactants Limited is a leading manufacturer of performance surfactants and specialty care ingredients for the Home & Personal Care and Beauty & Wellness industries. The company generates revenue primarily through product sales from its manufacturing facilities in India, USA, and Egypt, serv</p>
+</div>
+<div class="content">
+<!-- SECTION 00 -->
+<div class="section">
+  <div class="section-head"><span class="section-num">00</span><span class="section-title">Why I'm Watching Galaxy Surfactants (GALAXYSURF)</span></div>
+  <div class="thesis-box"><div class="th-label">My Thesis</div><div class="th-call">Despite its current technical Stage 4 decline, Galaxy Surfactants presents a fundamentally strong business with global reach and a focus on innovation in the essential Home & Personal Care sector. I'm watching for a potential turnaround driven by its strategic geographic expansion and specialty portfolio acceleration, backed by solid institutional interest and promoter conviction.</div></div>
+  <div class="kpi-grid">
+    <div class="kpi-cell kpi-revenue"><span class="kpi-label">Revenue (prior FY24)</span><span class="kpi-val">₹3794.38 Cr</span><span class="kpi-indicator green">Global presence</span></div>
+    <div class="kpi-cell kpi-growth"><span class="kpi-label">1yr Return</span><span class="kpi-val">-23.26%</span><span class="kpi-indicator red">Underperforming</span></div>
+    <div class="kpi-cell kpi-orderbook"><span class="kpi-label">Order Book</span><span class="kpi-val">None</span><span class="kpi-indicator amber">No visibility</span></div>
+    <div class="kpi-cell kpi-promoter"><span class="kpi-label">Promoter Holding</span><span class="kpi-val">70.91%</span><span class="kpi-indicator green">High conviction</span></div>
+  </div>
+</div>
+
+<!-- SECTION 01: FRAMEWORK SCORECARD -->
+<div class="section">
+  <div class="section-head"><span class="section-num">01</span><span class="section-title">How My Framework Scores This</span></div>
+  <div class="score-block">
+    <div class="score-header"><span class="score-label">NAV Stage 4 Watch Score</span><span class="score-date">10 Jun 2026</span></div>
+    <div class="score-total"><span class="score-num-big">8.5</span><span class="score-denom">/ 12</span><span class="tier-badge tier-watch">Stage 4 — Watching</span></div>
+    <div class="score-components">
+      <div class="score-comp"><span class="sc-label">Sector Tailwind</span><span class="sc-score">2.25/3</span><span class="sc-rationale">Resilient H&PC sector, but some recent headwinds affecting growth.</span></div>
+      <div class="score-comp"><span class="sc-label">Investor Network</span><span class="sc-score">3.0/3</span><span class="sc-rationale">Strong institutional backing from elite and strong funds.</span></div>
+      <div class="score-comp"><span class="sc-label">Financial Momentum</span><span class="sc-score">1.25/3</span><span class="sc-rationale">Current revenue/order book visibility is low, 1yr return is negative.</span></div>
+      <div class="score-comp"><span class="sc-label">Promoter Conviction</span><span class="sc-score">2.0/3</span><span class="sc-rationale">High promoter holding (70.91%) with stable activity and no pledge.</span></div>
+    </div>
+  </div>
+  <div class="layer-strip"><span class="layer-chip">Global B2B Play</span><span class="layer-chip">Clean Governance</span><span class="layer-chip">Strong Promoter</span><span class="layer-chip">Elite Investors</span><span class="layer-chip">Innovation Driven</span><span class="layer-chip">Bullish Management</span></div>
+  <div class="two-col">
+    <div class="info-block"><div class="ib-label">Commercial Network</div><div class="ib-content">Galaxy Surfactants serves a diverse B2B customer base, including Multinational Corporations and SMEs, from its manufacturing hubs in India, USA, and Egypt. This global footprint and customer diversification are key strengths. While supplier information isn't provided, their established operational excellence suggests robust supply chain management.</div></div>
+    <div class="info-block"><div class="ib-label">Investor Quality</div><div class="ib-content">The company enjoys significant institutional backing, with elite investors like Abu Dhabi Investment Authority and strong funds such as Axis Mutual Fund and Nippon Life India on its roster. This, combined with a high and stable promoter holding of 70.91% and no pledged shares, indicates strong confidence from both internal and external sophisticated investors.</div></div>
+  </div>
+</div>
+
+<!-- SECTION 02: FINANCIAL PICTURE -->
+<div class="section">
+  <div class="section-head"><span class="section-num">02</span><span class="section-title">The Financial Picture</span></div>
+  <p class="para">My current data shows a significant gap regarding the most recent revenue and order book figures, which is a concern for immediate financial momentum. However, I note that the prior fiscal year (FY24) revenue stood at ₹3794.38 Cr. The company's 1-year return of -23.26% clearly reflects the current Stage 4 technical downtrend, indicating recent financial headwinds or market sentiment. Despite this, the management tone is bullish, with guidance for FY26 anticipating growth driven by defending leadership in India and AMET, winning in the Americas, and accelerating its Specialty portfolio in Europe through recent subsidiary setups. This suggests a forward-looking strategy despite current challenges.</p>
+  <p class="para">Galaxy Surfactants has undertaken a Capex of ₹183.96 Cr, signaling continued investment in its operational capabilities, although specific utilisation rates are not available. From a valuation perspective, a PE ratio of 22.4, ROE of 10.8%, and ROCE of 13.5% suggest reasonable efficiency, though not exceptional. The absence of a Debt-to-Equity ratio might indicate a very low debt profile, which would be a positive for financial stability. The clean governance record and Big4 auditor (Deloitte Haskins & Sells LLP) provide comfort regarding financial reporting quality.</p>
+</div>
+
+<!-- SECTION 03: WHY IT IS STAGE 4 — AND WHAT WOULD CHANGE THAT -->
+<div class="section">
+  <div class="section-head"><span class="section-num">03</span><span class="section-title">Why It's Stage 4 — And What Would Change That</span></div>
+  <div class="tech-citation">Technical analysis follows the stage analysis approach described in <strong>Trade Like a Stock Market Wizard</strong> by Mark Minervini (McGraw-Hill, 2013), adapted for Indian market data.</div>
+  <p class="para">Galaxy Surfactants is firmly in Stage 4, characterized by a declining price and a 1-year return of -23.26%. My technical analysis framework, with a TT Score of 0/8 and an 'avoid' signal, confirms this downtrend. This could be attributed to a combination of factors: broader sector rotation out of chemicals, specific headwinds in the Home & Personal Care raw material space affecting demand or margins, or a period of slower growth as reflected by the missing current revenue data. The market appears to be discounting future prospects or reacting to recent performance, pushing the stock into a clear downtrend. I need to be honest with myself that the technical picture is poor, regardless of the underlying business quality.</p>
+  <h3 class="sub-label">What Would Move This to My Active List</h3>
+  <ul class="risk-list watch">
+    <li>Consistent and transparent reporting of positive revenue growth and a healthy order book, indicating a reversal in financial momentum.</li>
+    <li>A clear shift in the technical stage from Stage 4 to Stage 2, supported by strong institutional accumulation and price action.</li>
+    <li>Tangible evidence of success from their strategic initiatives in the Americas and Europe, leading to improved margins and profitability.</li>
+    <li>A significant improvement in ROE and ROCE, demonstrating enhanced capital efficiency and profitability.</li>
+  </ul>
+  <h3 class="sub-label">What Would Make Me Stop Watching</h3>
+  <ul class="risk-list">
+    <li>Any signs of governance issues or adverse findings from SEBI investigations.</li>
+    <li>A structural decline in demand for surfactants and specialty care ingredients, indicating a permanent shift in the industry.</li>
+    <li>Significant promoter selling or pledging of shares, eroding my conviction in their long-term commitment.</li>
+    <li>Continued stagnation or deterioration in financial performance without a clear path to recovery, despite management's bullish guidance.</li>
+  </ul>
+</div>
+
+<!-- SECTION 04: WHERE I STAND TODAY -->
+<div class="section">
+  <div class="section-head"><span class="section-num">04</span><span class="section-title">Where I Stand Today</span></div>
+  <div class="stand-box">
+    <div class="sb-label">Personal Stance</div>
+    <div class="sb-text">Today, I am not holding any position in Galaxy Surfactants. My current stance is strictly observational. While the underlying business quality, global footprint, clean governance, and strong investor backing are compelling, the technical Stage 4 status and the lack of recent revenue/order book data mean this is firmly on my "watching" list, not my "active" list. I am not looking to engage with this stock while it is in a clear downtrend.</div>
+    <div class="sb-text">My interest is purely in identifying fundamentally strong companies that are temporarily out of favor, anticipating a future technical turnaround. For Galaxy Surfactants, I need to see concrete evidence of financial improvements and a significant shift in price action before considering any engagement. This note serves as a reminder to track its progress and look for those specific catalysts that would indicate a true reversal of fortunes, both fundamentally and technically.</div>
+  </div>
+  <p class="para" style="font-size:12px;color:var(--muted);font-style:italic;margin-top:14px;">DISCLOSURE: I do not currently hold this position. This note is for my personal research record
+</div>
+</div>
+<div class="sources"><strong>Sources</strong>Annual Report FY25 · NSE XBRL filings · screener.in · BSE shareholding pattern · NAV Framework signals extraction (Gemini 2.5 Flash) · Price data: Zerodha Kite · Technical methodology: SEPA framework (Minervini, 2013)</div>
+<div class="report-foot">
+  <a href="/" class="back-link">← All Reports</a>
+  <div class="foot-meta">Published 10 Jun 2026 · Author: PAI</div>
+</div>
+</body>
+</html>

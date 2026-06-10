@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RECLTD — Deep Dive · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f5f2eb;--paper2:#ede9e0;--card:#fff;--rule:#d4cfc4;--ink:#0d0d0d;--muted:#7a7060;--green:#1a5c38;--green-pale:#d4edd8;--amber:#b35a00;--amber-pale:#fdefd8;--red:#8b1a1a;--red-pale:#fde0e0;--blue:#1a3a6b;--blue-pale:#dde5f5;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6}
+.disclaimer-banner{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:10.5px;padding:8px 24px;text-align:center;letter-spacing:.02em}
+.disclaimer-banner a{color:var(--paper);text-decoration:underline}
+.masthead{border-bottom:1px solid var(--rule);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--paper)}
+.logo-block{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink)}
+.logo-pi{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-1.5px}
+.logo-name{font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:.06em;text-transform:uppercase}
+.report-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.report-type{color:var(--green);font-weight:500}
+.page{max-width:900px;margin:0 auto}
+.report-head{padding:36px 36px 28px;background:var(--card);border-bottom:1px solid var(--rule)}
+.head-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.pill{font-family:var(--mono);font-size:9px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.pill.stage-2{background:var(--green-pale);color:var(--green)}
+.pill.stage-3{background:var(--amber-pale);color:var(--amber)}
+.pill.stage-4{background:var(--red-pale);color:var(--red)}
+.pill.transition{background:#fff3e0;color:#e65100}
+.pill.neutral{background:var(--paper2);color:var(--muted)}
+.pill.warn{background:#fff8e6;color:var(--amber);border:1px solid #f0c060}
+.head-title{font-family:var(--serif);font-size:38px;font-weight:500;line-height:1.15;letter-spacing:-.5px;margin-bottom:6px}
+.head-subtitle{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:18px}
+.head-tagline{font-size:14px;color:#444;line-height:1.7;max-width:700px}
+.content{padding:0 36px 40px}
+.section{padding:32px 0;border-bottom:1px solid var(--paper2)}
+.section:last-child{border-bottom:none}
+.section-head{display:flex;align-items:baseline;gap:16px;margin-bottom:22px}
+.section-num{font-family:var(--mono);font-size:11px;font-weight:500;color:#fff;background:var(--ink);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.05em}
+.section-title{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-.3px;line-height:1.2}
+.thesis-box{background:var(--paper);border-left:3px solid var(--green);border-radius:4px;padding:22px 26px}
+.th-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.th-call{font-family:var(--serif);font-size:18px;font-weight:300;line-height:1.5;color:var(--ink)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+.kpi-cell{background:var(--paper);border-radius:8px;padding:14px 16px}
+.kpi-label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.kpi-value{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.1}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
+.kpi-cell.green{background:var(--green-pale)}.kpi-cell.green .kpi-value{color:var(--green)}
+.kpi-cell.amber{background:var(--amber-pale)}.kpi-cell.amber .kpi-value{color:var(--amber)}
+.kpi-cell.red{background:var(--red-pale)}.kpi-cell.red .kpi-value{color:var(--red)}
+.score-block{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:28px;margin-bottom:24px}
+.score-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.score-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.score-date{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.score-total{display:flex;align-items:baseline;gap:12px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--paper2)}
+.score-num-big{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-2px}
+.score-denom{font-family:var(--mono);font-size:16px;color:var(--muted)}
+.tier-badge{margin-left:auto;font-family:var(--mono);font-size:10px;padding:5px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.tier-watch{background:#fff8e6;color:var(--amber);border:1px solid #f0c060}
+.score-components{display:flex;flex-direction:column;gap:14px}
+.component{display:grid;grid-template-columns:160px 1fr 56px;align-items:center;gap:12px}
+.component label{font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.component .bar{height:8px;background:var(--paper2);border-radius:4px;overflow:hidden}
+.component .fill{height:100%;border-radius:4px}
+.component .value{font-family:var(--mono);font-size:12px;color:var(--ink);text-align:right;font-weight:500}
+.component-rationale{font-family:var(--sans);font-size:12px;color:var(--muted);padding-left:172px;margin-top:-8px;line-height:1.6}
+.layer-strip{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 18px}
+.layer-chip{font-family:var(--mono);font-size:9px;font-weight:500;padding:4px 10px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
+.lc-strong{background:var(--green-pale);color:var(--green)}
+.lc-moderate{background:var(--amber-pale);color:var(--amber)}
+.lc-weak{background:var(--red-pale);color:var(--red)}
+.lc-clean{background:var(--green-pale);color:var(--green)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}
+.info-block{background:var(--paper);border-radius:8px;padding:18px 20px}
+.ib-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.ib-content{font-size:13px;line-height:1.7;color:#333}
+.ib-content strong{color:var(--ink);font-weight:600}
+.warn-strip{background:#fff8e6;border-left:3px solid var(--amber);border-radius:4px;padding:14px 18px;display:flex;gap:12px;margin:18px 0}
+.ws-icon{font-size:20px;line-height:1;flex-shrink:0;color:var(--amber)}
+.ws-text{font-size:13px;line-height:1.6;color:#4a3a00}
+.ws-text strong{color:var(--amber)}
+.para{font-size:14px;line-height:1.75;color:#333;margin-bottom:14px}
+.para strong{color:var(--ink);font-weight:600}
+.para em{color:var(--green);font-style:italic}
+.peer-table{width:100%;border-collapse:collapse;margin:18px 0;background:var(--paper);border-radius:8px;overflow:hidden}
+.peer-table th{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);font-weight:500}
+.peer-table td{padding:10px 12px;font-size:12px;border-bottom:1px solid var(--paper2)}
+.peer-table tbody tr:last-child td{border-bottom:none}
+.peer-table .highlight{background:var(--green-pale)}
+.peer-table .highlight td:first-child{font-weight:600}
+.tech-citation{background:var(--paper);border-radius:6px;padding:14px 18px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:18px;font-style:italic}
+.tech-citation strong{color:var(--ink);font-style:normal;font-weight:600}
+.risk-list{list-style:none;padding:0;margin:14px 0}
+.risk-list li{background:var(--paper);border-left:3px solid var(--red);border-radius:4px;padding:12px 18px;margin-bottom:8px;font-size:13px;line-height:1.6}
+.risk-list li strong{color:var(--red);font-weight:600;display:block;margin-bottom:3px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.risk-list.watch li{border-left-color:var(--amber)}
+.risk-list.watch li strong{color:var(--amber)}
+.stand-box{background:var(--paper);border-left:3px solid var(--blue);border-radius:4px;padding:22px 26px;margin:18px 0}
+.sb-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+.sb-text{font-size:14px;line-height:1.75;color:#333}
+.sources{padding:24px 36px;background:var(--paper);border-top:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.8;letter-spacing:.02em}
+.sources strong{color:var(--ink);display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;font-weight:500}
+.report-foot{padding:24px 36px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--paper)}
+.foot-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.04em}
+.back-link{font-family:var(--mono);font-size:11px;color:var(--blue);text-decoration:none;padding:8px 14px;background:var(--blue-pale);border-radius:6px;letter-spacing:.06em;text-transform:uppercase}
+h3.sub-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
+@media(max-width:700px){.report-head{padding:24px 20px}.head-title{font-size:28px}.content{padding:0 20px 30px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}.component{grid-template-columns:110px 1fr 50px}.component-rationale{padding-left:0}.report-foot{flex-direction:column;gap:12px;align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="disclaimer-banner">⚠️ Personal investment journal entry. Not SEBI-registered advice. Not a buy/sell recommendation. <a href="/#disclaimer">Full disclaimer</a></div>
+<header class="masthead">
+  <a href="/" class="logo-block"><span class="logo-pi">π</span><span class="logo-name">Passive Aggressive Investing</span></a>
+  <div class="report-meta"><span class="report-type">Deep Dive</span> · 10 Jun 2026</div>
+</header>
+<div class="page">
+<div class="report-head">
+  <div class="head-pills">
+    <span class="pill stage-4">Stage 4 — Watch</span>
+    <span class="pill neutral">Avoid</span>
+    <span class="pill neutral">Financial Services</span>
+  </div>
+  <h1 class="head-title">REC Limited</h1>
+  <div class="head-subtitle">NSE: RECLTD · Financial Services · CMP ₹335.75</div>
+  <p class="head-tagline">REC Limited is a Maharatna Central Public Sector Enterprise and one of India's largest Non-Banking Financial Companies. It provides long-term and short-term financial products for power sector infrastructure, renewable energy, and non-power infrastructure and logistics sectors across India, serving </p>
+</div>
+<div class="content">
+<!-- SECTION 00: WHY I'M WATCHING THIS -->
+<div class="section">
+  <div class="section-head"><span class="section-num">00</span><span class="section-title">Why I'm Watching REC Limited</span></div>
+  <div class="thesis-box"><div class="th-label">My Thesis</div><div class="th-call">REC Limited, as a Maharatna PSU and a key financier for India's power infrastructure, benefits from a clear government mandate and the nation's ambitious energy transition goals. Despite its current Stage 4 technical signal, its strategic importance and massive order book make it a structural play worth monitoring for a potential turnaround.</div></div>
+  <div class="kpi-grid">
+    <div class="kpi-cell">Revenue (FY23) <span class="kpi-val green">₹47,571 Cr</span></div>
+    <div class="kpi-cell">1yr Return <span class="kpi-val red">-17.76%</span></div>
+    <div class="kpi-cell">Order Book <span class="kpi-val green">₹337,179 Cr</span></div>
+    <div class="kpi-cell">Promoter Holding <span class="kpi-val green">52.63%</span></div>
+  </div>
+</div>
+
+<!-- SECTION 01: FRAMEWORK SCORECARD -->
+<div class="section">
+  <div class="section-head"><span class="section-num">01</span><span class="section-title">How My Framework Scores This</span></div>
+  <div class="score-block">
+    <div class="score-header"><span class="score-label">NAV Stage 4 Watch Score</span><span class="score-date">10 Jun 2026</span></div>
+    <div class="score-total"><span class="score-num-big">7.8</span><span class="score-denom">/ 12</span><span class="tier-badge tier-watch">Stage 4 — Watching</span></div>
+    <div class="score-components">
+      <div class="score-comp">Sector Tailwind <span class="score-comp-val">2.0/3</span> <span class="score-comp-rationale">Strong government push for power and renewable infrastructure.</span></div>
+      <div class="score-comp">Investor Network <span class="score-comp-val">1.5/3</span> <span class="score-comp-rationale">Institutional backing but no elite investors, stable promoter.</span></div>
+      <div class="score-comp">Financial Momentum <span class="score-comp-val">2.5/3</span> <span class="score-comp-rationale">Robust order book and strong ROE, but current year revenue data is missing.</span></div>
+      <div class="score-comp">Promoter Conviction <span class="score-comp-val">1.75/3</span> <span class="score-comp-rationale">Government promoter is stable, but governance concerns noted.</span></div>
+    </div>
+  </div>
+  <div class="layer-strip"><span class="layer-chip">Maharatna PSU</span><span class="layer-chip">Power Sector Financer</span><span class="layer-chip">Massive Order Book</span><span class="layer-chip">Governance Concern</span><span class="layer-chip">Stage 4 Downtrend</span><span class="layer-chip">Stable Govt Promoter</span></div>
+  <div class="two-col">
+    <div class="info-block"><div class="ib-label">Commercial Network</div><div class="ib-content">REC's commercial network is heavily concentrated, with approximately 86% of its revenue coming from Government Entities, including State/Central Power Utilities and Governments. The remaining 14% is from Independent Power Producers and Private Sector Borrowers. This strong government linkage provides stability but also means significant exposure to policy shifts. There are no specific key suppliers listed in my data.</div></div>
+    <div class="info-block"><div class="ib-label">Investor Quality</div><div class="ib-content">I see strong institutional backing from entities like ICICI PRUDENTIAL EQUITY &amp; DEBT FUND and NIPPON LIFE INDIA TRUSTEE LTD-A/C NIPPON INDIA SMALL CAP FUND. The promoter, the Government of India, holds a substantial 52.63% stake, which is stable and unpledged. While there are no elite investors currently, the institutional presence suggests a degree of confidence, albeit with the recent governance flags.</div></div>
+  </div>
+</div>
+
+<!-- SECTION 02: FINANCIAL PICTURE -->
+<div class="section">
+  <div class="section-head"><span class="section-num">02</span><span class="section-title">The Financial Picture</span></div>
+  <p class="para">Looking at the financials, I note a significant point: the revenue for FY2024 is currently listed as 'None', though the prior year (FY2023) saw a substantial ₹47,571.23 Cr. As an NBFC, REC's revenue primarily comes from interest spreads and fee-based services on its financing activities. This lack of current year revenue data makes a direct assessment of recent top-line growth challenging, but the nature of its business provides a steady income stream from its loan book.</p>
+  <p class="para">A standout metric is the colossal order book of ₹337,179.37 Cr. This figure is a strong indicator of future business potential and the continued demand for power sector financing in India. Capex for the period was ₹78.94 Cr, though utilisation data is not available. The company's valuation metrics show a low PE of 5.39 and a healthy ROE of 20.0%, indicating efficient capital deployment relative to earnings, though ROCE is lower at 9.71%. The Debt-to-Equity ratio is listed as 'None', which for an NBFC, might imply it's not captured in this format, or it's not a primary concern given its government backing.</p>
+  <div class="warn-strip">
+    <span class="warn-icon">⚠️</span>
+    <span class="warn-text">Governance concern: SEBI imposed fines (₹29.03 lakh in FY2024-25) for non-compliance with board/committee composition requirements. This is a red flag I'm monitoring closely.</span>
+  </div>
+</div>
+
+<!-- SECTION 03: WHY IT IS STAGE 4 — AND WHAT WOULD CHANGE THAT -->
+<div class="section">
+  <div class="section-head"><span class="section-num">03</span><span class="section-title">Why It's Stage 4 — And What Would Change That</span></div>
+  <div class="tech-citation">Technical analysis follows the stage analysis approach described in <strong>Trade Like a Stock Market Wizard</strong> by Mark Minervini (McGraw-Hill, 2013), adapted for Indian market data.</div>
+  <p class="para">REC Limited is currently in Stage 4, which is characterized by a declining price trend. My data shows a -17.76% return over the last year, confirming this downtrend. This could be due to a combination of factors including broader market rotation out of certain PSU stocks after a strong run, profit-taking, or potentially investor reaction to the governance concerns highlighted by the SEBI fines. The lack of current FY2024 revenue figures might also be contributing to uncertainty, even if the business model is inherently stable. From a technical perspective, it's clearly under distribution and currently an 'avoid' signal based on my framework.</p>
+  <h3 class="sub-label">What Would Move This to My Active List</h3>
+  <ul class="risk-list watch">
+    <li>A clear and sustained reversal in its technical price action, breaking out of its current downtrend on increasing volume, indicating accumulation.</li>
+    <li>Resolution of the governance issues, demonstrating improved compliance and a commitment to best practices from management.</li>
+    <li>Publication of strong FY2024 financial results, particularly revenue and profit growth, coupled with positive forward guidance from management.</li>
+    <li>New significant policy announcements or government mandates that further cement REC's central role in India's energy transition financing.</li>
+  </ul>
+  <h3 class="sub-label">What Would Make Me Stop Watching</h3>
+  <ul class="risk-list">
+    <li>Any further significant governance lapses or regulatory penalties that indicate systemic issues rather than isolated incidents.</li>
+    <li>A material decline in its order book or a slowdown in new project sanctions, signaling a weakening demand for its core financing services.</li>
+    <li>Major structural changes in government policy that negatively impact the viability or competitive position of public sector financial institutions in the power sector.</li>
+    <li>A notable reduction in the government's promoter holding without
+</div>
+</div>
+<div class="sources"><strong>Sources</strong>Annual Report FY25 · NSE XBRL filings · screener.in · BSE shareholding pattern · NAV Framework signals extraction (Gemini 2.5 Flash) · Price data: Zerodha Kite · Technical methodology: SEPA framework (Minervini, 2013)</div>
+<div class="report-foot">
+  <a href="/" class="back-link">← All Reports</a>
+  <div class="foot-meta">Published 10 Jun 2026 · Author: PAI</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VINATIORGA — Deep Dive · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f5f2eb;--paper2:#ede9e0;--card:#fff;--rule:#d4cfc4;--ink:#0d0d0d;--muted:#7a7060;--green:#1a5c38;--green-pale:#d4edd8;--amber:#b35a00;--amber-pale:#fdefd8;--red:#8b1a1a;--red-pale:#fde0e0;--blue:#1a3a6b;--blue-pale:#dde5f5;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6}
+.disclaimer-banner{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:10.5px;padding:8px 24px;text-align:center;letter-spacing:.02em}
+.disclaimer-banner a{color:var(--paper);text-decoration:underline}
+.masthead{border-bottom:1px solid var(--rule);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--paper)}
+.logo-block{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink)}
+.logo-pi{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-1.5px}
+.logo-name{font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:.06em;text-transform:uppercase}
+.report-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.report-type{color:var(--green);font-weight:500}
+.page{max-width:900px;margin:0 auto}
+.report-head{padding:36px 36px 28px;background:var(--card);border-bottom:1px solid var(--rule)}
+.head-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.pill{font-family:var(--mono);font-size:9px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.pill.stage-2{background:var(--green-pale);color:var(--green)}
+.pill.stage-3{background:var(--amber-pale);color:var(--amber)}
+.pill.stage-4{background:var(--red-pale);color:var(--red)}
+.pill.transition{background:#fff3e0;color:#e65100}
+.pill.neutral{background:var(--paper2);color:var(--muted)}
+.pill.warn{background:#fff8e6;color:var(--amber);border:1px solid #f0c060}
+.head-title{font-family:var(--serif);font-size:38px;font-weight:500;line-height:1.15;letter-spacing:-.5px;margin-bottom:6px}
+.head-subtitle{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:18px}
+.head-tagline{font-size:14px;color:#444;line-height:1.7;max-width:700px}
+.content{padding:0 36px 40px}
+.section{padding:32px 0;border-bottom:1px solid var(--paper2)}
+.section:last-child{border-bottom:none}
+.section-head{display:flex;align-items:baseline;gap:16px;margin-bottom:22px}
+.section-num{font-family:var(--mono);font-size:11px;font-weight:500;color:#fff;background:var(--ink);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.05em}
+.section-title{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-.3px;line-height:1.2}
+.thesis-box{background:var(--paper);border-left:3px solid var(--green);border-radius:4px;padding:22px 26px}
+.th-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.th-call{font-family:var(--serif);font-size:18px;font-weight:300;line-height:1.5;color:var(--ink)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+.kpi-cell{background:var(--paper);border-radius:8px;padding:14px 16px}
+.kpi-label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.kpi-value{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.1}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
+.kpi-cell.green{background:var(--green-pale)}.kpi-cell.green .kpi-value{color:var(--green)}
+.kpi-cell.amber{background:var(--amber-pale)}.kpi-cell.amber .kpi-value{color:var(--amber)}
+.kpi-cell.red{background:var(--red-pale)}.kpi-cell.red .kpi-value{color:var(--red)}
+.score-block{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:28px;margin-bottom:24px}
+.score-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.score-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.score-date{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.score-total{display:flex;align-items:baseline;gap:12px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--paper2)}
+.score-num-big{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-2px}
+.score-denom{font-family:var(--mono);font-size:16px;color:var(--muted)}
+.tier-badge{margin-left:auto;font-family:var(--mono);font-size:10px;padding:5px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.tier-watch{background:#fff8e6;color:var(--amber);border:1px solid #f0c060}
+.score-components{display:flex;flex-direction:column;gap:14px}
+.component{display:grid;grid-template-columns:160px 1fr 56px;align-items:center;gap:12px}
+.component label{font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.component .bar{height:8px;background:var(--paper2);border-radius:4px;overflow:hidden}
+.component .fill{height:100%;border-radius:4px}
+.component .value{font-family:var(--mono);font-size:12px;color:var(--ink);text-align:right;font-weight:500}
+.component-rationale{font-family:var(--sans);font-size:12px;color:var(--muted);padding-left:172px;margin-top:-8px;line-height:1.6}
+.layer-strip{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 18px}
+.layer-chip{font-family:var(--mono);font-size:9px;font-weight:500;padding:4px 10px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
+.lc-strong{background:var(--green-pale);color:var(--green)}
+.lc-moderate{background:var(--amber-pale);color:var(--amber)}
+.lc-weak{background:var(--red-pale);color:var(--red)}
+.lc-clean{background:var(--green-pale);color:var(--green)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}
+.info-block{background:var(--paper);border-radius:8px;padding:18px 20px}
+.ib-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.ib-content{font-size:13px;line-height:1.7;color:#333}
+.ib-content strong{color:var(--ink);font-weight:600}
+.warn-strip{background:#fff8e6;border-left:3px solid var(--amber);border-radius:4px;padding:14px 18px;display:flex;gap:12px;margin:18px 0}
+.ws-icon{font-size:20px;line-height:1;flex-shrink:0;color:var(--amber)}
+.ws-text{font-size:13px;line-height:1.6;color:#4a3a00}
+.ws-text strong{color:var(--amber)}
+.para{font-size:14px;line-height:1.75;color:#333;margin-bottom:14px}
+.para strong{color:var(--ink);font-weight:600}
+.para em{color:var(--green);font-style:italic}
+.peer-table{width:100%;border-collapse:collapse;margin:18px 0;background:var(--paper);border-radius:8px;overflow:hidden}
+.peer-table th{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);font-weight:500}
+.peer-table td{padding:10px 12px;font-size:12px;border-bottom:1px solid var(--paper2)}
+.peer-table tbody tr:last-child td{border-bottom:none}
+.peer-table .highlight{background:var(--green-pale)}
+.peer-table .highlight td:first-child{font-weight:600}
+.tech-citation{background:var(--paper);border-radius:6px;padding:14px 18px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:18px;font-style:italic}
+.tech-citation strong{color:var(--ink);font-style:normal;font-weight:600}
+.risk-list{list-style:none;padding:0;margin:14px 0}
+.risk-list li{background:var(--paper);border-left:3px solid var(--red);border-radius:4px;padding:12px 18px;margin-bottom:8px;font-size:13px;line-height:1.6}
+.risk-list li strong{color:var(--red);font-weight:600;display:block;margin-bottom:3px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.risk-list.watch li{border-left-color:var(--amber)}
+.risk-list.watch li strong{color:var(--amber)}
+.stand-box{background:var(--paper);border-left:3px solid var(--blue);border-radius:4px;padding:22px 26px;margin:18px 0}
+.sb-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+.sb-text{font-size:14px;line-height:1.75;color:#333}
+.sources{padding:24px 36px;background:var(--paper);border-top:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.8;letter-spacing:.02em}
+.sources strong{color:var(--ink);display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;font-weight:500}
+.report-foot{padding:24px 36px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--paper)}
+.foot-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.04em}
+.back-link{font-family:var(--mono);font-size:11px;color:var(--blue);text-decoration:none;padding:8px 14px;background:var(--blue-pale);border-radius:6px;letter-spacing:.06em;text-transform:uppercase}
+h3.sub-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
+@media(max-width:700px){.report-head{padding:24px 20px}.head-title{font-size:28px}.content{padding:0 20px 30px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}.component{grid-template-columns:110px 1fr 50px}.component-rationale{padding-left:0}.report-foot{flex-direction:column;gap:12px;align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="disclaimer-banner">⚠️ Personal investment journal entry. Not SEBI-registered advice. Not a buy/sell recommendation. <a href="/#disclaimer">Full disclaimer</a></div>
+<header class="masthead">
+  <a href="/" class="logo-block"><span class="logo-pi">π</span><span class="logo-name">Passive Aggressive Investing</span></a>
+  <div class="report-meta"><span class="report-type">Deep Dive</span> · 10 Jun 2026</div>
+</header>
+<div class="page">
+<div class="report-head">
+  <div class="head-pills">
+    <span class="pill stage-4">Stage 4 — Watch</span>
+    <span class="pill neutral">Avoid</span>
+    <span class="pill neutral">Chemicals</span>
+  </div>
+  <h1 class="head-title">VINATI ORGANICS LIMITED</h1>
+  <div class="head-subtitle">NSE: VINATIORGA · Chemicals · CMP ₹1298.6</div>
+  <p class="head-tagline">Vinati Organics Limited, established in 1989, is a global specialty chemicals powerhouse. It has grown from a single-product venture to offering over 30 advanced, high-value products in organic intermediates and niche specialty chemicals. The company makes money primarily through product sales to di</p>
+</div>
+<div class="content">
+<!-- SECTION 00: WHY I'M WATCHING THIS -->
+<div class="section">
+  <div class="section-head"><span class="section-num">00</span><span class="section-title">Why I'm Watching Vinati Organics</span></div>
+  <div class="thesis-box"><div class="th-label">My Thesis</div><div class="th-call">Despite the current technical downtrend, Vinati Organics stands out as a global specialty chemicals player with a robust product portfolio and strong management intent for future growth. I'm watching for signs of fundamental improvement and a shift in market sentiment as their planned capex and new product development initiatives materialize, potentially signaling a turnaround from its current Stage 4 status.</div></div>
+  <div class="kpi-grid">
+    <div class="kpi-cell"><span class="kpi-label">FY2025 Revenue</span><span class="kpi-value red">Data Not Available</span></div>
+    <div class="kpi-cell"><span class="kpi-label">1-Year Price Perf.</span><span class="kpi-value red">-30.56%</span></div>
+    <div class="kpi-cell"><span class="kpi-label">Order Book Visibility</span><span class="kpi-value red">Limited (None Cr)</span></div>
+    <div class="kpi-cell"><span class="kpi-label">Promoter Holding</span><span class="kpi-value green">71.66% (0% Pledge)</span></div>
+  </div>
+</div>
+
+<!-- SECTION 01: FRAMEWORK SCORECARD -->
+<div class="section">
+  <div class="section-head"><span class="section-num">01</span><span class="section-title">How My Framework Scores This</span></div>
+  <div class="score-block">
+    <div class="score-header"><span class="score-label">NAV Stage 4 Watch Score</span><span class="score-date">10 Jun 2026</span></div>
+    <div class="score-total"><span class="score-num-big">8.2</span><span class="score-denom">/ 12</span><span class="tier-badge tier-watch">Stage 4 — Watching</span></div>
+    <div class="score-components">
+      <div class="score-comp"><span class="comp-label">Sector Tailwind</span><span class="comp-score">2.25/3</span><span class="comp-rationale">Specialty chemicals generally have tailwinds; strong positioning in niche products.</span></div>
+      <div class="score-comp"><span class="comp-label">Investor Network</span><span class="comp-score">2.25/3</span><span class="comp-rationale">Reputable institutional funds are present, though no 'elite' investors currently.</span></div>
+      <div class="score-comp"><span class="comp-label">Financial Momentum</span><span class="comp-score">1.75/3</span><span class="comp-rationale">Recent financials are unclear (missing data), impacting market sentiment significantly.</span></div>
+      <div class="score-comp"><span class="comp-label">Promoter Conviction</span><span class="comp-score">2.0/3</span><span class="comp-rationale">High promoter holding with zero pledge and stable activity indicates strong conviction.</span></div>
+    </div>
+  </div>
+  <div class="layer-strip"><span class="layer-chip">Stage 4</span><span class="layer-chip">High Promoter Holding</span><span class="layer-chip">Strong Institutional Backing</span><span class="layer-chip">Bullish Management Tone</span><span class="layer-chip">Significant Capex Planned</span><span class="layer-chip">Missing Recent Financials</span></div>
+  <div class="two-col">
+    <div class="info-block"><div class="ib-label">Commercial Network</div><div class="ib-content">My network check shows key customers like BASF, NALCO, and DOW, indicating strong global relationships in diverse industrial sectors. The company's business model thrives on advanced technologies and strategic partnerships to deliver specialized chemical solutions worldwide, positioning them well in various end-use applications.</div></div>
+    <div class="info-block"><div class="ib-label">Investor Quality</div><div class="ib-content">Promoter holding is a robust 71.66% with zero pledge, which I view as a strong sign of long-term commitment. While there are no 'elite' investors on my radar, the presence of reputable mutual funds like ICICI Prudential Quality Fund and Aditya Birla Sun Life suggests institutional confidence in the underlying business.</div></div>
+  </div>
+</div>
+
+<!-- SECTION 02: FINANCIAL PICTURE -->
+<div class="section">
+  <div class="section-head"><span class="section-num">02</span><span class="section-title">The Financial Picture</span></div>
+  <p class="para">My current view of Vinati Organics' financial picture is somewhat clouded by the lack of reported revenue and order book data for FY2025. This uncertainty, coupled with a prior year revenue of ₹1899.98 Cr, makes it difficult to assess recent top-line momentum directly. The market's reaction, evidenced by a -30.56% return over the past year, clearly reflects this ambiguity and perhaps some underlying operational challenges or sector headwinds.</p>
+  <p class="para">Despite the current financial opacity, management's tone is notably bullish, expecting strong revenue growth in the coming year. This optimism is supported by their leadership in ATBS, steady performance in Butyl Phenols, and planned expansion into Antioxidants. Critically, the company has earmarked a substantial ₹350+ crores for capital investments in 2025-26, following a ₹189.73 Cr capex in the current year. This planned outlay for capacity expansion and new product development indicates a clear long-term strategy, though the market is clearly waiting for execution and results.</p>
+  <div class="warn-strip">
+    <span class="ws-icon">⚠️</span>
+    <span class="ws-text">Significant missing financial data for FY2025 (Revenue, Order Book) creates uncertainty, contributing to current market sentiment and the -30.56% 1-year price decline.</span>
+  </div>
+</div>
+
+<!-- SECTION 03: WHY IT IS STAGE 4 — AND WHAT WOULD CHANGE THAT -->
+<div class="section">
+  <div class="section-head"><span class="section-num">03</span><span class="section-title">Why It's Stage 4 — And What Would Change That</span></div>
+  <div class="tech-citation">Technical analysis follows the stage analysis approach described in <strong>Trade Like a Stock Market Wizard</strong> by Mark Minervini (McGraw-Hill, 2013), adapted for Indian market data.</div>
+  <p class="para">Vinati Organics is squarely in Stage 4, indicated by its 0/8 TT Score and a painful -30.56% price decline over the last year. This downtrend suggests a period of significant selling pressure, likely fueled by a combination of factors including broader sector rotation out of chemicals, profit-booking after previous runs, and, critically, the apparent lack of recent positive financial catalysts. The absence of reported FY2025 revenue and order book data leaves a vacuum, allowing negative sentiment to dominate in the absence of fresh, compelling fundamental news.</p>
+  <h3 class="sub-label">What Would Move This to My Active List</h3>
+  <ul class="risk-list watch">
+    <li>Clear and positive financial results for FY2025, showing strong revenue growth and improved profitability, validating management's bullish guidance.</li>
+    <li>Tangible progress and positive market reception to the planned ₹350+ Cr capex, indicating successful capacity expansion and new product development leading to future earnings visibility.</li>
+    <li>A sustained period of price consolidation followed by a clear technical breakout into Stage 1, signaling a reversal in market sentiment and accumulation.</li>
+    <li>Specific news regarding new product commercialization or significant order wins that provide a
+</div>
+</div>
+<div class="sources"><strong>Sources</strong>Annual Report FY25 · NSE XBRL filings · screener.in · BSE shareholding pattern · NAV Framework signals extraction (Gemini 2.5 Flash) · Price data: Zerodha Kite · Technical methodology: SEPA framework (Minervini, 2013)</div>
+<div class="report-foot">
+  <a href="/" class="back-link">← All Reports</a>
+  <div class="foot-meta">Published 10 Jun 2026 · Author: PAI</div>
+</div>
+</body>
+</html>
