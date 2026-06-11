@@ -126,12 +126,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       Price · 50DMA<span style="color:#f0883e">●</span>  150DMA<span style="color:#d29922">●</span>  200DMA<span style="color:#a371f7">●</span>  Volume
     </div>
     <div style="position:relative;height:300px;margin-top:4px">
-  <canvas id="price_PNDZF_59002"></canvas>
+  <canvas id="price_PNDZF_15358"></canvas>
 </div>
 <script>
 (function(){
   var D={labels:["2023-06-09", "2023-06-30", "2023-07-21", "2023-08-30", "2023-09-29", "2023-10-03", "2023-10-16", "2023-10-20", "2023-11-24", "2024-02-07", "2024-02-16", "2024-02-27", "2024-04-04", "2024-04-15", "2024-04-19", "2024-04-24", "2024-05-10", "2024-05-15", "2024-05-29", "2024-06-13", "2024-07-11", "2024-08-21", "2024-11-26", "2024-12-03", "2024-12-18", "2025-03-05", "2025-04-07", "2025-04-23", "2025-05-05", "2025-07-21", "2025-07-28", "2025-08-25", "2026-01-22", "2026-02-02", "2026-02-04", "2026-02-20", "2026-03-03", "2026-03-10", "2026-03-17", "2026-03-25", "2026-04-28", "2026-04-30"],price:[74.06, 82.28, 90.17, 90.17, 96.05, 91.97, 91.97, 104.0, 123.42, 136.8, 136.8, 153.1, 150.18, 144.91, 146.46, 146.46, 154.26, 156.37, 156.37, 145.66, 145.66, 154.59, 143.08, 155.06, 166.89, 162.74, 128.09, 142.81, 145.15, 155.81, 161.64, 132.39, 75.5, 85.28, 75.11, 82.12, 74.37, 73.81, 68.08, 71.5, 78.4, 75.0],d50:[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],d150:[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],d200:[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],vol:[1000, 6200, 100, 800, 100, 400, 900, 1300, 100, 100, 500, 100, 100, 100, 100, 500, 100, 400, 1000, 100, 100, 300, 200, 2500, 8000, 100, 100, 100, 100, 100, 100, 300, 100, 900, 400, 200, 100, 100, 200, 100, 100, 200],w52h:161.6414,w52l:68.08};
-  var ctx=document.getElementById('price_PNDZF_59002');
+  var ctx=document.getElementById('price_PNDZF_15358');
   var ann=[];
   if(D.w52h)ann.push({type:'line',yMin:D.w52h,yMax:D.w52h,borderColor:'#d2992288',borderWidth:1,borderDash:[4,3],label:{content:'52W High $'+D.w52h,display:true,color:'#d29922',font:{size:9},position:'end'}});
   if(D.w52l)ann.push({type:'line',yMin:D.w52l,yMax:D.w52l,borderColor:'#8b949e66',borderWidth:1,borderDash:[4,3],label:{content:'52W Low $'+D.w52l,display:true,color:'#8b949e',font:{size:9},position:'start'}});
@@ -247,14 +247,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   <span style="color:#484f58">●</span> Also held &nbsp;
   Hover for details
 </div>
-<div id="net_PNDZF_59002" style="height:400px;background:#0d1117;border-radius:8px;border:1px solid #21262d"></div>
+<div id="net_PNDZF_15358" style="height:400px;background:#0d1117;border-radius:8px;border:1px solid #21262d"></div>
 <script>
 (function(){
   if(typeof vis==='undefined')return;
   var N=new vis.DataSet([{"id": 0, "label": "PNDZF", "shape": "dot", "color": {"background": "#58a6ff", "border": "#ffffff"}, "size": 26, "font": {"color": "#e6edf3", "size": 13, "bold": true, "face": "monospace"}, "title": "<b>PNDZF</b><br>Subject company"}, {"id": 1, "label": "BlackRock Funds-BlackR", "shape": "square", "color": {"background": "#ffa65722", "border": "#ffa657"}, "size": 12, "font": {"color": "#ffa657", "size": 9, "face": "sans-serif"}, "title": "<b>BlackRock Funds-BlackRock Advantage International Fund</b><br>Tier: elite<br>Held: 0.42%<br>QoQ: +208.2%<br>Also holds: 0 companies"}, {"id": 2, "label": "Fidelity Salem Street ", "shape": "square", "color": {"background": "#ffa65722", "border": "#ffa657"}, "size": 12, "font": {"color": "#ffa657", "size": 9, "face": "sans-serif"}, "title": "<b>Fidelity Salem Street TRT-Fidelity SAI Intl Value Index Fd.</b><br>Tier: elite<br>Held: 0.29%<br>QoQ: +2.9%<br>Also holds: 0 companies"}]);
   var E=new vis.DataSet([{"from": 0, "to": 1, "color": {"color": "#ffa657bb", "highlight": "#ffa657"}, "width": 2, "dashes": false, "title": "elite \u00b7 0.42%"}, {"from": 0, "to": 2, "color": {"color": "#ffa657bb", "highlight": "#ffa657"}, "width": 2, "dashes": false, "title": "elite \u00b7 0.29%"}]);
   new vis.Network(
-    document.getElementById('net_PNDZF_59002'),
+    document.getElementById('net_PNDZF_15358'),
     {nodes:N,edges:E},
     {
       nodes:{shadow:{enabled:true,color:'rgba(0,0,0,0.5)',size:8},borderWidth:1},
