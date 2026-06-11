@@ -1,182 +1,320 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CDSL — Deep Dive · PAI</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CDSL — Deep Dive</title>
 <style>
-:root{--paper:#f5f2eb;--paper2:#ede9e0;--card:#fff;--rule:#d4cfc4;--ink:#0d0d0d;--muted:#7a7060;--green:#1a5c38;--green-pale:#d4edd8;--amber:#b35a00;--amber-pale:#fdefd8;--red:#8b1a1a;--red-pale:#fde0e0;--blue:#1a3a6b;--blue-pale:#dde5f5;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6}
-.disclaimer-banner{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:10.5px;padding:8px 24px;text-align:center;letter-spacing:.02em}
-.disclaimer-banner a{color:var(--paper);text-decoration:underline}
-.masthead{border-bottom:1px solid var(--rule);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--paper)}
-.logo-block{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink)}
-.logo-pi{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-1.5px}
-.logo-name{font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:.06em;text-transform:uppercase}
-.report-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
-.report-type{color:var(--green);font-weight:500}
-.page{max-width:900px;margin:0 auto}
-.report-head{padding:36px 36px 28px;background:var(--card);border-bottom:1px solid var(--rule)}
-.head-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
-.pill{font-family:var(--mono);font-size:9px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
-.pill.stage-2{background:var(--green-pale);color:var(--green)}
-.pill.stage-3{background:var(--amber-pale);color:var(--amber)}
-.pill.stage-4{background:var(--red-pale);color:var(--red)}
-.pill.transition{background:#fff3e0;color:#e65100}
-.pill.neutral{background:var(--paper2);color:var(--muted)}
-.pill.warn{background:#fff8e6;color:var(--amber);border:1px solid #f0c060}
-.head-title{font-family:var(--serif);font-size:38px;font-weight:500;line-height:1.15;letter-spacing:-.5px;margin-bottom:6px}
-.head-subtitle{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:18px}
-.head-tagline{font-size:14px;color:#444;line-height:1.7;max-width:700px}
-.content{padding:0 36px 40px}
-.section{padding:32px 0;border-bottom:1px solid var(--paper2)}
-.section:last-child{border-bottom:none}
-.section-head{display:flex;align-items:baseline;gap:16px;margin-bottom:22px}
-.section-num{font-family:var(--mono);font-size:11px;font-weight:500;color:#fff;background:var(--ink);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.05em}
-.section-title{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-.3px;line-height:1.2}
-.thesis-box{background:var(--paper);border-left:3px solid var(--green);border-radius:4px;padding:22px 26px}
-.th-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-.th-call{font-family:var(--serif);font-size:18px;font-weight:300;line-height:1.5;color:var(--ink)}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
-.kpi-cell{background:var(--paper);border-radius:8px;padding:14px 16px}
-.kpi-label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
-.kpi-value{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.1}
-.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
-.kpi-cell.green{background:var(--green-pale)}.kpi-cell.green .kpi-value{color:var(--green)}
-.kpi-cell.amber{background:var(--amber-pale)}.kpi-cell.amber .kpi-value{color:var(--amber)}
-.kpi-cell.red{background:var(--red-pale)}.kpi-cell.red .kpi-value{color:var(--red)}
-.score-block{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:28px;margin-bottom:24px}
-.score-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
-.score-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
-.score-date{font-family:var(--mono);font-size:10px;color:var(--muted)}
-.score-total{display:flex;align-items:baseline;gap:12px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--paper2)}
-.score-num-big{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-2px}
-.score-denom{font-family:var(--mono);font-size:16px;color:var(--muted)}
-.tier-badge{margin-left:auto;font-family:var(--mono);font-size:10px;padding:5px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
-.tier-watch{background:#fff8e6;color:var(--amber);border:1px solid #f0c060}
-.score-components{display:flex;flex-direction:column;gap:14px}
-.component{display:grid;grid-template-columns:160px 1fr 56px;align-items:center;gap:12px}
-.component label{font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:.06em;text-transform:uppercase;font-weight:500}
-.component .bar{height:8px;background:var(--paper2);border-radius:4px;overflow:hidden}
-.component .fill{height:100%;border-radius:4px}
-.component .value{font-family:var(--mono);font-size:12px;color:var(--ink);text-align:right;font-weight:500}
-.component-rationale{font-family:var(--sans);font-size:12px;color:var(--muted);padding-left:172px;margin-top:-8px;line-height:1.6}
-.layer-strip{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 18px}
-.layer-chip{font-family:var(--mono);font-size:9px;font-weight:500;padding:4px 10px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
-.lc-strong{background:var(--green-pale);color:var(--green)}
-.lc-moderate{background:var(--amber-pale);color:var(--amber)}
-.lc-weak{background:var(--red-pale);color:var(--red)}
-.lc-clean{background:var(--green-pale);color:var(--green)}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}
-.info-block{background:var(--paper);border-radius:8px;padding:18px 20px}
-.ib-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-.ib-content{font-size:13px;line-height:1.7;color:#333}
-.ib-content strong{color:var(--ink);font-weight:600}
-.warn-strip{background:#fff8e6;border-left:3px solid var(--amber);border-radius:4px;padding:14px 18px;display:flex;gap:12px;margin:18px 0}
-.ws-icon{font-size:20px;line-height:1;flex-shrink:0;color:var(--amber)}
-.ws-text{font-size:13px;line-height:1.6;color:#4a3a00}
-.ws-text strong{color:var(--amber)}
-.para{font-size:14px;line-height:1.75;color:#333;margin-bottom:14px}
-.para strong{color:var(--ink);font-weight:600}
-.para em{color:var(--green);font-style:italic}
-.peer-table{width:100%;border-collapse:collapse;margin:18px 0;background:var(--paper);border-radius:8px;overflow:hidden}
-.peer-table th{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);font-weight:500}
-.peer-table td{padding:10px 12px;font-size:12px;border-bottom:1px solid var(--paper2)}
-.peer-table tbody tr:last-child td{border-bottom:none}
-.peer-table .highlight{background:var(--green-pale)}
-.peer-table .highlight td:first-child{font-weight:600}
-.tech-citation{background:var(--paper);border-radius:6px;padding:14px 18px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:18px;font-style:italic}
-.tech-citation strong{color:var(--ink);font-style:normal;font-weight:600}
-.risk-list{list-style:none;padding:0;margin:14px 0}
-.risk-list li{background:var(--paper);border-left:3px solid var(--red);border-radius:4px;padding:12px 18px;margin-bottom:8px;font-size:13px;line-height:1.6}
-.risk-list li strong{color:var(--red);font-weight:600;display:block;margin-bottom:3px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
-.risk-list.watch li{border-left-color:var(--amber)}
-.risk-list.watch li strong{color:var(--amber)}
-.stand-box{background:var(--paper);border-left:3px solid var(--blue);border-radius:4px;padding:22px 26px;margin:18px 0}
-.sb-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
-.sb-text{font-size:14px;line-height:1.75;color:#333}
-.sources{padding:24px 36px;background:var(--paper);border-top:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.8;letter-spacing:.02em}
-.sources strong{color:var(--ink);display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;font-weight:500}
-.report-foot{padding:24px 36px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--paper)}
-.foot-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.04em}
-.back-link{font-family:var(--mono);font-size:11px;color:var(--blue);text-decoration:none;padding:8px 14px;background:var(--blue-pale);border-radius:6px;letter-spacing:.06em;text-transform:uppercase}
-h3.sub-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
-@media(max-width:700px){.report-head{padding:24px 20px}.head-title{font-size:28px}.content{padding:0 20px 30px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}.component{grid-template-columns:110px 1fr 50px}.component-rationale{padding-left:0}.report-foot{flex-direction:column;gap:12px;align-items:flex-start}}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+       background: #0d1117; color: #c9d1d9; padding: 28px 32px; font-size: 13px; line-height: 1.5; }
+.card { background: #161b22; border-radius: 10px; padding: 22px 24px;
+        box-shadow: 0 1px 6px rgba(0,0,0,.25); margin-bottom: 16px; }
+.section-title { font-family: monospace; font-size: 10px; letter-spacing: .14em;
+                 text-transform: uppercase; color: #8b949e; margin-bottom: 14px;
+                 display: flex; align-items: center; gap: 8px; }
+.metrics-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.metric-box { background: #0d1117; border-radius: 6px; padding: 10px 14px; min-width: 115px; }
+.metric-label { font-family: monospace; font-size: 9px; letter-spacing: .1em;
+                text-transform: uppercase; color: #484f58; margin-bottom: 4px; }
+.metric-val { font-family: monospace; font-size: 18px; font-weight: 700; }
+.metric-sub { font-family: monospace; font-size: 9px; color: #8b949e; margin-top: 3px; }
+.mini-card { background: #0d1117; border-radius: 6px; padding: 12px; }
+.mini-label { font-family: monospace; font-size: 9px; letter-spacing: .1em;
+              text-transform: uppercase; color: #484f58; }
+.mini-metric { display: inline-flex; flex-direction: column; margin-right: 16px; margin-bottom: 8px; }
+.mini-metrics-row { display: flex; flex-wrap: wrap; }
+.ml { font-size: 9px; color: #484f58; font-family: monospace; text-transform: uppercase; letter-spacing: .06em; }
+.mv { font-family: monospace; font-size: 14px; font-weight: 700; color: #e6edf3; }
+.ms { font-size: 9px; color: #8b949e; font-family: monospace; }
+.peer-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.peer-table th { font-family: monospace; font-size: 9px; letter-spacing: .08em;
+                 text-transform: uppercase; color: #484f58; padding: 6px 10px;
+                 text-align: left; border-bottom: 1px solid #21262d; white-space: nowrap; }
+.peer-table td { padding: 8px 10px; border-bottom: 1px solid #161b22; vertical-align: middle; }
+.peer-table tr:hover td { background: #1c2128; }
+.tip { border-bottom: 1px dashed #484f58; cursor: help; position: relative; }
+.tip:hover::after { content: attr(data-tip); position: absolute; bottom: 120%; left: 0;
+  background: #161b22; border: 1px solid #30363d; border-radius: 6px;
+  padding: 6px 10px; font-size: 11px; color: #c9d1d9; white-space: nowrap;
+  z-index: 10; min-width: 180px; max-width: 300px; white-space: normal; line-height: 1.5; }
+.takeaway { font-size: 11px; border-left: 2px solid; padding: 3px 8px; margin-bottom: 5px; }
+.fin-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.fin-table th { font-family: monospace; font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
+  color: #484f58; padding: 5px 8px; border-bottom: 1px solid #21262d; text-align: right; }
+.fin-table th:first-child { text-align: left; }
+.fin-table td { padding: 5px 8px; border-bottom: 1px solid #0d1117; font-family: monospace; font-size: 11px;
+  text-align: right; color: #c9d1d9; }
+.fin-table td:first-child { text-align: left; color: #8b949e; font-size: 10px; white-space: nowrap; }
+.fin-table tr:hover td { background: #161b22; }
+.fin-table .hl td { font-weight: 700; color: #e6edf3; }
+@media (max-width: 800px) { body { padding: 16px; } }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
-<div class="disclaimer-banner">⚠️ Personal investment journal entry. Not SEBI-registered advice. Not a buy/sell recommendation. <a href="/#disclaimer">Full disclaimer</a></div>
-<header class="masthead">
-  <a href="/" class="logo-block"><span class="logo-pi">π</span><span class="logo-name">Passive Aggressive Investing</span></a>
-  <div class="report-meta"><span class="report-type">Deep Dive</span> · 10 Jun 2026</div>
-</header>
-<div class="page">
-<div class="report-head">
-  <div class="head-pills">
-    <span class="pill stage-4">Stage 4 — Watch</span>
-    <span class="pill neutral">Avoid</span>
-    <span class="pill neutral">Financial Services</span>
-  </div>
-  <h1 class="head-title">Central Depository Services (India) Limited</h1>
-  <div class="head-subtitle">NSE: CDSL · Financial Services · CMP ₹1219.9</div>
-  <p class="head-tagline">Central Depository Services (India) Limited is a market infrastructure institution providing secure and efficient depository services, empowering investors and corporates in Indian capital markets. It generates revenue through various fee-based charges like annual issuer charges, transaction charges</p>
-</div>
-<div class="content">
-<!-- SECTION 00: WHY I'M WATCHING THIS -->
-<div class="section">
-  <div class="section-head"><span class="section-num">00</span><span class="section-title">Why I'm Watching CDSL Despite the Headwinds</span></div>
-  <div class="thesis-box"><div class="th-label">My Thesis</div><div class="th-call">I'm watching CDSL because of its foundational role as India's largest depository, making it an indispensable part of the growing Indian capital markets. Despite current regulatory challenges and its Stage 4 technical status, its robust technology platform and fee-based revenue model represent a compelling long-term structural play on financial inclusion and market integrity in India.</div></div>
-  <div class="kpi-grid">
-    <div class="kpi-cell"><span class="kpi-label">Revenue (prior FY)</span><span class="kpi-val amber">₹812.26 Cr</span></div>
-    <div class="kpi-cell"><span class="kpi-label">FY25 Revenue Growth</span><span class="kpi-val amber">Undisclosed</span></div>
-    <div class="kpi-cell"><span class="kpi-label">Key Metric</span><span class="kpi-val green">Dominant Market Position</span></div>
-    <div class="kpi-cell"><span class="kpi-label">Promoter Holding</span><span class="kpi-val green">15.0% (Stable)</span></div>
-  </div>
+<div class="card" style="margin-bottom:16px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap"><div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px"><span style="font-family:monospace;font-size:24px;font-weight:800;color:#e6edf3">CDSL</span><span style="font-size:15px;color:#8b949e">CDSL</span><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:6px;font-size:10px">Financial Services</span></div><div style="margin-bottom:12px"><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#8b949e22;color:#8b949e;margin-right:4px">NN unknown</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#484f5822;color:#484f58;margin-right:4px">no data</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8514922;color:#f85149;margin-right:4px">Stage 4</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8514922;color:#f85149;margin-right:4px">TT 0/8</span></div><p style='font-size:12px;color:#8b949e;max-width:720px;line-height:1.7;margin:0'>Central Depository Services (India) Limited is a market infrastructure institution providing secure and efficient depository services, empowering investors and corporates in Indian capital markets. It generates revenue through various fee-based charges like annual issuer charges, transaction charges, and e-voting, leveraging its robust technology platform, regulatory licenses,…</p></div><div style="text-align:right"><div style="margin-top:10px"><span style="font-family:monospace;font-size:22px;font-weight:700;color:#58a6ff">₹1,220</span>&ensp;<span class="tip" data-tip="Current Market Price — the last traded price of this stock on NSE">CMP</span><div style='font-family:monospace;font-size:9px;color:#484f58;margin-top:2px'>as of Jun 04, 2026</div></div></div></div></div><div class="card"><div class="section-title">Industry &amp; Macro Outlook</div><div style="display:grid;grid-template-columns:1fr;gap:16px;margin-top:12px"><div style="background:#0d1117;border-radius:8px;padding:16px;border-left:3px solid #58a6ff"><div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#484f58;margin-bottom:8px">Management Outlook · FY2024-25 Annual Report</div><div style="margin-bottom:10px"><span style="font-family:monospace;font-size:9px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:4px;background:#3fb95022;color:#3fb950">BULLISH</span></div><p style="font-size:12px;color:#8b949e;margin:0;line-height:1.65">Management expects India's economy to grow at 6.5% in FY25-26, driven by increased consumption, investment, and rural growth, with the RBI projecting disinflation and continued support for growth.</p></div></div></div><div class="card">
+<div class="section-title">Business Model
+  <span style="font-size:10px;color:#8b949e">· Central Depository Services, Market Infrastructure Institution</span>
 </div>
 
-<!-- SECTION 01: FRAMEWORK SCORECARD -->
-<div class="section">
-  <div class="section-head"><span class="section-num">01</span><span class="section-title">How My Framework Scores This</span></div>
-  <div class="score-block">
-    <div class="score-header"><span class="score-label">NAV Stage 4 Watch Score</span><span class="score-date">10 Jun 2026</span></div>
-    <div class="score-total"><span class="score-num-big">7.8</span><span class="score-denom">/ 12</span><span class="tier-badge tier-watch">Stage 4 — Watching</span></div>
-    <div class="score-components">
-      <div class="score-comp-item"><span class="score-comp-label">Sector Tailwind</span><span class="score-comp-val">1.75/3</span><span class="score-comp-rationale">Strong structural growth in Indian capital markets, but regulatory scrutiny introduces headwinds.</span></div>
-      <div class="score-comp-item"><span class="score-comp-label">Investor Network</span><span class="score-comp-val">3.0/3</span><span class="score-comp-rationale">Excellent institutional backing from multiple Vanguard funds and Nippon Life India.</span></div>
-      <div class="score-comp-item"><span class="score-comp-label">Financial Momentum</span><span class="score-comp-val">2.0/3</span><span class="score-comp-rationale">Impressive ROE/ROCE, but current FY financials are undisclosed, and the high PE is notable.</span></div>
-      <div class="score-comp-item"><span class="score-comp-label">Promoter Conviction</span><span class="score-comp-val">1.0/3</span><span class="score-comp-rationale">Promoter holding is stable with no pledge, but the overall stake is relatively low at 15%.</span></div>
+<div style="margin-bottom:12px"><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">Platform</span><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">Fee Based</span><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">service provider</span><span style="background:#161b22;border:1px solid #30363d;color:#8b949e;padding:3px 10px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">pan-India</span></div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">
+  <div>
+    <div class="mini-label" style="margin-bottom:6px">Competitive Moat</div><div style="margin-bottom:12px"><span style="background:#3fb95022;color:#3fb950;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">regulatory_license</span><span style="background:#3fb95022;color:#3fb950;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">technology</span><span style="background:#3fb95022;color:#3fb950;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">scale</span></div>
+    <div class="mini-label" style="margin-bottom:4px">Government Proximity</div><div style="font-size:12px;color:#a371f7;font-weight:600;margin-bottom:12px;text-transform:capitalize">high</div>
+    <div class="mini-label" style="margin-bottom:6px">Customer Quality</div><div style="margin-bottom:12px"><div style="margin-bottom:7px"><span style="font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:4px;background:#8b949e22;color:#8b949e;margin:2px;display:inline-block">Retail B2C</span><span style="font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:4px;background:#58a6ff22;color:#58a6ff;margin:2px;display:inline-block">B2B Corporate</span><span style="font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:4px;background:#79c0ff22;color:#79c0ff;margin:2px;display:inline-block">Institutional</span></div><div style="margin-bottom:5px"><span style="background:#161b22;border:1px solid #21262d;color:#8b949e;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">CDSL Ventures Limited (Receivables Customer 1 – 212.88 Lakh (23%))</span><span style="background:#161b22;border:1px solid #21262d;color:#8b949e;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">Centrico Insurance Repository Limited (Revenue Customer 1 - 20.15 Lakh (26%), Customer 2 - 15.71 Lakh (20%), Customer 3 - 12.12 Lakh (15%), Customer 4 - 10.58 Lakh (13%))</span><span style="background:#161b22;border:1px solid #21262d;color:#8b949e;padding:2px 8px;border-radius:4px;font-size:10px;margin:2px;display:inline-block">Countrywide Commodity Repository Limited (Receivables Customer 1 - 15.08 Lakh (24.29%))</span></div></div>
+    <div class="mini-label" style="margin-bottom:6px">Operational Metrics</div><div class="mini-metrics-row"><div class="mini-metric"><span class="ml">Debtor Days</span><span class="mv" style="color:#3fb950">27d</span></div><div class="mini-metric"><span class="ml">CapEx (latest)</span><span class="mv">₹124Cr</span></div><div class="mini-metric"><span class="ml">Employees</span><span class="mv">403</span></div><div class="mini-metric"><span class="ml">Contingent Liab.</span><span class="mv" style="color:#8b949e">₹16Cr</span></div></div>
+  </div>
+  <div>
+    <div class="mini-label" style="margin-bottom:6px">Key Risks</div><div style="margin-bottom:12px"><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>Information Security and Cyber Security Risk</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>Regulatory/Compliance Risk</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>Critical Operations Risk</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>Customer Relationship Management Risk</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#f0883e;font-size:10px;margin-top:1px">▲</span>Human Capital Development Risk</div></div>
+    <div class="mini-label" style="margin-bottom:6px">Key Initiatives</div><div style="margin-bottom:12px"><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#58a6ff;font-size:10px;margin-top:1px">→</span>Technological Advancement & Resiliency of Infrastructure</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#58a6ff;font-size:10px;margin-top:1px">→</span>Investor Education</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#58a6ff;font-size:10px;margin-top:1px">→</span>Investor Focus: Service Diversification & Innovation</div><div style="font-size:11px;color:#c9d1d9;margin-bottom:4px;display:flex;gap:6px"><span style="color:#58a6ff;font-size:10px;margin-top:1px">→</span>Regulation Driven</div></div>
+  </div>
+</div></div><div class="card">
+<div class="section-title">KYC — Company · Individuals · Investors</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:20px">
+  <div>
+<div class="mini-label" style="margin-bottom:8px">Company Integrity</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
+  <div style="background:#0d1117;border-radius:6px;padding:10px">
+    <div style="font-family:monospace;font-size:20px;font-weight:700;color:#3fb950">0</div>
+    <div style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.08em">Contagion</div>
+    <div style="font-size:9px;color:#3fb950;margin-top:2px">0 severe DIN links</div>
+  </div>
+  <div style="background:#0d1117;border-radius:6px;padding:10px">
+    <div style="font-size:14px;font-weight:600;color:#8b949e">—</div>
+    <div style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.08em;margin-top:2px">News flag</div>
+    
+  </div>
+  <div style="background:#0d1117;border-radius:6px;padding:10px">
+    <div style="font-size:11px;font-weight:600;color:#d29922">Concern</div>
+    <div style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Governance</div>
+  </div>
+</div>
+<div style="margin-bottom:10px">
+  <div style="font-size:11px;color:#3fb950;margin-bottom:4px">
+    <span style="color:#484f58">Auditor:</span> S.R. Batliboi & Co. LLP
+     (Big 4)
+    
+  </div>
+  <div style="margin-left:8px"><div style="font-size:10px;color:#8b949e;margin-bottom:2px">· Valuation of investments and its impairment</div></div>
+</div>
+
+</div>
+  <div>
+<div class="mini-label" style="margin-bottom:8px">Promoters & Management</div>
+<div style="margin-bottom:8px">
+  <div style="font-size:13px;color:#e6edf3;font-weight:600">Shri Nehal Vora</div>
+  <div style="font-size:10px;color:#8b949e;text-transform:capitalize;margin-bottom:4px">institutional</div>
+  <div style="font-size:11px;color:#c9d1d9;line-height:1.6;margin-bottom:8px">Shri Nehal Vora has close to three decades of experience in significant roles at BSE, DSP Merrill Lynch, and SEBI, driving transformative growth at CDSL. He has expertise in regulatory matters and…</div>
+</div>
+<div style="display:flex;gap:16px;margin-bottom:10px;flex-wrap:wrap">
+  <div><div style="font-family:monospace;font-size:16px;font-weight:700;color:#ffa657">15.0%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">Promoter</div></div>
+  <div><div style="font-family:monospace;font-size:16px;font-weight:700;color:#58a6ff">8.1%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">FII</div></div>
+  <div><div style="font-family:monospace;font-size:16px;font-weight:700;color:#3fb950">11.3%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">DII</div></div>
+  <div><div style="font-family:monospace;font-size:16px;font-weight:700;color:#3fb950">0.0%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">Pledged</div></div>
+</div>
+<div style="font-size:11px;color:#8b949e;margin-bottom:8px">Promoter activity: stable</div>
+
+<div class="mini-label" style="margin-bottom:6px;margin-top:8px">Board  (0 directors · 0% independent ⚠)</div>
+</div>
+  <div>
+<div class="mini-label" style="margin-bottom:8px">
+  Smart Money
+  <span style="background:#79c0ff22;color:#79c0ff;padding:2px 10px;border-radius:10px;font-size:10px;margin-left:8px">Watch Entry</span>
+  <span style="font-family:monospace;font-size:10px;color:#484f58;margin-left:6px">score 3 · latest Mar '26</span>
+</div>
+<div style="display:flex;gap:20px;margin-bottom:10px">
+  <div><div style="font-family:monospace;font-size:11px;color:#ffa657">0↑ entering  0● stable  0↓ exiting</div></div>
+</div>
+<div style="margin-top:6px">
+  <div style="display:flex;gap:8px;margin-left:252px;margin-bottom:2px"><div style="width:22px;font-size:8px;color:#484f58;text-align:center">MAR'25</div><div style="width:22px;font-size:8px;color:#484f58;text-align:center">JUN'25</div><div style="width:22px;font-size:8px;color:#484f58;text-align:center">SEP'25</div><div style="width:22px;font-size:8px;color:#484f58;text-align:center">DEC'25</div><div style="width:22px;font-size:8px;color:#484f58;text-align:center">MAR'26</div></div>
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><div style="min-width:170px;font-size:11px;color:#ffa657;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Vanguard</div><div style="min-width:42px;font-size:9px;color:#484f58;font-family:monospace;text-transform:uppercase">elite</div><span style="color:#3fb950;font-size:9px;font-weight:700;min-width:36px">NEW↑</span><div style="display:flex"><div title="31-MAR-2025" style="width:22px;height:16px;background:#21262d;border-radius:2px;margin:1px;display:inline-block;opacity:0.35"></div><div title="30-JUN-2025" style="width:22px;height:16px;background:#21262d;border-radius:2px;margin:1px;display:inline-block;opacity:0.35"></div><div title="30-SEP-2025" style="width:22px;height:16px;background:#21262d;border-radius:2px;margin:1px;display:inline-block;opacity:0.35"></div><div title="31-DEC-2025" style="width:22px;height:16px;background:#21262d;border-radius:2px;margin:1px;display:inline-block;opacity:0.35"></div><div title="31-MAR-2026" style="width:22px;height:16px;background:#21262d;border-radius:2px;margin:1px;display:inline-block;opacity:0.35"></div></div></div>
+</div>
+<div style="display:flex;gap:20px;margin-top:14px;border-top:1px solid #21262d;padding-top:10px">
+  <div style="font-size:11px;font-family:monospace">
+    <span style="color:#ffa657">P</span> 15.0% <span style="color:#8b949e;font-size:10px;font-family:monospace">+0.0pp</span>
+  </div>
+  <div style="font-size:11px;font-family:monospace">
+    <span style="color:#58a6ff">F</span> 11.36% <span style="color:#f85149;font-size:10px;font-family:monospace">-2.6pp</span>
+  </div>
+  <div style="font-size:11px;font-family:monospace">
+    <span style="color:#3fb950">D</span> 14.42% <span style="color:#f85149;font-size:10px;font-family:monospace">-10.5pp</span>
+  </div>
+  <div style="font-family:monospace;font-size:11px;color:#8b949e">(12 quarters)</div>
+</div></div>
+</div></div><div class="card">
+<div class="section-title">Financials · Peer Comparison<span style="font-size:9px;color:#484f58;font-family:monospace;font-weight:400;letter-spacing:0"> · screener as of Jun 04, 2026</span></div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px">
+
+  <div class="mini-card">
+    <div class="mini-label" style="margin-bottom:8px"><span class="tip" data-tip="How efficiently the company converts revenue to profit">Profitability</span> &amp; Revenue Growth</div>
+    <table class="fin-table">
+      <thead><tr><th>Year</th><th>Revenue</th><th>∆%</th><th><span class="tip" data-tip="Operating Profit Margin — revenue minus operating costs. Higher = better cost control">OPM%</span></th><th>PAT</th><th>PAT ∆%</th></tr></thead>
+      <tbody><tr><td>Mar 2022</td><td>₹551</td><td style="color:#8b949e">—</td><td style="color:#3fb950">66.0%</td><td>₹312</td><td style="color:#8b949e">—</td></tr><tr><td>Mar 2023</td><td>₹555</td><td style="color:#3fb950">+1%</td><td style="color:#3fb950">57.0%</td><td>₹276</td><td style="color:#f85149">-12%</td></tr><tr><td>Mar 2024</td><td>₹812</td><td style="color:#3fb950">+46%</td><td style="color:#3fb950">60.0%</td><td>₹420</td><td style="color:#3fb950">+52%</td></tr><tr><td>Mar 2025</td><td>₹1,082</td><td style="color:#3fb950">+33%</td><td style="color:#3fb950">58.0%</td><td>₹526</td><td style="color:#3fb950">+25%</td></tr><tr style="background:#1c2128"><td>Mar 2026</td><td>₹1,145</td><td style="color:#3fb950">+6%</td><td style="color:#3fb950">51.0%</td><td>₹455</td><td style="color:#f85149">-13%</td></tr></tbody>
+    </table>
+    <div style="margin-top:10px"><div class="takeaway" style="border-color:#d2992244;color:#d29922">Revenue +6% in last 12m — growth decelerating (prior year +33%)</div><div class="takeaway" style="border-color:#f8514944;color:#f85149">OPM contracted 9.0pp over 2 years → 51.0%</div><div class="takeaway" style="border-color:#f8514944;color:#f85149">PAT -13% in last 12m — profit growth lagging revenue</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Peers: trades at 0% premium to sector PE (56.1× vs 56.1×)</div><div class="takeaway" style="border-color:#d2992244;color:#d29922">ROCE 32.0% vs sector median 32.0% (+0.0pp)</div></div>
+  </div>
+
+  <div class="mini-card">
+    <div class="mini-label" style="margin-bottom:8px">Cash Management · <span class="tip" data-tip="How efficiently the business collects from customers, manages inventory, and pays suppliers">Working Capital</span></div>
+    <table class="fin-table">
+      <thead><tr><th>Year</th><th><span class="tip" data-tip="Cash Flow from Operations — actual cash generated (vs accounting profit). Healthy if CFO/Revenue > 8%">CFO</span></th><th><span class="tip" data-tip="Cash Conversion Cycle = Debtor days + Inventory days − Payable days. Lower = faster cash recovery">CCC</span></th><th>Deb.d</th><th>Inv.d</th><th>Pay.d</th></tr></thead>
+      <tbody><tr><td>Mar 2022</td><td style="color:#3fb950">₹283</td><td style="color:#3fb950">30d</td><td>30d</td><td>—</td><td>—</td></tr><tr><td>Mar 2023</td><td style="color:#3fb950">₹249</td><td style="color:#3fb950">25d</td><td>25d</td><td>—</td><td>—</td></tr><tr><td>Mar 2024</td><td style="color:#3fb950">₹386</td><td style="color:#3fb950">30d</td><td>30d</td><td>—</td><td>—</td></tr><tr><td>Mar 2025</td><td style="color:#3fb950">₹543</td><td style="color:#3fb950">18d</td><td>18d</td><td>—</td><td>—</td></tr><tr style="background:#1c2128"><td>Mar 2026</td><td style="color:#3fb950">₹467</td><td style="color:#3fb950">21d</td><td>21d</td><td>—</td><td>—</td></tr></tbody>
+    </table>
+    <div style="margin-top:10px"><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">CFO/Revenue 40.8% — healthy cash generation</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">CCC improved from 30d → 21d (-9d over 4 yrs)</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Debtor days 21d (+3d YoY) — fast collections</div></div>
+  </div>
+
+  <div class="mini-card">
+    <div class="mini-label" style="margin-bottom:8px">Balance Sheet · <span class="tip" data-tip="How much debt the company carries relative to equity. Lower D/E and higher interest coverage = safer">Leverage</span></div>
+    <table class="fin-table">
+      <thead><tr><th>Year</th><th><span class="tip" data-tip="Debt-to-Equity — total debt divided by shareholder equity. Below 0.3× = conservative">D/E</span></th><th><span class="tip" data-tip="Interest Coverage = EBIT ÷ Interest expense. Above 4× means comfortable debt servicing">Int.Cov.</span></th><th>Net Worth</th><th>Total Debt</th></tr></thead>
+      <tbody><tr><td>Mar 2022</td><td style="color:#3fb950">0.00×</td><td style="color:#8b949e">—</td><td>₹1,092</td><td>—</td></tr><tr><td>Mar 2023</td><td style="color:#3fb950">0.00×</td><td style="color:#8b949e">—</td><td>₹1,213</td><td>₹2</td></tr><tr><td>Mar 2024</td><td style="color:#3fb950">0.00×</td><td style="color:#8b949e">—</td><td>₹1,463</td><td>₹1</td></tr><tr><td>Mar 2025</td><td style="color:#3fb950">0.00×</td><td style="color:#8b949e">—</td><td>₹1,760</td><td>₹3</td></tr><tr style="background:#1c2128"><td>Mar 2026</td><td style="color:#3fb950">0.00×</td><td style="color:#8b949e">—</td><td>₹1,960</td><td>₹2</td></tr></tbody>
+    </table>
+    <div style="margin-top:10px"><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">D/E 0.00× — debt-free</div><div class="takeaway" style="border-color:#d2992244;color:#d29922">FCF yield 1.1% on mktcap ₹25,582Cr</div></div>
+  </div>
+
+</div>
+
+<div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px;margin-bottom:16px">
+  <div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="mini-label">P/E vs Peers · cheapest → most expensive</div>
+      <span style="font-family:monospace;font-size:9px;font-weight:700;letter-spacing:.05em;padding:3px 10px;border-radius:4px;background:#f8514922;color:#f85149">PE 35% ABOVE MEDIAN</span>
     </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><div style="width:110px;font-size:10px;color:#8b949e;font-weight:400;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Beacon Trust.</div><div style="flex:1;position:relative;height:16px;background:#161b22;border-radius:2px"><div style="position:absolute;left:73.9%;top:0;bottom:0;width:1px;background:#484f5888"></div><div style="width:38.5%;height:100%;background:#21262d;border-radius:2px"></div></div><div style="width:38px;font-family:monospace;font-size:10px;color:#8b949e;text-align:right">22×</div></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><div style="width:110px;font-size:10px;color:#8b949e;font-weight:400;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Cams Services</div><div style="flex:1;position:relative;height:16px;background:#161b22;border-radius:2px"><div style="position:absolute;left:73.9%;top:0;bottom:0;width:1px;background:#484f5888"></div><div style="width:70.5%;height:100%;background:#21262d;border-radius:2px"></div></div><div style="width:38px;font-family:monospace;font-size:10px;color:#8b949e;text-align:right">40×</div></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><div style="width:110px;font-size:10px;color:#8b949e;font-weight:400;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">KFin Technolog.</div><div style="flex:1;position:relative;height:16px;background:#161b22;border-radius:2px"><div style="position:absolute;left:73.9%;top:0;bottom:0;width:1px;background:#484f5888"></div><div style="width:73.9%;height:100%;background:#21262d;border-radius:2px"></div></div><div style="width:38px;font-family:monospace;font-size:10px;color:#8b949e;text-align:right">41×</div></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><div style="width:110px;font-size:10px;color:#8b949e;font-weight:400;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">N S D L</div><div style="flex:1;position:relative;height:16px;background:#161b22;border-radius:2px"><div style="position:absolute;left:73.9%;top:0;bottom:0;width:1px;background:#484f5888"></div><div style="width:77.7%;height:100%;background:#21262d;border-radius:2px"></div></div><div style="width:38px;font-family:monospace;font-size:10px;color:#8b949e;text-align:right">44×</div></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><div style="width:110px;font-size:10px;color:#58a6ff;font-weight:600;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">CDSL  ←</div><div style="flex:1;position:relative;height:16px;background:#161b22;border-radius:2px"><div style="position:absolute;left:73.9%;top:0;bottom:0;width:1px;background:#484f5888"></div><div style="width:100.0%;height:100%;border:1px solid #58a6ff66;background:#58a6ff33;border-radius:2px"></div></div><div style="width:38px;font-family:monospace;font-size:10px;color:#58a6ff;text-align:right">56×</div></div><div style="display:flex;align-items:center;gap:8px;margin-top:1px"><div style="width:110px"></div><div style="flex:1;position:relative;height:12px"><div style="position:absolute;left:73.9%;transform:translateX(-50%);font-family:monospace;font-size:8px;color:#484f58;white-space:nowrap">↑ peer median 41×</div></div><div style="width:38px"></div></div>
   </div>
-  <div class="layer-strip">
-    <span class="layer-chip">Market Infrastructure</span>
-    <span class="layer-chip">Strong Institutional Backing</span>
-    <span class="layer-chip">High ROE/ROCE</span>
-    <span class="layer-chip">Regulatory Headwinds</span>
-    <span class="layer-chip">Stage 4 Downtrend</span>
-    <span class="layer-chip">Missing FY25 Financials</span>
+  <div>
+    <div class="mini-label" style="margin-bottom:10px">ROCE/PE Efficiency <span class="tip" data-tip="Quality per unit of valuation paid. ROCE÷PE ratio — higher means you get more return on capital per rupee of valuation. Useful for comparing capital-light vs capital-heavy peers at different price points.">ROCE÷PE</span></div>
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;padding:2px 4px;"><div style="width:18px;font-family:monospace;font-size:9px;color:#ffa657;text-align:right">#1</div><div style="width:98px;font-size:10px;color:#c9d1d9;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Cams Services</div><div style="flex:1;background:#161b22;border-radius:2px;height:12px"><div style="width:100.0%;height:100%;border-radius:2px;background:#21262d;"></div></div><div style="width:34px;font-family:monospace;font-size:10px;color:#c9d1d9;text-align:right">1.24</div></div><div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;padding:2px 4px;"><div style="width:18px;font-family:monospace;font-size:9px;color:#8b949e;text-align:right">#2</div><div style="width:98px;font-size:10px;color:#c9d1d9;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Beacon Trust.</div><div style="flex:1;background:#161b22;border-radius:2px;height:12px"><div style="width:73.7%;height:100%;border-radius:2px;background:#21262d;"></div></div><div style="width:34px;font-family:monospace;font-size:10px;color:#c9d1d9;text-align:right">0.91</div></div><div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;padding:2px 4px;"><div style="width:18px;font-family:monospace;font-size:9px;color:#8b949e;text-align:right">#3</div><div style="width:98px;font-size:10px;color:#c9d1d9;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">KFin Technolog</div><div style="flex:1;background:#161b22;border-radius:2px;height:12px"><div style="width:59.3%;height:100%;border-radius:2px;background:#21262d;"></div></div><div style="width:34px;font-family:monospace;font-size:10px;color:#c9d1d9;text-align:right">0.73</div></div><div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;background:#1c2128;padding:2px 4px;border-radius:3px;"><div style="width:18px;font-family:monospace;font-size:9px;color:#8b949e;text-align:right">#4</div><div style="width:98px;font-size:10px;color:#58a6ff;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">CDSL</div><div style="flex:1;background:#161b22;border-radius:2px;height:12px"><div style="width:46.0%;height:100%;border-radius:2px;background:#3fb95044;border:1px solid #3fb95077;"></div></div><div style="width:34px;font-family:monospace;font-size:10px;color:#58a6ff;text-align:right">0.57</div></div><div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;padding:2px 4px;"><div style="width:18px;font-family:monospace;font-size:9px;color:#8b949e;text-align:right">#5</div><div style="width:98px;font-size:10px;color:#c9d1d9;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">N S D L</div><div style="flex:1;background:#161b22;border-radius:2px;height:12px"><div style="width:43.0%;height:100%;border-radius:2px;background:#21262d;"></div></div><div style="width:34px;font-family:monospace;font-size:10px;color:#c9d1d9;text-align:right">0.53</div></div>
   </div>
-  <div class="two-col">
-    <div class="info-block"><div class="ib-label">Commercial Network</div><div class="ib-content">CDSL serves a diverse set of customers across its depository services. Key receivables come from CDSL Ventures Limited and Countrywide Commodity Repository Limited, with significant revenue concentration from Centrico Insurance Repository Limited, which accounts for over 70% of its revenue from four key customers. The data suggests no key suppliers, indicating a self-sufficient operational model.</div></div>
-    <div class="info-block"><div class="ib-label">Investor Quality</div><div class="ib-content">I see strong institutional confidence with numerous Vanguard funds, including Total International Stock Index Fund and Emerging Markets Stock Index Fund, holding positions. Nippon Life India Trustee Ltd-A/C Nippon India Small Cap Fund also appears to be a strong investor. The promoter holding is stable at 15.0% with no pledges, which is a positive sign for management's commitment.</div></div>
+</div>
+<div>
+  <div class="mini-label" style="margin-bottom:8px">Peer Detail · ROCE ranked #2 of 5</div>
+  <table class="peer-table">
+    <thead><tr><th>Company</th><th>P/E</th><th>ROCE</th><th>ROCE/PE</th><th>Sales ∆ QoQ</th><th>Profit ∆ QoQ</th><th>Mkt Cap</th></tr></thead>
+    <tbody><tr style="background:#1c2128;"><td style="font-weight:700;color:#58a6ff">CDSL  ←</td><td><span style="font-family:monospace;font-size:11px">56×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:70px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">32%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:45px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">0.57</td><td style="font-family:monospace;font-size:11px;color:#8b949e">—</td><td style="font-family:monospace;font-size:11px;color:#8b949e">—</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹25,582</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">Cams Services</td><td><span style="font-family:monospace;font-size:11px">40×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:49px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">49%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:70px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">1.24</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+11%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+11%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹18,852</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">N S D L</td><td><span style="font-family:monospace;font-size:11px">44×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:54px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">23%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:33px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">0.53</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+26%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+8%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹16,538</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">KFin Technolog.</td><td><span style="font-family:monospace;font-size:11px">41×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:51px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">30%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:43px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">0.73</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+23%</td><td style="font-family:monospace;font-size:11px;color:#f85149">-1%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹14,634</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">Beacon Trust.</td><td><span style="font-family:monospace;font-size:11px">22×</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:26px;height:5px;background:#58a6ff;border-radius:3px"></div></div></td><td><span style="font-family:monospace;font-size:11px">20%</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:28px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">0.91</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+19%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">+114%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">₹151</td></tr><tr style="border-top:1px solid #30363d"><td style="color:#484f58;font-size:10px;font-family:monospace">Peer median</td><td style="font-family:monospace;font-size:10px;color:#484f58">41×</td><td style="font-family:monospace;font-size:10px;color:#484f58">30%</td><td colspan="4"></td></tr></tbody>
+  </table>
+</div></div><div class="card">
+<div class="section-title">Technical Analysis<span style="font-size:9px;color:#484f58;font-family:monospace;font-weight:400;letter-spacing:0"> · price data as of Jun 04, 2026</span></div>
+
+<div style="display:grid;grid-template-columns:280px 1fr;gap:24px">
+  <div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+      <span style="font-family:monospace;font-size:30px;font-weight:800;color:#f85149">0</span>
+      <span style="color:#484f58;font-size:16px">/8</span>
+      <span style="font-family:monospace;font-size:14px;letter-spacing:3px;margin-left:6px"><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span></span>
+    </div>
+    <div style="font-size:12px;font-weight:600;color:#f85149;margin-bottom:12px">Stage 4 Declining ▼</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">Price > 150 & 200 DMA</span><span style='font-size:10px;color:#484f58;font-family:monospace'>₹1,220 vs D150 ₹1,375 / D200 ₹1,417</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">150 DMA > 200 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">200 DMA trending up (1m)</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">50 DMA > 150 & 200 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">Price > 50 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">Price ≥30% above 52w low</span><span style='font-size:10px;color:#484f58;font-family:monospace'>9.3% above 52w low</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">Within 25% of 52w high</span><span style='font-size:10px;color:#484f58;font-family:monospace'>-33.3% vs 52w high</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">RS beats Nifty (1yr)</span><span style='font-size:10px;color:#484f58;font-family:monospace'>Stock -19.4% vs Nifty -5.6%</span></div>
+    <div style="margin-top:10px;padding-top:8px;border-top:1px solid #21262d"><span style="font-family:monospace;font-size:10px;margin-right:14px"><span style="color:#484f58">50DMA</span> ₹1,246 <span style="color:#f85149">-2.1%</span></span><span style="font-family:monospace;font-size:10px;margin-right:14px"><span style="color:#484f58">150DMA</span> ₹1,375 <span style="color:#f85149">-11.3%</span></span><span style="font-family:monospace;font-size:10px;margin-right:14px"><span style="color:#484f58">200DMA</span> ₹1,417 <span style="color:#f85149">-13.9%</span></span></div>
+    <div style="margin:10px 0"><div style="font-size:9px;color:#484f58;font-family:monospace;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">52-week range</div><div style="position:relative;height:6px;background:#21262d;border-radius:3px;width:260px"><div style="position:absolute;left:15%;top:-3px;width:12px;height:12px;background:#f85149;border-radius:50%;transform:translateX(-50%)"></div></div><div style="display:flex;justify-content:space-between;width:260px;margin-top:4px"><span style="font-family:monospace;font-size:9px;color:#484f58">₹1,116</span><span style="font-family:monospace;font-size:10px;color:#f85149;font-weight:600">₹1,220 (15%)</span><span style="font-family:monospace;font-size:9px;color:#484f58">₹1,829</span></div></div>
+    <div style="font-family:monospace;font-size:10px;color:#8b949e;margin-top:6px">ATR% 2.4%  (14-day volatility)</div>
+  </div>
+  <div>
+    <div style="margin-bottom:6px;font-size:9px;color:#484f58;font-family:monospace;text-transform:uppercase;letter-spacing:.08em">
+      Price · 50DMA<span style="color:#f0883e">●</span>  150DMA<span style="color:#d29922">●</span>  200DMA<span style="color:#a371f7">●</span>  Volume
+    </div>
+    <div style="position:relative;height:300px;margin-top:4px">
+  <canvas id="price_CDSL_61119"></canvas>
+</div>
+<script>
+(function(){
+  var D={labels:["2025-05-29", "2025-05-30", "2025-06-02", "2025-06-03", "2025-06-04", "2025-06-05", "2025-06-06", "2025-06-09", "2025-06-10", "2025-06-11", "2025-06-12", "2025-06-13", "2025-06-16", "2025-06-17", "2025-06-18", "2025-06-19", "2025-06-20", "2025-06-23", "2025-06-24", "2025-06-25", "2025-06-26", "2025-06-27", "2025-06-30", "2025-07-01", "2025-07-02", "2025-07-03", "2025-07-04", "2025-07-07", "2025-07-08", "2025-07-09", "2025-07-10", "2025-07-11", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-21", "2025-07-22", "2025-07-23", "2025-07-24", "2025-07-25", "2025-07-28", "2025-07-29", "2025-07-30", "2025-07-31", "2025-08-01", "2025-08-04", "2025-08-05", "2025-08-06", "2025-08-07", "2025-08-08", "2025-08-11", "2025-08-12", "2025-08-13", "2025-08-14", "2025-08-18", "2025-08-19", "2025-08-20", "2025-08-21", "2025-08-22", "2025-08-25", "2025-08-26", "2025-08-28", "2025-08-29", "2025-09-01", "2025-09-02", "2025-09-03", "2025-09-04", "2025-09-05", "2025-09-08", "2025-09-09", "2025-09-10", "2025-09-11", "2025-09-12", "2025-09-15", "2025-09-16", "2025-09-17", "2025-09-18", "2025-09-19", "2025-09-22", "2025-09-23", "2025-09-24", "2025-09-25", "2025-09-26", "2025-09-29", "2025-09-30", "2025-10-01", "2025-10-03", "2025-10-06", "2025-10-07", "2025-10-08", "2025-10-09", "2025-10-10", "2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-23", "2025-10-24", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-01", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-01", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13", "2026-02-16", "2026-02-17", "2026-02-18", "2026-02-19", "2026-02-20", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27", "2026-03-02", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-27", "2026-03-30", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-04", "2026-05-05", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22", "2026-05-25", "2026-05-26", "2026-05-27", "2026-05-29", "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04"],price:[1513.0, 1529.7, 1682.9, 1708.9, 1701.3, 1778.8, 1776.0, 1793.5, 1787.2, 1739.4, 1644.2, 1659.7, 1682.6, 1686.8, 1680.3, 1637.8, 1685.8, 1723.3, 1748.5, 1744.3, 1746.8, 1760.5, 1794.0, 1797.5, 1779.0, 1804.9, 1762.5, 1778.5, 1754.1, 1761.5, 1747.2, 1688.7, 1677.4, 1701.4, 1721.5, 1714.1, 1698.5, 1731.5, 1714.7, 1697.3, 1679.3, 1614.7, 1522.8, 1539.7, 1512.8, 1480.8, 1478.8, 1572.4, 1566.2, 1545.6, 1564.5, 1567.1, 1564.8, 1541.7, 1564.5, 1559.8, 1575.1, 1581.7, 1583.6, 1569.5, 1574.4, 1541.9, 1492.1, 1452.0, 1424.4, 1476.9, 1508.9, 1518.6, 1509.4, 1523.4, 1554.3, 1548.9, 1548.8, 1531.9, 1545.8, 1553.6, 1549.4, 1568.9, 1588.3, 1582.0, 1558.5, 1546.6, 1514.0, 1494.8, 1467.7, 1475.0, 1458.6, 1475.5, 1490.1, 1524.9, 1562.8, 1539.7, 1558.6, 1605.3, 1619.4, 1606.5, 1622.0, 1620.3, 1611.3, 1599.8, 1604.0, 1600.3, 1590.2, 1636.5, 1632.8, 1616.4, 1614.7, 1587.2, 1593.4, 1539.1, 1532.9, 1578.8, 1589.8, 1600.9, 1655.3, 1626.3, 1625.8, 1631.5, 1605.7, 1622.8, 1640.1, 1610.2, 1587.6, 1574.1, 1619.9, 1624.6, 1617.2, 1604.5, 1592.1, 1550.5, 1536.3, 1550.6, 1520.9, 1517.2, 1479.3, 1522.7, 1526.5, 1517.6, 1501.2, 1477.3, 1489.6, 1499.6, 1518.7, 1515.5, 1498.9, 1482.7, 1463.5, 1433.9, 1443.6, 1446.2, 1466.6, 1468.6, 1457.0, 1475.6, 1438.2, 1409.7, 1417.5, 1419.9, 1415.6, 1434.3, 1414.9, 1341.0, 1333.8, 1356.6, 1326.3, 1322.1, 1356.9, 1323.0, 1320.2, 1230.3, 1237.2, 1343.0, 1366.3, 1363.3, 1331.4, 1374.3, 1400.9, 1397.2, 1370.2, 1335.3, 1353.7, 1339.4, 1355.7, 1320.3, 1320.4, 1334.3, 1324.8, 1326.8, 1295.8, 1272.2, 1228.3, 1209.4, 1239.6, 1224.1, 1210.5, 1249.3, 1219.4, 1210.8, 1176.5, 1184.5, 1199.3, 1233.6, 1194.2, 1190.8, 1133.8, 1185.5, 1212.8, 1171.3, 1119.4, 1182.8, 1186.3, 1205.3, 1203.5, 1287.4, 1279.3, 1303.4, 1290.6, 1339.8, 1367.8, 1393.2, 1370.3, 1362.6, 1321.2, 1323.6, 1312.8, 1324.1, 1324.6, 1306.4, 1272.0, 1238.3, 1254.7, 1282.8, 1269.8, 1259.3, 1226.8, 1182.4, 1186.2, 1198.7, 1186.7, 1184.2, 1209.5, 1224.6, 1199.8, 1204.1, 1217.4, 1226.3, 1243.8, 1244.6, 1215.1, 1226.8, 1218.2, 1219.9],d50:[1285.27, 1294.44, 1306.94, 1318.72, 1329.28, 1341.45, 1352.64, 1363.8, 1375.34, 1386.5, 1395.63, 1404.43, 1414.12, 1423.43, 1432.27, 1441.03, 1451.87, 1462.89, 1474.93, 1486.46, 1496.85, 1507.41, 1518.45, 1528.27, 1537.6, 1546.48, 1554.38, 1563.33, 1571.63, 1579.94, 1588.48, 1595.69, 1602.97, 1611.79, 1620.89, 1630.37, 1639.97, 1649.02, 1656.84, 1664.06, 1670.9, 1675.02, 1676.46, 1678.28, 1679.53, 1680.04, 1680.37, 1682.44, 1684.45, 1684.97, 1686.0, 1686.75, 1684.39, 1681.05, 1678.31, 1673.93, 1669.91, 1665.68, 1661.6, 1658.21, 1656.81, 1654.45, 1650.64, 1645.95, 1640.83, 1637.61, 1634.07, 1629.98, 1625.2, 1620.78, 1616.93, 1612.7, 1607.79, 1602.48, 1597.82, 1592.79, 1588.53, 1584.34, 1581.02, 1577.43, 1573.66, 1570.82, 1567.55, 1563.42, 1558.34, 1553.56, 1548.76, 1543.64, 1539.15, 1535.7, 1533.37, 1531.87, 1532.59, 1533.9, 1536.03, 1538.54, 1541.41, 1542.37, 1543.27, 1544.35, 1545.14, 1545.81, 1546.31, 1548.21, 1549.58, 1550.71, 1551.5, 1551.61, 1551.81, 1551.2, 1550.37, 1551.11, 1553.06, 1556.04, 1560.66, 1563.64, 1565.98, 1568.24, 1570.17, 1572.15, 1573.87, 1575.1, 1575.87, 1576.72, 1578.2, 1579.62, 1580.97, 1581.69, 1581.76, 1581.13, 1580.69, 1580.77, 1580.91, 1581.35, 1581.59, 1582.54, 1583.9, 1584.74, 1584.96, 1584.01, 1582.55, 1581.74, 1580.95, 1579.15, 1576.74, 1574.26, 1571.09, 1567.37, 1564.01, 1560.94, 1558.19, 1555.56, 1552.89, 1549.68, 1545.78, 1541.65, 1537.71, 1534.36, 1530.8, 1528.71, 1526.35, 1521.59, 1516.47, 1511.59, 1505.01, 1498.92, 1493.54, 1487.37, 1481.66, 1473.81, 1465.76, 1460.41, 1455.99, 1451.77, 1446.0, 1440.99, 1436.67, 1432.52, 1428.08, 1423.78, 1420.13, 1415.9, 1412.6, 1408.66, 1405.48, 1401.72, 1397.68, 1393.87, 1389.76, 1385.66, 1380.43, 1374.63, 1369.04, 1363.22, 1357.45, 1352.78, 1347.9, 1343.44, 1338.09, 1332.86, 1327.51, 1322.81, 1317.56, 1311.86, 1305.77, 1301.29, 1297.2, 1292.22, 1286.3, 1281.27, 1276.7, 1273.98, 1271.38, 1269.99, 1269.05, 1268.68, 1267.35, 1267.69, 1268.64, 1271.9, 1274.56, 1274.95, 1274.05, 1273.26, 1272.89, 1271.88, 1270.36, 1268.54, 1266.58, 1264.64, 1262.66, 1261.52, 1259.81, 1258.59, 1256.71, 1253.68, 1250.9, 1248.34, 1246.16, 1244.4, 1244.02, 1244.33, 1243.53, 1243.13, 1243.27, 1242.81, 1243.3, 1243.97, 1244.75, 1245.59, 1245.97, 1245.7],d150:[null, 1438.05, 1439.53, 1441.05, 1442.59, 1444.99, 1446.94, 1449.15, 1450.94, 1452.23, 1452.81, 1453.72, 1454.66, 1455.43, 1455.96, 1456.23, 1457.11, 1458.45, 1460.54, 1462.35, 1463.96, 1465.66, 1467.32, 1469.04, 1470.53, 1471.98, 1472.95, 1474.15, 1474.91, 1475.55, 1476.11, 1475.91, 1474.72, 1473.5, 1472.28, 1470.98, 1469.44, 1467.99, 1466.47, 1464.73, 1462.83, 1460.6, 1457.71, 1455.57, 1453.53, 1451.3, 1449.12, 1447.75, 1446.53, 1445.11, 1443.48, 1441.9, 1440.29, 1439.03, 1437.74, 1436.65, 1435.99, 1435.91, 1436.27, 1436.25, 1436.06, 1435.65, 1434.95, 1433.97, 1433.28, 1433.1, 1433.05, 1433.17, 1434.27, 1436.0, 1437.75, 1439.6, 1441.2, 1442.7, 1444.69, 1446.44, 1447.78, 1449.39, 1451.07, 1452.96, 1455.09, 1457.16, 1459.07, 1461.0, 1462.74, 1464.68, 1466.35, 1467.86, 1469.42, 1471.49, 1473.9, 1476.47, 1479.48, 1482.82, 1486.17, 1489.29, 1492.27, 1495.38, 1498.74, 1502.04, 1505.47, 1509.0, 1512.55, 1515.99, 1519.06, 1522.03, 1524.69, 1527.03, 1529.58, 1531.97, 1534.27, 1536.66, 1539.28, 1541.81, 1544.59, 1547.43, 1550.64, 1553.7, 1556.77, 1559.8, 1562.55, 1565.07, 1567.37, 1569.16, 1571.2, 1572.96, 1574.63, 1576.45, 1578.14, 1579.5, 1580.94, 1582.42, 1583.81, 1585.52, 1586.94, 1588.82, 1590.87, 1592.47, 1593.65, 1594.59, 1595.61, 1596.21, 1596.66, 1597.11, 1597.43, 1597.62, 1597.62, 1597.39, 1597.24, 1596.76, 1596.45, 1596.04, 1594.53, 1592.98, 1591.22, 1588.76, 1586.37, 1583.88, 1581.4, 1579.37, 1577.84, 1575.72, 1573.39, 1571.19, 1568.83, 1566.73, 1564.53, 1561.86, 1559.01, 1555.58, 1552.19, 1549.4, 1546.55, 1543.66, 1540.67, 1537.8, 1535.39, 1532.85, 1530.29, 1527.45, 1524.82, 1522.5, 1520.35, 1517.81, 1515.14, 1512.6, 1510.11, 1507.42, 1504.62, 1501.79, 1498.78, 1496.08, 1494.19, 1492.09, 1490.07, 1488.53, 1486.8, 1484.39, 1481.79, 1479.38, 1476.95, 1474.73, 1472.26, 1469.92, 1467.04, 1464.55, 1462.13, 1459.4, 1456.3, 1453.73, 1451.14, 1448.89, 1446.97, 1445.87, 1444.91, 1443.75, 1442.29, 1441.1, 1440.16, 1439.29, 1438.06, 1436.82, 1435.3, 1433.91, 1432.36, 1430.83, 1429.33, 1427.58, 1425.47, 1423.18, 1421.16, 1419.4, 1417.77, 1416.2, 1414.59, 1412.64, 1410.83, 1408.98, 1406.96, 1404.69, 1402.33, 1400.23, 1397.84, 1395.17, 1392.49, 1389.95, 1387.43, 1384.93, 1382.28, 1379.8, 1377.23, 1374.69],d200:[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1500.22, 1500.74, 1501.05, 1501.52, 1502.23, 1502.68, 1503.28, 1503.61, 1503.72, 1503.81, 1503.91, 1503.66, 1503.06, 1502.17, 1501.58, 1501.35, 1501.33, 1501.7, 1501.96, 1502.2, 1502.42, 1502.44, 1502.4, 1502.35, 1502.18, 1501.84, 1501.69, 1501.44, 1501.02, 1500.5, 1499.64, 1497.93, 1495.98, 1493.8, 1491.63, 1489.27, 1486.91, 1484.64, 1482.47, 1480.47, 1478.42, 1476.43, 1475.15, 1474.16, 1473.11, 1472.19, 1471.4, 1470.72, 1469.92, 1468.9, 1467.88, 1466.8, 1466.33, 1465.7, 1465.17, 1464.87, 1464.83, 1465.15, 1464.99, 1464.64, 1464.51, 1464.47, 1464.49, 1465.13, 1465.73, 1466.28, 1466.94, 1468.25, 1470.04, 1471.78, 1473.48, 1474.87, 1476.2, 1478.07, 1479.74, 1481.08, 1482.46, 1483.74, 1485.01, 1486.49, 1488.06, 1489.53, 1491.09, 1492.45, 1494.14, 1495.73, 1497.08, 1498.3, 1499.62, 1501.06, 1502.79, 1504.85, 1506.9, 1508.82, 1510.53, 1511.97, 1513.38, 1515.06, 1516.77, 1518.65, 1520.64, 1522.63, 1524.41, 1525.74, 1526.93, 1527.94, 1528.86, 1529.89, 1531.15, 1532.29, 1532.89, 1533.57, 1534.25, 1534.69, 1535.3, 1536.37, 1537.12, 1537.99, 1538.3, 1538.35, 1538.9, 1539.53, 1539.81, 1539.9, 1539.97, 1540.14, 1540.47, 1540.62, 1540.57, 1540.74, 1540.79, 1541.01, 1541.31, 1541.58, 1542.05, 1542.58, 1542.82, 1542.68, 1542.36, 1541.81, 1540.82, 1539.76, 1538.64, 1537.44, 1536.41, 1535.19, 1533.9, 1532.46, 1530.78, 1529.21, 1527.73, 1525.29, 1522.7, 1519.86, 1516.89, 1514.08, 1510.97, 1507.63, 1504.85, 1502.56, 1500.28, 1497.89, 1495.89, 1493.89, 1492.21, 1490.24, 1488.32, 1486.42, 1484.66, 1482.78, 1480.79, 1478.43, 1476.06, 1473.73, 1471.32, 1469.13, 1466.77, 1464.36, 1461.74, 1459.28, 1457.25, 1455.21, 1453.0, 1450.53, 1447.87, 1445.31, 1442.65, 1440.01, 1437.44, 1435.09, 1433.14, 1431.53, 1429.85, 1428.37, 1427.1, 1425.92, 1424.29, 1422.53, 1420.94, 1419.2, 1417.47],vol:[4432920, 5711655, 19982537, 12431994, 6823572, 9554463, 8394808, 4467666, 4428584, 7668758, 8169499, 6176138, 4531283, 5365587, 2574935, 2740650, 3125164, 7333258, 5572107, 4128802, 2840860, 4679966, 5084031, 3619853, 3075273, 3253951, 5459008, 2706713, 4684269, 1846080, 2045231, 3250994, 4160928, 2506938, 2277719, 1721691, 1669910, 2168014, 2601526, 2624523, 1500102, 3021430, 6256943, 2790287, 2574925, 2862587, 2222837, 5011132, 2757011, 2781305, 3084909, 6086096, 2750081, 1706051, 1778979, 1289206, 1982597, 1073753, 1008227, 3472849, 1575909, 1269755, 2013894, 1952370, 2043349, 1785436, 3467152, 1183630, 1287980, 1679391, 1698162, 1320841, 1744358, 1313310, 1186378, 1129103, 626658, 1718548, 4680341, 1496807, 1040158, 1127421, 1373690, 1356025, 1537976, 1962994, 1400153, 1182174, 1372102, 2020414, 4417500, 1327054, 1698777, 3338032, 3364466, 2945797, 1672560, 1347594, 2174965, 1232035, 326850, 1347483, 1230930, 2697487, 1894587, 1844623, 809134, 2101693, 2171717, 3060056, 1409286, 3992633, 1566128, 1310637, 4718903, 2358185, 1521310, 1219735, 1562523, 1551858, 4399462, 1455188, 1225592, 1245972, 1900973, 1440230, 736163, 1240350, 1046619, 1568685, 1554894, 1187921, 1629503, 2122000, 1602602, 1810907, 907070, 720157, 798177, 1256442, 1015587, 817447, 975094, 772845, 764304, 1213369, 1145867, 2130446, 1144940, 681478, 1061313, 1534959, 917193, 854521, 1808746, 2028398, 1764414, 1288820, 1253505, 1832515, 951384, 3660268, 2164548, 1454883, 1204091, 1976187, 1696080, 2530693, 1830315, 5785378, 3307440, 5410284, 2783558, 1462213, 1801895, 1639681, 2540851, 1302246, 1133736, 1663043, 1709640, 901508, 1366930, 1202401, 1072874, 901439, 1312682, 873158, 3319781, 1682338, 3150540, 2561793, 1533461, 1119602, 2081372, 1624184, 1531624, 1620635, 2195060, 2120620, 1858349, 2027771, 1909124, 1507667, 2661615, 2510822, 2459343, 2484627, 2950773, 2151571, 2020485, 2144856, 1790857, 4449476, 2724972, 2534434, 2222592, 2943754, 2375688, 2418769, 2430970, 1643169, 3311575, 1334615, 1395501, 1084591, 1238028, 1876708, 2429730, 4740623, 2522931, 3364296, 1958453, 2883848, 2274941, 2520735, 2650766, 2705051, 1401730, 1892291, 1653732, 1750026, 2489809, 1176424, 1199970, 1592677, 1997940, 2255976, 1377240, 1153482, 1215220, 965269],w52h:1828.9,w52l:1116.3};
+  var ctx=document.getElementById('price_CDSL_61119');
+  var ann=[];
+  if(D.w52h)ann.push({type:'line',yMin:D.w52h,yMax:D.w52h,borderColor:'#d2992288',borderWidth:1,borderDash:[4,3],label:{content:'52W High ₹'+D.w52h,display:true,color:'#d29922',font:{size:9},position:'end'}});
+  if(D.w52l)ann.push({type:'line',yMin:D.w52l,yMax:D.w52l,borderColor:'#8b949e66',borderWidth:1,borderDash:[4,3],label:{content:'52W Low ₹'+D.w52l,display:true,color:'#8b949e',font:{size:9},position:'start'}});
+  var maxVol=Math.max.apply(null,D.vol)||1;
+  new Chart(ctx,{
+    data:{
+      labels:D.labels,
+      datasets:[
+        {type:'line',label:'Price (CMP)',data:D.price,borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,0.06)',borderWidth:2,pointRadius:0,fill:true,yAxisID:'y',order:1,tension:0.1},
+        {type:'line',label:'50 DMA',data:D.d50,borderColor:'#f0883e',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:2,spanGaps:true,tension:0.1},
+        {type:'line',label:'150 DMA',data:D.d150,borderColor:'#d29922',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:3,spanGaps:true,tension:0.1},
+        {type:'line',label:'200 DMA',data:D.d200,borderColor:'#a371f7',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:4,spanGaps:true,tension:0.1},
+        {type:'bar',label:'Volume',data:D.vol,backgroundColor:D.price.map((v,i)=>i>0&&v>=D.price[i-1]?'rgba(63,185,80,0.3)':'rgba(248,81,73,0.3)'),yAxisID:'y2',order:5}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{labels:{color:'#8b949e',font:{size:10},boxWidth:14,padding:12}},
+        tooltip:{
+          backgroundColor:'#161b22',borderColor:'#30363d',borderWidth:1,
+          titleColor:'#c9d1d9',bodyColor:'#8b949e',padding:10,
+          callbacks:{
+            label:function(c){
+              if(c.datasetIndex===4)return'Vol: '+(c.parsed.y/1e5).toFixed(1)+'L shares';
+              if(c.parsed.y==null)return null;
+              return c.dataset.label+': ₹'+c.parsed.y.toLocaleString('en-IN');
+            }
+          }
+        },
+        annotation:{annotations:ann}
+      },
+      scales:{
+        x:{grid:{color:'#21262d40',drawTicks:false},ticks:{color:'#484f58',maxTicksLimit:8,font:{size:9},callback:function(v,i){var d=this.getLabelForValue(v);return d?d.substring(0,7):'';} }},
+        y:{position:'left',grid:{color:'#21262d30'},ticks:{color:'#484f58',font:{size:9},callback:function(v){return'₹'+v.toLocaleString('en-IN');}}},
+        y2:{position:'right',grid:{display:false},max:maxVol*5,ticks:{color:'#484f58',font:{size:8},callback:function(v){return(v/1e5).toFixed(0)+'L';}}}
+      }
+    }
+  });
+})();
+</script>
   </div>
 </div>
 
-<!-- SECTION 02: FINANCIAL PICTURE -->
-<div class="section">
-  <div class="section-head"><span class="section-num">02</span><span class="section-title">The Financial Picture</span></div>
-  <p class="para">For the current fiscal year FY2024-25, the revenue and order book figures are currently undisclosed, which leaves a gap in the immediate financial picture. However, looking at the prior fiscal year, CDSL reported a revenue of ₹812.26 Cr. The business model is robust, generating revenue through various fee-based charges like annual issuer charges, transaction charges, and e-voting, which is typical for a market infrastructure institution.</p>
-  <p class="para">From a profitability standpoint, CDSL boasts a strong Return on Equity (ROE) of 24.5% and Return on Capital Employed (ROCE) of 32.0%, indicating efficient capital utilization. However, the Price-to-Earnings (PE) ratio stands at a relatively high 56.1. The company undertook significant Capex of ₹124.41 Cr, though the utilisation percentage for this investment is not provided. The debt-to-equity ratio is also undisclosed, but typically for such businesses, it tends to be low.</p>
-  <div class="warn-strip">
-    <div class="ws-label">Governance Concerns</div>
-    <div class="ws-content">I'm noting significant governance concerns, particularly the multiple financial disincentives and settlements imposed by SEBI. These range from ₹10 lakh for cyber security non-compliance and breach reporting failures, to ₹50 lakh for pay-in procedure issues, ₹3 crore for past technical glitches, and a ₹1.3 crore settlement for alleged violations. These incidents collectively raise questions about
+<div style="margin-top:18px;padding:14px;background:#0d1117;border-radius:8px;border-left:3px solid #f85149">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <span style="font-family:monospace;font-size:13px;font-weight:700;color:#f85149">AVOID</span>
+    <span style="font-size:10px;color:#484f58;font-family:monospace">3-month · 6-month outlook</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+    <div></div>
+    <div><div style="font-size:11px;color:#8b949e;margin-bottom:8px">Stage 4 — declining/topping. No entry.</div></div>
+    <div><div style="font-size:11px;color:#8b949e;margin-bottom:4px">Reassess when 200DMA stabilises and price recovers above it.</div></div>
+  </div>
+</div></div><div class="card"><div class="section-title">Portfolio Analytics</div><div style="color:#484f58;font-size:12px">Not in ranked candidate list. Run rank_candidates.py to score.</div></div><div class="card">
+<div class="section-title">Investor Network · <span class="tip" data-tip="Shows which fund houses hold this company and what other companies in our universe they also hold — reveals shared institutional conviction">Cross-Holdings</span></div>
+<div style="font-size:10px;color:#8b949e;margin-bottom:10px">
+  <span style="color:#3fb950">●</span> Entering &nbsp;
+  <span style="color:#58a6ff">●</span> Stable &nbsp;
+  <span style="color:#f85149">●</span> Exiting &nbsp;
+  <span style="color:#8b949e;margin-left:8px">■</span> Fund house (square) &nbsp;
+  <span style="color:#484f58">—</span> Solid = active · Dashed = exiting &nbsp;
+  Hover nodes for details
 </div>
-</div>
-<div class="sources"><strong>Sources</strong>Annual Report FY25 · NSE XBRL filings · screener.in · BSE shareholding pattern · NAV Framework signals extraction (Gemini 2.5 Flash) · Price data: Zerodha Kite · Technical methodology: SEPA framework (Minervini, 2013)</div>
-<div class="report-foot">
-  <a href="/" class="back-link">← All Reports</a>
-  <div class="foot-meta">Published 10 Jun 2026 · Author: PAI</div>
+<div id="net_CDSL_61119" style="height:420px;background:#0d1117;border-radius:8px;border:1px solid #21262d"></div>
+<script>
+(function(){
+  if(typeof vis==='undefined')return;
+  var N=new vis.DataSet([{"id": 0, "label": "CDSL", "shape": "dot", "color": {"background": "#8b949e", "border": "#ffffff"}, "size": 26, "font": {"color": "#e6edf3", "size": 13, "bold": true, "face": "monospace"}, "title": "<b>CDSL</b><br>Subject company"}, {"id": 1, "label": "Vanguard", "shape": "square", "color": {"background": "#ffa65722", "border": "#ffa657"}, "size": 15, "font": {"color": "#ffa657", "size": 9, "face": "sans-serif"}, "title": "<b>Vanguard</b><br>Tier: elite<br>Category: entering<br>Holds 3 other universe companies"}, {"id": 2, "label": "FIVESTAR", "shape": "dot", "color": {"background": "#f8514955", "border": "#f85149"}, "size": 14, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>FIVESTAR</b><br>Composite: 6.0"}, {"id": 3, "label": "SANSERA", "shape": "dot", "color": {"background": "#79c0ff55", "border": "#79c0ff"}, "size": 13, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>SANSERA</b><br>Composite: 5.3"}, {"id": 4, "label": "SUZLON", "shape": "dot", "color": {"background": "#58a6ff55", "border": "#58a6ff"}, "size": 15, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>SUZLON</b><br>Composite: 7.1"}]);
+  var E=new vis.DataSet([{"from": 0, "to": 1, "color": {"color": "#3fb950bb", "highlight": "#3fb950"}, "width": 3, "dashes": false, "title": "entering"}, {"from": 2, "to": 1, "color": {"color": "#f8514944"}, "width": 1, "dashes": true, "title": "FIVESTAR \u2014 exiting"}, {"from": 3, "to": 1, "color": {"color": "#3fb95044"}, "width": 1, "dashes": false, "title": "SANSERA \u2014 entering"}, {"from": 4, "to": 1, "color": {"color": "#58a6ff44"}, "width": 1, "dashes": false, "title": "SUZLON \u2014 stable"}]);
+  new vis.Network(
+    document.getElementById('net_CDSL_61119'),
+    {nodes:N,edges:E},
+    {
+      nodes:{shadow:{enabled:true,color:'rgba(0,0,0,0.5)',size:8},borderWidth:1},
+      edges:{smooth:{type:'continuous'}},
+      physics:{
+        barnesHut:{gravitationalConstant:-5000,centralGravity:0.25,springLength:130,springConstant:0.05},
+        stabilization:{iterations:120}
+      },
+      interaction:{hover:true,tooltipDelay:100,navigationButtons:false,keyboard:false},
+      configure:{enabled:false}
+    }
+  );
+})();
+</script></div>
+<div style="font-family:monospace;font-size:9px;color:#30363d;margin-top:28px;text-align:center">
+  NAV Framework · 2026-06-10 · CDSL · Private research only
 </div>
 </body>
 </html>
