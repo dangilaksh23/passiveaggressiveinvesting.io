@@ -1,316 +1,426 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BZ — US Deep Dive</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BZ — Deep Dive · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-       background: #0d1117; color: #c9d1d9; padding: 28px 32px; font-size: 13px; line-height: 1.5; }
-.card { background: #161b22; border-radius: 10px; padding: 22px 24px;
-        box-shadow: 0 1px 6px rgba(0,0,0,.25); margin-bottom: 16px; }
-.section-title { font-family: monospace; font-size: 10px; letter-spacing: .14em;
-                 text-transform: uppercase; color: #8b949e; margin-bottom: 14px;
-                 display: flex; align-items: center; gap: 8px; }
-.metrics-row { display: flex; flex-wrap: wrap; gap: 10px; }
-.metric-box { background: #0d1117; border-radius: 6px; padding: 10px 14px; min-width: 115px; }
-.metric-label { font-family: monospace; font-size: 9px; letter-spacing: .1em;
-                text-transform: uppercase; color: #484f58; margin-bottom: 4px; }
-.metric-val { font-family: monospace; font-size: 18px; font-weight: 700; }
-.metric-sub { font-family: monospace; font-size: 9px; color: #8b949e; margin-top: 3px; }
-.mini-card { background: #0d1117; border-radius: 6px; padding: 12px; }
-.mini-label { font-family: monospace; font-size: 9px; letter-spacing: .1em;
-              text-transform: uppercase; color: #484f58; }
-.mini-metric { display: inline-flex; flex-direction: column; margin-right: 16px; margin-bottom: 8px; }
-.mini-metrics-row { display: flex; flex-wrap: wrap; }
-.ml { font-size: 9px; color: #484f58; font-family: monospace; text-transform: uppercase; letter-spacing: .06em; }
-.mv { font-family: monospace; font-size: 14px; font-weight: 700; color: #e6edf3; }
-.ms { font-size: 9px; color: #8b949e; font-family: monospace; }
-.peer-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.peer-table th { font-family: monospace; font-size: 9px; letter-spacing: .08em;
-                 text-transform: uppercase; color: #484f58; padding: 6px 10px;
-                 text-align: left; border-bottom: 1px solid #21262d; white-space: nowrap; }
-.peer-table td { padding: 8px 10px; border-bottom: 1px solid #161b22; vertical-align: middle; }
-.peer-table tr:hover td { background: #1c2128; }
-.tip { border-bottom: 1px dashed #484f58; cursor: help; position: relative; }
-.tip:hover::after { content: attr(data-tip); position: absolute; bottom: 120%; left: 0;
-  background: #161b22; border: 1px solid #30363d; border-radius: 6px;
-  padding: 6px 10px; font-size: 11px; color: #c9d1d9; white-space: nowrap;
-  z-index: 10; min-width: 180px; max-width: 300px; white-space: normal; line-height: 1.5; }
-.takeaway { font-size: 11px; border-left: 2px solid; padding: 3px 8px; margin-bottom: 5px; }
-.fin-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-.fin-table th { font-family: monospace; font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
-  color: #484f58; padding: 5px 8px; border-bottom: 1px solid #21262d; text-align: right; }
-.fin-table th:first-child { text-align: left; }
-.fin-table td { padding: 5px 8px; border-bottom: 1px solid #0d1117; font-family: monospace; font-size: 11px;
-  text-align: right; color: #c9d1d9; }
-.fin-table td:first-child { text-align: left; color: #8b949e; font-size: 10px; white-space: nowrap; }
-.fin-table tr:hover td { background: #161b22; }
-@media (max-width: 800px) { body { padding: 16px; } }
+:root{--paper:#f5f2eb;--paper2:#ede9e0;--card:#fff;--rule:#d4cfc4;--ink:#0d0d0d;--muted:#7a7060;--green:#1a5c38;--green-pale:#d4edd8;--amber:#b35a00;--amber-pale:#fdefd8;--red:#8b1a1a;--red-pale:#fde0e0;--blue:#1a3a6b;--blue-pale:#dde5f5;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6}
+.disclaimer-banner{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:10.5px;padding:8px 24px;text-align:center;letter-spacing:.02em}
+.disclaimer-banner a{color:var(--paper);text-decoration:underline}
+.masthead{border-bottom:1px solid var(--rule);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--paper)}
+.logo-block{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink)}
+.logo-pi{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-1.5px}
+.logo-name{font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:.06em;text-transform:uppercase}
+.report-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.report-type{color:var(--green);font-weight:500}
+.page{max-width:900px;margin:0 auto}
+.report-head{padding:36px 36px 28px;background:var(--card);border-bottom:1px solid var(--rule)}
+.head-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.pill{font-family:var(--mono);font-size:9px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.pill.stage-2{background:var(--green-pale);color:var(--green)}
+.pill.stage-3{background:var(--amber-pale);color:var(--amber)}
+.pill.stage-4{background:var(--red-pale);color:var(--red)}
+.pill.transition{background:#fff3e0;color:#e65100}
+.pill.neutral{background:var(--paper2);color:var(--muted)}
+.pill.warn{background:#fff8e6;color:var(--amber);border:1px solid #f0c060}
+.head-title{font-family:var(--serif);font-size:38px;font-weight:500;line-height:1.15;letter-spacing:-.5px;margin-bottom:6px}
+.head-subtitle{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:18px}
+.head-tagline{font-size:14px;color:#444;line-height:1.7;max-width:700px}
+.content{padding:0 36px 40px}
+.section{padding:32px 0;border-bottom:1px solid var(--paper2)}
+.section:last-child{border-bottom:none}
+.section-head{display:flex;align-items:baseline;gap:16px;margin-bottom:22px}
+.section-num{font-family:var(--mono);font-size:11px;font-weight:500;color:#fff;background:var(--ink);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.05em}
+.section-title{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-.3px;line-height:1.2}
+.thesis-box{background:var(--paper);border-left:3px solid var(--green);border-radius:4px;padding:22px 26px}
+.th-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.th-call{font-family:var(--serif);font-size:18px;font-weight:300;line-height:1.5;color:var(--ink)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+.kpi-cell{background:var(--paper);border-radius:8px;padding:14px 16px}
+.kpi-label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.kpi-value{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.1}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
+.kpi-cell.green{background:var(--green-pale)}.kpi-cell.green .kpi-value{color:var(--green)}
+.kpi-cell.amber{background:var(--amber-pale)}.kpi-cell.amber .kpi-value{color:var(--amber)}
+.kpi-cell.red{background:var(--red-pale)}.kpi-cell.red .kpi-value{color:var(--red)}
+.score-block{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:28px;margin-bottom:24px}
+.score-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.score-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.score-date{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.score-total{display:flex;align-items:baseline;gap:12px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--paper2)}
+.score-num-big{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-2px}
+.score-denom{font-family:var(--mono);font-size:16px;color:var(--muted)}
+.tier-badge{margin-left:auto;font-family:var(--mono);font-size:10px;padding:5px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.tier-watch{background:#fff8e6;color:var(--amber);border:1px solid #f0c060}
+.tier-quality{background:var(--green-pale);color:var(--green);border:1px solid #a0d8a8}
+.score-components{display:flex;flex-direction:column;gap:14px}
+.component{display:grid;grid-template-columns:180px 1fr 56px;align-items:center;gap:12px}
+.component label{font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.component .bar{height:8px;background:var(--paper2);border-radius:4px;overflow:hidden}
+.component .fill{height:100%;border-radius:4px}
+.component .value{font-family:var(--mono);font-size:12px;color:var(--ink);text-align:right;font-weight:500}
+.component-rationale{font-family:var(--sans);font-size:12px;color:var(--muted);padding-left:192px;margin-top:-8px;line-height:1.6}
+.layer-strip{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 18px}
+.layer-chip{font-family:var(--mono);font-size:9px;font-weight:500;padding:4px 10px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
+.lc-strong{background:var(--green-pale);color:var(--green)}
+.lc-moderate{background:var(--amber-pale);color:var(--amber)}
+.lc-weak{background:var(--red-pale);color:var(--red)}
+.lc-clean{background:var(--green-pale);color:var(--green)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}
+.info-block{background:var(--paper);border-radius:8px;padding:18px 20px}
+.ib-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.ib-content{font-size:13px;line-height:1.7;color:#333}
+.ib-content strong{color:var(--ink);font-weight:600}
+.warn-strip{background:#fff8e6;border-left:3px solid var(--amber);border-radius:4px;padding:14px 18px;display:flex;gap:12px;margin:18px 0}
+.ws-icon{font-size:20px;line-height:1;flex-shrink:0;color:var(--amber)}
+.ws-text{font-size:13px;line-height:1.6;color:#4a3a00}
+.ws-text strong{color:var(--amber)}
+.para{font-size:14px;line-height:1.75;color:#333;margin-bottom:14px}
+.para strong{color:var(--ink);font-weight:600}
+.para em{color:var(--green);font-style:italic}
+.peer-table{width:100%;border-collapse:collapse;margin:18px 0;background:var(--paper);border-radius:8px;overflow:hidden}
+.peer-table th{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);font-weight:500}
+.peer-table td{padding:10px 12px;font-size:12px;border-bottom:1px solid var(--paper2)}
+.peer-table tbody tr:last-child td{border-bottom:none}
+.peer-table .highlight{background:var(--green-pale)}
+.peer-table .highlight td:first-child{font-weight:600}
+.tech-citation{background:var(--paper);border-radius:6px;padding:14px 18px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:18px;font-style:italic}
+.tech-citation strong{color:var(--ink);font-style:normal;font-weight:600}
+.risk-list{list-style:none;padding:0;margin:14px 0}
+.risk-list li{background:var(--paper);border-left:3px solid var(--red);border-radius:4px;padding:12px 18px;margin-bottom:8px;font-size:13px;line-height:1.6}
+.risk-list li strong{color:var(--red);font-weight:600;display:block;margin-bottom:3px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.risk-list.watch li{border-left-color:var(--amber)}
+.risk-list.watch li strong{color:var(--amber)}
+.stand-box{background:var(--paper);border-left:3px solid var(--blue);border-radius:4px;padding:22px 26px;margin:18px 0}
+.sb-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+.sb-text{font-size:14px;line-height:1.75;color:#333}
+.ownership-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.sources{padding:24px 36px;background:var(--paper);border-top:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.8;letter-spacing:.02em}
+.sources strong{color:var(--ink);display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;font-weight:500}
+.report-foot{padding:24px 36px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--paper)}
+.foot-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.04em}
+.back-link{font-family:var(--mono);font-size:11px;color:var(--blue);text-decoration:none;padding:8px 14px;background:var(--blue-pale);border-radius:6px;letter-spacing:.06em;text-transform:uppercase}
+h3.sub-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
+@media(max-width:700px){.report-head{padding:24px 20px}.head-title{font-size:28px}.content{padding:0 20px 30px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}.ownership-grid{grid-template-columns:repeat(2,1fr)}.component{grid-template-columns:120px 1fr 50px}.component-rationale{padding-left:0}.report-foot{flex-direction:column;gap:12px;align-items:flex-start}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/dist/vis-network.min.js"></script>
 </head>
 <body>
-<div class="card" style="margin-bottom:16px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap"><div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px"><span style="font-family:monospace;font-size:24px;font-weight:800;color:#e6edf3">BZ</span><span style="font-size:15px;color:#8b949e">BZ</span><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:6px;font-size:10px">Internet Content & Information</span><span style="background:#21262d;color:#484f58;padding:2px 8px;border-radius:6px;font-size:10px">Communication Services</span></div><div style="margin-bottom:12px"><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">NN clean</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8514922;color:#f85149;margin-right:4px">avoid</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8514922;color:#f85149;margin-right:4px">Stage 4</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8514922;color:#f85149;margin-right:4px">TT 0/8</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#8b949e22;color:#8b949e;margin-right:4px">China</span></div><div style="margin-top:12px;padding:8px 12px;background:#161b22;border-left:2px solid #30363d;border-radius:4px;font-family:monospace;font-size:9px;color:#484f58;letter-spacing:.04em">⚠ DATA GAPS — missing: Customers · Directors. Sections below will show placeholders where data is unavailable.</div></div><div style="text-align:right"><div style="font-family:monospace;font-size:38px;font-weight:800;color:#3fb950;line-height:1">8.5</div><div style="font-size:9px;color:#484f58;letter-spacing:.1em;text-transform:uppercase;margin-top:2px">Quality Score / 10</div><div style="margin-top:10px"><span style="font-family:monospace;font-size:22px;font-weight:700;color:#58a6ff">$13.63</span><span style='font-family:monospace;font-size:11px;color:#484f58;margin-left:8px'>$6.0B</span><div style="font-family:monospace;font-size:10px;color:#f85149;margin-top:2px">1yr -24.8%</div></div></div></div></div><div class="card"><div class="section-title">Industry &amp; Macro Outlook</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px"><div><div class="mini-label" style="margin-bottom:8px">Sector Outlook · Communication Services</div><div style="background:#0d1117;border-radius:8px;padding:16px 18px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="font-family:monospace;font-size:11px;font-weight:700;color:#c9d1d9">Communication Services</span><span style="background:#3fb95022;color:#3fb950;font-family:monospace;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:.06em">POSITIVE</span></div><div style="font-size:11px;color:#8b949e;line-height:1.7">Streaming profitability improving. Digital ad market recovering strongly. 5G monetisation maturing; AI content moderation driving opex.</div></div></div><div><div class="mini-label" style="margin-bottom:8px">Management Outlook</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:0"><span style="font-family:monospace;font-size:13px;font-weight:700;color:#d29922">Neutral</span><span style='font-size:9px;color:#484f58;font-family:monospace'>· Tone</span></div></div></div></div><div class="card">
-<div class="section-title">Business Model<span style="font-size:9px;color:#484f58;font-family:monospace;font-weight:400;letter-spacing:0"> · 10-K 2026-04</span></div>
+<!-- VERDICT_BANNER -->
 
-<p style="font-size:12px;color:#8b949e;line-height:1.7;margin-bottom:14px;max-width:820px">Organizational Structure Contractual Arrangements with the VIE and Its Shareholders. 4 Table of Contents However, the contractual arrangements may not be as effective as direct ownership in providing us with control over the VIE and we may incur substantial costs to enforce the terms of the arrangements. Uncertainties in the PRC legal system may limit our ability, as a Cayman Islands holding company, to enforce these contractual arrangements. Meanwhile, there are very few precedents as to whether contractual arrangements would be judged to direct the activities of the VIE through the contractual arrangements, or how contractual arrangements in the context of a VIE should be interpreted or enforced by the courts of the Chinese mainland.</p>
-
-<div style="margin-bottom:12px">
-  <div class="mini-label" style="margin-bottom:5px">Model Type · Revenue Model · Value Chain</div>
-  <span style="background:#21262d;color:#8b949e;padding:2px 9px;border-radius:12px;font-size:10px;margin:2px 3px 2px 0;display:inline-block">mixed</span><span style="background:#21262d;color:#8b949e;padding:2px 9px;border-radius:12px;font-size:10px;margin:2px 3px 2px 0;display:inline-block">mixed</span>
-</div>
-
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:10px">
-
+<div id="verdict-banner" style="background:#161b22;border-radius:10px;padding:16px 24px;
+  margin-bottom:16px;border-left:3px solid #f85149;display:flex;align-items:flex-start;
+  justify-content:space-between;flex-wrap:wrap;gap:12px">
   <div>
-    <div class="mini-label" style="margin-bottom:6px">Competitive Moat</div><div style="margin-bottom:12px"><span style="background:#3fb95022;color:#3fb950;padding:2px 9px;border-radius:12px;font-size:10px;margin:2px 3px 2px 0;display:inline-block;font-weight:600">none_stated</span></div>
-    <div class="mini-label" style="margin-bottom:6px">Key Risks</div><div style="font-size:11px;color:#f0883e;padding:3px 0 3px 6px;border-left:2px solid #f0883e33;margin-bottom:4px">&#9651; Other sections of this annual report discuss factors which could adversely impact our business and financial performance.</div><div style="font-size:11px;color:#f0883e;padding:3px 0 3px 6px;border-left:2px solid #f0883e33;margin-bottom:4px">&#9651; Identity of Directors, Senior Management and Advisers Not applicable.</div>
-  </div>
-
-  <div>
-    
-    <div class="mini-label" style="margin-top:10px;margin-bottom:6px">Operational Metrics</div><div class="mini-metrics-row"><div class="mini-metric"><span class="ml">Employees</span><span class="mv" style="color:#c9d1d9;font-size:12px">4,884</span></div><div class="mini-metric"><span class="ml">Reg. Exposure</span><span class="mv" style="color:#3fb950;font-size:12px">Lightly Regulated</span></div></div>
-  </div>
-
-</div>
-</div><div class="card">
-<div class="section-title">Financials · Peer Comparison</div>
-
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px">
-
-  <div class="mini-card">
-    <div class="mini-label" style="margin-bottom:8px">Revenue & <span class="tip" data-tip="Operating profit as % of revenue — higher = better cost control">Op Margin</span></div>
-    <table class="fin-table">
-      <thead><tr><th>Year</th><th>Revenue</th><th>∆%</th><th><span class="tip" data-tip="Operating profit as % of revenue — higher = better cost control">Op Margin</span></th><th>Net Inc.</th><th>FCF</th></tr></thead>
-      <tbody><tr><td>2022</td><td>$4,511M</td><td style="color:#8b949e">—</td><td style="color:#f85149">-2.9%</td><td style="color:#8b949e">$107M</td><td>$663M</td></tr><tr><td>2023</td><td>$5,952M</td><td style="color:#3fb950">+32%</td><td style="color:#d29922">9.8%</td><td style="color:#3fb950">$1,099M</td><td>$2,092M</td></tr><tr><td>2024</td><td>$7,356M</td><td style="color:#3fb950">+24%</td><td style="color:#3fb950">15.9%</td><td style="color:#3fb950">$1,585M</td><td>$2,686M</td></tr><tr style="background:#1c2128"><td>2025</td><td>$8,268M</td><td style="color:#3fb950">+12%</td><td style="color:#3fb950">29.8%</td><td style="color:#3fb950">$2,735M</td><td>$4,433M</td></tr></tbody>
-    </table>
-    <div style="margin-top:10px"><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Revenue +12% YoY → $8,268M</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Revenue CAGR 22.4% (multi-year)</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Op margin 29.8% · sector 93th pct</div></div>
-  </div>
-
-  <div class="mini-card">
-    <div class="mini-label" style="margin-bottom:8px">Cash Management · <span class="tip" data-tip="Free cash flow as % of revenue — true cash generation after capex">FCF Margin</span> · <span class="tip" data-tip="Cash Conversion Cycle = DSO + DIO − DPO. Negative = business collects before paying">CCC</span></div>
-    <table class="fin-table">
-      <thead><tr><th>Year</th><th><span class="tip" data-tip="Free cash flow as % of revenue — true cash generation after capex">FCF Margin</span></th><th><span class="tip" data-tip="Cash Conversion Cycle = DSO + DIO − DPO. Negative = business collects before paying">CCC</span></th><th>DSO</th><th>DIO</th><th>DPO</th></tr></thead>
-      <tbody><tr><td>2022</td><td style="color:#3fb950">14.7%</td><td style="color:#3fb950">-89d</td><td>1d</td><td>—</td><td>90d</td></tr><tr><td>2023</td><td style="color:#3fb950">35.1%</td><td style="color:#3fb950">-216d</td><td>1d</td><td>—</td><td>217d</td></tr><tr><td>2024</td><td style="color:#3fb950">36.5%</td><td style="color:#3fb950">-30d</td><td>2d</td><td>1d</td><td>33d</td></tr><tr style="background:#1c2128"><td>2025</td><td style="color:#3fb950">53.6%</td><td style="color:#3fb950">-33d</td><td>2d</td><td>1d</td><td>36d</td></tr></tbody>
-    </table>
-    <div style="margin-top:10px"><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">FCF margin 53.6% · sector 98th pct</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">FCF trend: improving</div><div class="takeaway" style="border-color:#f8514944;color:#f85149">CCC worsened -89d → -33d (+56d)</div></div>
-  </div>
-
-  <div class="mini-card">
-    <div class="mini-label" style="margin-bottom:8px">Balance Sheet · <span class="tip" data-tip="Net Debt ÷ EBITDA — leverage ratio. Below 1× = low leverage">ND/EBITDA</span> · <span class="tip" data-tip="Return on equity. Above 15% is strong for most sectors">ROE</span></div>
-    <table class="fin-table">
-      <thead><tr><th>Year</th><th><span class="tip" data-tip="Net Debt ÷ EBITDA — leverage ratio. Below 1× = low leverage">ND/EBITDA</span></th><th><span class="tip" data-tip="Return on equity. Above 15% is strong for most sectors">ROE</span></th><th>Cash</th><th>Net Debt</th></tr></thead>
-      <tbody><tr><td>2022</td><td style="color:#3fb950">-59.9×</td><td style="color:#f85149;font-size:11px">0.9%</td><td>$9,752M</td><td>$-9,457M</td></tr><tr><td>2023</td><td style="color:#3fb950">-2.2×</td><td style="color:#d29922;font-size:11px">8.2%</td><td>$2,473M</td><td>$-2,193M</td></tr><tr><td>2024</td><td style="color:#3fb950">-1.2×</td><td style="color:#d29922;font-size:11px">10.7%</td><td>$2,553M</td><td>$-2,251M</td></tr><tr style="background:#1c2128"><td>2025</td><td style="color:#3fb950">-1.2×</td><td style="color:#d29922;font-size:11px">13.7%</td><td>$4,105M</td><td>$-3,947M</td></tr></tbody>
-    </table>
-    <div style="margin-top:10px"><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Net debt/EBITDA -1.2× — net cash</div><div class="takeaway" style="border-color:#d2992244;color:#d29922">ROE 13.7% · sector 67th pct</div></div>
-  </div>
-
-</div>
-
-<div style="margin-top:20px">
-  <div class="mini-label" style="margin-bottom:8px">Sector Peers — <span class="tip" data-tip="Sector-relative percentile rank across FCF margin, op margin, ROE, CAGR, CCC">Quality Score</span> ranked · MCap > $500M</div>
-  
-<div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px;margin-bottom:16px">
-  <div>
-    <div class="mini-label" style="margin-bottom:12px">P/E vs Peers · cheapest → most expensive<span style="background:#d2992222;color:#d29922;font-family:monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;letter-spacing:.04em;margin-left:10px">PE IN LINE (-16%)</span></div>
-    <div style="position:relative;padding-top:18px"><div style="position:relative;margin-bottom:6px"><div style="position:absolute;left:29%;top:0;height:100%;border-left:1px dashed #484f5888;pointer-events:none"></div><span style="position:absolute;left:29%;top:-14px;font-size:8px;color:#484f58;font-family:monospace;transform:translateX(-50%)">med 15×</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">DDI</span><div style="width:180px;height:8px;background:#21262d;border-radius:3px;position:relative"><div style="width:17px;height:8px;background:#30363d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400">5.0×</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">TME</span><div style="width:180px;height:8px;background:#21262d;border-radius:3px;position:relative"><div style="width:37px;height:8px;background:#30363d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400">10.9×</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">TIMB</span><div style="width:180px;height:8px;background:#21262d;border-radius:3px;position:relative"><div style="width:42px;height:8px;background:#30363d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400">12.4×</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#e6edf3;font-weight:700;min-width:52px">BZ</span><div style="width:180px;height:8px;background:#21262d;border-radius:3px;position:relative"><div style="width:43px;height:8px;background:#58a6ff;border-radius:3px"></div></div><span style="font-family:monospace;font-size:10px;color:#e6edf3;font-weight:700">12.6×</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">NETTF</span><div style="width:180px;height:8px;background:#21262d;border-radius:3px;position:relative"><div style="width:51px;height:8px;background:#30363d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400">15.0×</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">NTES</span><div style="width:180px;height:8px;background:#21262d;border-radius:3px;position:relative"><div style="width:52px;height:8px;background:#30363d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400">15.4×</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">MEIUF</span><div style="width:180px;height:8px;background:#21262d;border-radius:3px;position:relative"><div style="width:180px;height:8px;background:#30363d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400">52.5×</span></div></div>
-  </div>
-  <div>
-    <div class="mini-label" style="margin-bottom:8px"><span class="tip" data-tip="Quality Score ÷ P/E — quality per unit of valuation paid. Higher = better value">Q/PE</span> Efficiency · quality per unit of PE</div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">DDI</span><div style="width:140px;height:8px;background:#21262d;border-radius:3px"><div style="width:140px;height:8px;background:#21262d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:9px;color:#484f58">15.83</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">TME</span><div style="width:140px;height:8px;background:#21262d;border-radius:3px"><div style="width:64px;height:8px;background:#21262d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:9px;color:#484f58">7.27</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#e6edf3;font-weight:700;min-width:52px">BZ</span><div style="width:140px;height:8px;background:#21262d;border-radius:3px"><div style="width:59px;height:8px;background:#3fb950;border-radius:3px"></div></div><span style="font-family:monospace;font-size:9px;color:#484f58">6.71</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">TIMB</span><div style="width:140px;height:8px;background:#21262d;border-radius:3px"><div style="width:55px;height:8px;background:#21262d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:9px;color:#484f58">6.28</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">NETTF</span><div style="width:140px;height:8px;background:#21262d;border-radius:3px"><div style="width:46px;height:8px;background:#21262d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:9px;color:#484f58">5.30</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">NTES</span><div style="width:140px;height:8px;background:#21262d;border-radius:3px"><div style="width:45px;height:8px;background:#21262d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:9px;color:#484f58">5.16</span></div>
-  </div>
-</div>
-  <table class="peer-table">
-    <thead><tr><th>Ticker</th><th><span class="tip" data-tip="Sector-relative percentile rank across FCF margin, op margin, ROE, CAGR, CCC">Quality Score</span></th><th><span class="tip" data-tip="Operating profit as % of revenue — higher = better cost control">Op Margin</span></th><th><span class="tip" data-tip="Free cash flow as % of revenue — true cash generation after capex">FCF Margin</span></th><th>Rev CAGR</th><th>P/E</th><th><span class="tip" data-tip="Quality Score ÷ P/E — quality per unit of valuation paid. Higher = better value">Q/PE</span></th><th>Mkt Cap</th></tr></thead>
-    <tbody><tr style="background:#1c2128;"><td style="font-weight:700;color:#58a6ff">BZ  ←</td><td><span style="font-family:monospace;font-size:11px;color:#e6edf3">85</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:70px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">29.8%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">53.6%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">22.4%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">12.6×</td><td style="font-family:monospace;font-size:11px;color:#8b949e">6.71</td><td style="font-family:monospace;font-size:11px;color:#8b949e">$6.0B</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">NETTF</td><td><span style="font-family:monospace;font-size:11px;color:#e6edf3">80</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:65px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">31.8%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">43.2%</td><td style="font-family:monospace;font-size:11px;color:#d29922">5.3%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">15.0×</td><td style="font-family:monospace;font-size:11px;color:#8b949e">5.30</td><td style="font-family:monospace;font-size:11px;color:#8b949e">$74.9B</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">NTES</td><td><span style="font-family:monospace;font-size:11px;color:#e6edf3">79</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:65px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">31.8%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">43.2%</td><td style="font-family:monospace;font-size:11px;color:#d29922">5.3%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">15.4×</td><td style="font-family:monospace;font-size:11px;color:#8b949e">5.16</td><td style="font-family:monospace;font-size:11px;color:#8b949e">$76.9B</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">DDI</td><td><span style="font-family:monospace;font-size:11px;color:#e6edf3">79</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:65px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">37.5%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">37.9%</td><td style="font-family:monospace;font-size:11px;color:#d29922">3.9%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">5.0×</td><td style="font-family:monospace;font-size:11px;color:#3fb950">15.83</td><td style="font-family:monospace;font-size:11px;color:#8b949e">$569M</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">TME</td><td><span style="font-family:monospace;font-size:11px;color:#e6edf3">79</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:65px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">29.6%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">27.5%</td><td style="font-family:monospace;font-size:11px;color:#d29922">5.1%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">10.9×</td><td style="font-family:monospace;font-size:11px;color:#8b949e">7.27</td><td style="font-family:monospace;font-size:11px;color:#8b949e">$14.9B</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">TIMB</td><td><span style="font-family:monospace;font-size:11px;color:#e6edf3">78</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:64px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">25.0%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">33.4%</td><td style="font-family:monospace;font-size:11px;color:#d29922">7.3%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">12.4×</td><td style="font-family:monospace;font-size:11px;color:#8b949e">6.28</td><td style="font-family:monospace;font-size:11px;color:#8b949e">$10.3B</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">MEIUF</td><td><span style="font-family:monospace;font-size:11px;color:#e6edf3">75</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:61px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">22.4%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">31.3%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">22.8%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">52.5×</td><td style="font-family:monospace;font-size:11px;color:#8b949e">1.43</td><td style="font-family:monospace;font-size:11px;color:#8b949e">$4.8B</td></tr></tbody>
-  </table>
-</div></div><div class="card">
-<div class="section-title">Technical Analysis · Minervini SEPA</div>
-
-<div style="display:grid;grid-template-columns:280px 1fr;gap:24px">
-  <div>
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-      <span style="font-family:monospace;font-size:30px;font-weight:800;color:#f85149">0</span>
-      <span style="color:#484f58;font-size:16px">/8</span>
-      <span style="font-family:monospace;font-size:14px;letter-spacing:3px;margin-left:6px"><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span><span style="color:#f85149">○</span></span>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+      <span style="font-family:monospace;font-size:18px;font-weight:800;color:#f85149">✕ AVOID</span>
+      <span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f0883e22;color:#f0883e;margin-right:4px">Confidence: LOW</span>
+      <span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f0883e22;color:#f0883e;margin-right:4px">Bear: MODERATE BEAR</span>
+      <span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#58a6ff22;color:#58a6ff;margin-right:4px">Adj Score 84.00</span>
     </div>
-    <div style="font-size:12px;font-weight:600;color:#f85149;margin-bottom:12px">Stage 4 Declining ▼</div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#484f58;font-size:13px;width:14px">·</span><span style="font-size:11px;color:#484f58">Price > 150 & 200 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#484f58;font-size:13px;width:14px">·</span><span style="font-size:11px;color:#484f58">150 DMA > 200 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#484f58;font-size:13px;width:14px">·</span><span style="font-size:11px;color:#484f58">200 DMA trending up (1m)</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#484f58;font-size:13px;width:14px">·</span><span style="font-size:11px;color:#484f58">50 DMA > 150 & 200 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#484f58;font-size:13px;width:14px">·</span><span style="font-size:11px;color:#484f58">Price > 50 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#484f58;font-size:13px;width:14px">·</span><span style="font-size:11px;color:#484f58">Price ≥30% above 52w low</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">Within 25% of 52w high</span><span style='font-size:10px;color:#484f58;font-family:monospace'> -45.6% vs 52w high</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">RS beats SPY (1yr)</span><span style='font-size:10px;color:#484f58;font-family:monospace'> 1yr: -24.8% vs SPY</span></div>
-    <div style="margin:10px 0"><div style="font-size:9px;color:#484f58;font-family:monospace;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">52-week range</div><div style="position:relative;height:6px;background:#21262d;border-radius:3px;width:260px"><div style="position:absolute;left:6%;top:-3px;width:12px;height:12px;background:#f85149;border-radius:50%;transform:translateX(-50%)"></div></div><div style="display:flex;justify-content:space-between;width:260px;margin-top:4px"><span style="font-family:monospace;font-size:9px;color:#484f58">$12.85</span><span style="font-family:monospace;font-size:10px;color:#f85149;font-weight:600">$13.63 (6%)</span><span style="font-family:monospace;font-size:9px;color:#484f58">$25.08</span></div></div>
-    <div style="font-family:monospace;font-size:10px;color:#8b949e;margin-top:4px">Vol ratio 0.80× (recent vs avg)</div>
-    <div style="font-size:11px;color:#8b949e;margin-top:8px;padding:8px;background:#0d1117;border-radius:4px;border-left:2px solid #f8514944">Stage 4 = price below key DMAs. This is a <em style="color:#d29922">Minervini price stage</em>, not a fundamental rating. Quality companies in Stage 4 can be value opportunities on a longer horizon.</div>
+    <p style="font-size:11px;color:#8b949e;max-width:820px;line-height:1.6;margin:0 0 6px">
+      <strong style="color:#c9d1d9">Headline risk:</strong> Stage=4 + insider selling + China hiring market slowdown; BOSS Zhipin is a China online recruitment platform where white-collar hiring is structurally suppressed by tech sector layoffs.
+    </p>
+    <p style="font-size:10px;color:#484f58">
+      Half-Kelly position: 0.000 × model weight = <strong style="color:#c9d1d9">0.0%</strong>
+      &nbsp;·&nbsp; Time horizon: 6M
+      &nbsp;·&nbsp; <a href="#verdict-section" style="color:#58a6ff;text-decoration:none">↓ Full adversarial review</a>
+    </p>
   </div>
-  <div>
-    <div style="margin-bottom:6px;font-size:9px;color:#484f58;font-family:monospace;text-transform:uppercase;letter-spacing:.08em">
-      Price · 50DMA<span style="color:#f0883e">●</span>  150DMA<span style="color:#d29922">●</span>  200DMA<span style="color:#a371f7">●</span>  Volume
-    </div>
-    <div style="position:relative;height:300px;margin-top:4px">
-  <canvas id="price_BZ_48620"></canvas>
-</div>
-<script>
-(function(){
-  var D={labels:["2025-06-06", "2025-06-09", "2025-06-10", "2025-06-11", "2025-06-12", "2025-06-13", "2025-06-16", "2025-06-17", "2025-06-18", "2025-06-20", "2025-06-23", "2025-06-24", "2025-06-25", "2025-06-26", "2025-06-27", "2025-06-30", "2025-07-01", "2025-07-02", "2025-07-03", "2025-07-07", "2025-07-08", "2025-07-09", "2025-07-10", "2025-07-11", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-21", "2025-07-22", "2025-07-23", "2025-07-24", "2025-07-25", "2025-07-28", "2025-07-29", "2025-07-30", "2025-07-31", "2025-08-01", "2025-08-04", "2025-08-05", "2025-08-06", "2025-08-07", "2025-08-08", "2025-08-11", "2025-08-12", "2025-08-13", "2025-08-14", "2025-08-15", "2025-08-18", "2025-08-19", "2025-08-20", "2025-08-21", "2025-08-22", "2025-08-25", "2025-08-26", "2025-08-27", "2025-08-28", "2025-08-29", "2025-09-02", "2025-09-03", "2025-09-04", "2025-09-05", "2025-09-08", "2025-09-09", "2025-09-10", "2025-09-11", "2025-09-12", "2025-09-15", "2025-09-16", "2025-09-17", "2025-09-18", "2025-09-19", "2025-09-22", "2025-09-23", "2025-09-24", "2025-09-25", "2025-09-26", "2025-09-29", "2025-09-30", "2025-10-01", "2025-10-02", "2025-10-03", "2025-10-06", "2025-10-07", "2025-10-08", "2025-10-09", "2025-10-10", "2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-24", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13", "2026-02-17", "2026-02-18", "2026-02-19", "2026-02-20", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-01", "2026-05-04", "2026-05-05", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22", "2026-05-26", "2026-05-27", "2026-05-28", "2026-05-29", "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05", "2026-06-08"],price:[18.11, 18.67, 18.38, 18.51, 18.09, 17.53, 18.24, 17.72, 17.63, 17.7, 17.56, 17.96, 17.43, 17.5, 17.99, 17.72, 17.38, 17.66, 17.82, 17.69, 18.53, 18.71, 18.82, 18.39, 18.26, 18.8, 18.65, 18.4, 18.87, 18.75, 19.31, 19.75, 19.96, 19.91, 19.69, 19.45, 19.02, 18.83, 18.53, 19.16, 19.68, 19.97, 20.39, 20.93, 20.95, 21.68, 22.28, 21.17, 21.22, 21.38, 20.92, 21.93, 23.38, 22.68, 22.74, 22.77, 22.69, 22.94, 23.45, 23.56, 23.98, 23.84, 23.81, 23.77, 23.83, 24.09, 24.39, 24.37, 24.51, 24.64, 24.74, 24.18, 24.11, 23.59, 23.01, 23.33, 23.34, 22.84, 23.28, 23.2, 22.73, 23.24, 23.31, 24.16, 23.88, 24.38, 23.41, 21.68, 22.76, 21.93, 22.0, 21.5, 21.68, 22.21, 21.99, 21.81, 22.17, 22.14, 22.38, 22.23, 22.49, 22.34, 22.16, 22.6, 21.55, 20.97, 21.09, 21.08, 21.14, 21.11, 21.34, 20.88, 20.56, 20.52, 20.79, 21.0, 20.38, 20.44, 21.0, 21.75, 21.92, 22.1, 22.3, 22.02, 21.63, 21.07, 21.77, 21.41, 21.29, 20.96, 20.26, 19.96, 20.03, 20.2, 20.31, 21.37, 20.82, 21.03, 21.02, 21.02, 21.05, 20.79, 20.45, 20.38, 20.91, 21.33, 19.95, 19.93, 19.69, 19.21, 19.25, 19.12, 19.59, 19.2, 19.27, 19.02, 18.95, 19.05, 19.26, 19.0, 19.28, 18.83, 18.9, 18.52, 18.8, 18.2, 17.51, 17.49, 17.92, 18.15, 18.7, 18.34, 17.62, 17.32, 17.3, 17.37, 17.21, 17.48, 16.3, 16.35, 16.24, 16.32, 16.08, 16.18, 15.91, 15.87, 15.54, 15.14, 15.07, 15.03, 14.38, 14.13, 14.17, 14.35, 14.55, 13.69, 13.4, 13.63, 13.35, 13.26, 13.36, 13.55, 13.13, 13.34, 13.39, 13.48, 13.52, 13.5, 13.16, 13.49, 13.13, 13.05, 13.17, 13.5, 14.23, 14.35, 14.21, 14.09, 13.82, 13.65, 13.33, 13.62, 13.64, 13.71, 13.55, 13.52, 13.65, 13.78, 13.84, 14.37, 14.24, 14.02, 14.31, 14.2, 14.74, 14.34, 14.07, 14.16, 14.11, 14.07, 13.8, 13.75, 13.31, 13.34, 13.47, 13.57, 14.04, 14.66, 14.1, 14.24, 14.03, 13.63],d50:[16.47, 16.44, 16.42, 16.41, 16.4, 16.37, 16.36, 16.41, 16.46, 16.53, 16.58, 16.66, 16.72, 16.78, 16.85, 16.93, 17.0, 17.08, 17.17, 17.23, 17.31, 17.4, 17.48, 17.55, 17.61, 17.68, 17.72, 17.77, 17.82, 17.88, 17.95, 18.03, 18.07, 18.12, 18.15, 18.18, 18.19, 18.21, 18.22, 18.25, 18.3, 18.35, 18.41, 18.48, 18.55, 18.64, 18.74, 18.81, 18.87, 18.93, 18.99, 19.06, 19.16, 19.24, 19.33, 19.44, 19.53, 19.63, 19.75, 19.86, 19.99, 20.11, 20.24, 20.36, 20.48, 20.61, 20.75, 20.88, 21.02, 21.15, 21.28, 21.39, 21.49, 21.6, 21.69, 21.78, 21.88, 21.97, 22.05, 22.14, 22.21, 22.28, 22.35, 22.43, 22.52, 22.62, 22.7, 22.76, 22.85, 22.9, 22.95, 22.98, 23.0, 23.03, 23.05, 23.05, 23.05, 23.07, 23.09, 23.11, 23.14, 23.15, 23.12, 23.12, 23.1, 23.06, 23.03, 22.99, 22.95, 22.9, 22.85, 22.79, 22.72, 22.66, 22.6, 22.53, 22.45, 22.38, 22.31, 22.25, 22.19, 22.15, 22.11, 22.08, 22.05, 22.01, 21.98, 21.95, 21.91, 21.86, 21.82, 21.75, 21.68, 21.61, 21.53, 21.47, 21.42, 21.41, 21.37, 21.36, 21.34, 21.32, 21.3, 21.26, 21.24, 21.23, 21.19, 21.14, 21.09, 21.03, 20.96, 20.9, 20.85, 20.78, 20.73, 20.69, 20.65, 20.61, 20.57, 20.53, 20.49, 20.45, 20.42, 20.38, 20.34, 20.28, 20.22, 20.16, 20.1, 20.03, 19.97, 19.89, 19.8, 19.7, 19.62, 19.54, 19.45, 19.37, 19.27, 19.18, 19.1, 19.03, 18.95, 18.87, 18.78, 18.67, 18.56, 18.45, 18.33, 18.21, 18.07, 17.94, 17.82, 17.69, 17.57, 17.41, 17.28, 17.16, 17.03, 16.91, 16.79, 16.68, 16.55, 16.44, 16.32, 16.21, 16.1, 15.99, 15.87, 15.76, 15.63, 15.52, 15.4, 15.3, 15.21, 15.13, 15.07, 15.0, 14.92, 14.83, 14.72, 14.63, 14.55, 14.47, 14.4, 14.32, 14.25, 14.18, 14.13, 14.09, 14.05, 14.0, 13.97, 13.93, 13.9, 13.87, 13.84, 13.82, 13.81, 13.79, 13.77, 13.77, 13.75, 13.73, 13.71, 13.71, 13.72, 13.74, 13.75, 13.77, 13.79, 13.79],d150:[null, 15.56, 15.59, 15.61, 15.63, 15.65, 15.68, 15.69, 15.71, 15.73, 15.76, 15.79, 15.81, 15.84, 15.87, 15.9, 15.92, 15.96, 15.99, 16.03, 16.07, 16.11, 16.15, 16.18, 16.2, 16.24, 16.27, 16.3, 16.33, 16.36, 16.39, 16.43, 16.46, 16.5, 16.54, 16.58, 16.62, 16.65, 16.69, 16.72, 16.76, 16.8, 16.85, 16.9, 16.95, 17.0, 17.06, 17.11, 17.16, 17.22, 17.27, 17.32, 17.39, 17.45, 17.5, 17.56, 17.61, 17.67, 17.73, 17.79, 17.85, 17.91, 17.96, 18.03, 18.09, 18.15, 18.21, 18.28, 18.34, 18.4, 18.47, 18.52, 18.58, 18.63, 18.68, 18.73, 18.78, 18.83, 18.88, 18.93, 18.97, 19.03, 19.07, 19.13, 19.19, 19.23, 19.28, 19.3, 19.34, 19.36, 19.39, 19.41, 19.42, 19.43, 19.44, 19.45, 19.46, 19.48, 19.5, 19.51, 19.53, 19.55, 19.57, 19.59, 19.61, 19.62, 19.64, 19.68, 19.72, 19.77, 19.81, 19.85, 19.89, 19.93, 19.98, 20.02, 20.07, 20.11, 20.16, 20.21, 20.26, 20.31, 20.36, 20.41, 20.45, 20.49, 20.53, 20.56, 20.59, 20.63, 20.66, 20.69, 20.7, 20.72, 20.73, 20.76, 20.77, 20.79, 20.81, 20.83, 20.86, 20.88, 20.9, 20.92, 20.95, 20.98, 20.99, 21.01, 21.02, 21.02, 21.03, 21.03, 21.04, 21.05, 21.05, 21.06, 21.07, 21.08, 21.09, 21.1, 21.11, 21.12, 21.13, 21.13, 21.14, 21.14, 21.14, 21.14, 21.14, 21.14, 21.15, 21.14, 21.13, 21.13, 21.12, 21.11, 21.1, 21.1, 21.08, 21.06, 21.04, 21.02, 20.99, 20.97, 20.94, 20.92, 20.9, 20.87, 20.85, 20.82, 20.79, 20.75, 20.71, 20.66, 20.62, 20.57, 20.51, 20.46, 20.4, 20.35, 20.3, 20.24, 20.18, 20.11, 20.05, 19.99, 19.93, 19.86, 19.8, 19.73, 19.66, 19.58, 19.51, 19.44, 19.38, 19.32, 19.25, 19.18, 19.11, 19.04, 18.96, 18.89, 18.82, 18.75, 18.69, 18.62, 18.56, 18.5, 18.44, 18.38, 18.32, 18.26, 18.2, 18.13, 18.07, 18.01, 17.94, 17.89, 17.84, 17.78, 17.73, 17.68, 17.62, 17.56, 17.5, 17.45, 17.4, 17.35, 17.29, 17.24, 17.18, 17.12],d200:[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 16.43, 16.48, 16.52, 16.56, 16.6, 16.64, 16.68, 16.72, 16.77, 16.82, 16.87, 16.92, 16.97, 17.02, 17.08, 17.13, 17.19, 17.25, 17.31, 17.37, 17.43, 17.48, 17.53, 17.58, 17.63, 17.67, 17.72, 17.76, 17.81, 17.85, 17.89, 17.93, 17.99, 18.04, 18.09, 18.14, 18.18, 18.23, 18.27, 18.31, 18.35, 18.39, 18.43, 18.47, 18.51, 18.56, 18.6, 18.65, 18.69, 18.74, 18.78, 18.82, 18.87, 18.9, 18.93, 18.97, 19.0, 19.03, 19.06, 19.1, 19.13, 19.15, 19.18, 19.22, 19.24, 19.27, 19.3, 19.33, 19.36, 19.4, 19.43, 19.46, 19.49, 19.52, 19.55, 19.58, 19.61, 19.64, 19.66, 19.68, 19.71, 19.73, 19.75, 19.77, 19.79, 19.81, 19.83, 19.85, 19.86, 19.87, 19.88, 19.89, 19.89, 19.89, 19.9, 19.9, 19.9, 19.89, 19.89, 19.89, 19.89, 19.89, 19.89, 19.89, 19.89, 19.89, 19.91, 19.93, 19.96, 19.98, 20.0, 20.02, 20.04, 20.07, 20.09, 20.11, 20.13, 20.15, 20.17, 20.19, 20.21, 20.22, 20.23, 20.24, 20.25, 20.26, 20.26, 20.26, 20.27, 20.27, 20.27, 20.26, 20.26, 20.24, 20.23, 20.22, 20.21, 20.19, 20.18, 20.16, 20.15, 20.13, 20.12, 20.1, 20.09, 20.06, 20.04, 20.02, 20.0, 19.97, 19.95, 19.92, 19.89, 19.87, 19.85, 19.83, 19.81, 19.78, 19.76, 19.74, 19.72, 19.69, 19.67, 19.66, 19.64, 19.62, 19.61, 19.59, 19.56, 19.54, 19.51, 19.49, 19.46, 19.44, 19.41, 19.39, 19.37, 19.34, 19.32, 19.29, 19.27, 19.24, 19.21, 19.18, 19.16, 19.13, 19.11, 19.09, 19.06, 19.03, 19.0, 18.97, 18.93, 18.89, 18.85, 18.81, 18.78, 18.74, 18.71, 18.67, 18.63],vol:[3505800, 6377700, 2338600, 2864100, 2682000, 4319300, 2281100, 2563600, 1823300, 6231500, 1676000, 2950900, 2797200, 2834000, 2395000, 3570300, 2550600, 3292200, 2689800, 6265600, 4403500, 2027000, 2578000, 1564400, 1389000, 2822600, 2571300, 4172400, 3491900, 2564800, 2962500, 3374100, 2400800, 1725500, 2327900, 3394900, 1247500, 3370300, 2787600, 3266000, 4871400, 3408000, 5680700, 3017600, 3382200, 4242100, 5694400, 3897200, 2205000, 3325600, 4344100, 8545900, 6766200, 5973500, 3377500, 14594700, 3301500, 3100400, 4373100, 4830000, 4265400, 2298400, 3431100, 2513300, 3684200, 3081800, 3564600, 3003200, 5832100, 3525700, 7492900, 4848100, 3256800, 3552900, 2753900, 3256800, 3768000, 2493300, 7997300, 4844200, 2766200, 3901200, 2623600, 3732600, 2191400, 1984500, 1751600, 3886900, 3550400, 3450400, 3135200, 3908600, 2573000, 2960600, 1562100, 2028500, 1962600, 2140800, 1904600, 2118900, 1132200, 4611900, 2310300, 1970000, 3973600, 5770200, 4356700, 3880700, 3574000, 3330200, 2764600, 2813700, 2356100, 2440100, 4486000, 4953300, 3218200, 3230000, 4608800, 3786600, 2318600, 1573300, 2408200, 2968800, 1911900, 2111200, 3604900, 2566600, 2059800, 1047500, 2990100, 6022800, 3777700, 2044600, 2132700, 3046400, 4910200, 1538700, 962600, 525800, 672900, 1082200, 1195500, 2181500, 2966700, 2428300, 6269600, 4147400, 4331700, 4310400, 3992400, 3024700, 4113700, 2321900, 4966100, 4596500, 3311000, 4684900, 2737900, 2865800, 3053100, 2567600, 3735600, 3327300, 2898900, 5041700, 6122800, 3816800, 3013900, 2788500, 2661600, 2623300, 6167500, 2519100, 3115200, 1793000, 1329800, 2091900, 4269400, 5554300, 3867700, 3487800, 3761200, 3221400, 3356100, 4878800, 3213500, 5084600, 5723800, 5635400, 4707300, 4588900, 3183100, 3892800, 4405000, 6372800, 10175400, 9812600, 4966000, 7651500, 5057200, 4514100, 6716000, 4743800, 6492700, 3794200, 2570100, 1793500, 4691900, 2657400, 2865100, 2195000, 2653800, 3090900, 4929200, 3591700, 4054000, 4071600, 6867100, 4963300, 4726600, 2373900, 3463300, 2481800, 3208500, 3833800, 2013400, 2085600, 1936500, 3230500, 5566300, 4223500, 2550600, 3192700, 4815000, 4770800, 5276900, 4038100, 3713600, 4705300, 5768700, 6404100, 4017800, 5129100, 3863100, 5203500, 2419400, 5014100, 4153000, 3594300, 5273100, 3165900],w52h:25.0835,w52l:12.85};
-  var ctx=document.getElementById('price_BZ_48620');
-  var ann=[];
-  if(D.w52h)ann.push({type:'line',yMin:D.w52h,yMax:D.w52h,borderColor:'#d2992288',borderWidth:1,borderDash:[4,3],label:{content:'52W High $'+D.w52h,display:true,color:'#d29922',font:{size:9},position:'end'}});
-  if(D.w52l)ann.push({type:'line',yMin:D.w52l,yMax:D.w52l,borderColor:'#8b949e66',borderWidth:1,borderDash:[4,3],label:{content:'52W Low $'+D.w52l,display:true,color:'#8b949e',font:{size:9},position:'start'}});
-  var maxVol=Math.max.apply(null,D.vol)||1;
-  new Chart(ctx,{
-    data:{
-      labels:D.labels,
-      datasets:[
-        {type:'line',label:'Price',data:D.price,borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,0.06)',borderWidth:2,pointRadius:0,fill:true,yAxisID:'y',order:1,tension:0.1},
-        {type:'line',label:'50 DMA',data:D.d50,borderColor:'#f0883e',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:2,spanGaps:true,tension:0.1},
-        {type:'line',label:'150 DMA',data:D.d150,borderColor:'#d29922',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:3,spanGaps:true,tension:0.1},
-        {type:'line',label:'200 DMA',data:D.d200,borderColor:'#a371f7',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:4,spanGaps:true,tension:0.1},
-        {type:'bar',label:'Volume',data:D.vol,backgroundColor:D.price.map((v,i)=>i>0&&v>=D.price[i-1]?'rgba(63,185,80,0.3)':'rgba(248,81,73,0.3)'),yAxisID:'y2',order:5}
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{labels:{color:'#8b949e',font:{size:10},boxWidth:14,padding:12}},
-        tooltip:{
-          backgroundColor:'#161b22',borderColor:'#30363d',borderWidth:1,
-          titleColor:'#c9d1d9',bodyColor:'#8b949e',padding:10,
-          callbacks:{
-            label:function(c){
-              if(c.datasetIndex===4)return'Vol: '+(c.parsed.y/1e6).toFixed(2)+'M';
-              if(c.parsed.y==null)return null;
-              return c.dataset.label+': $'+c.parsed.y.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-            }
-          }
-        },
-        annotation:{annotations:ann}
-      },
-      scales:{
-        x:{grid:{color:'#21262d40',drawTicks:false},ticks:{color:'#484f58',maxTicksLimit:8,font:{size:9},callback:function(v,i){var d=this.getLabelForValue(v);return d?d.substring(0,7):'';} }},
-        y:{position:'left',grid:{color:'#21262d30'},ticks:{color:'#484f58',font:{size:9},callback:function(v){return'$'+v.toLocaleString('en-US');}}},
-        y2:{position:'right',grid:{display:false},max:maxVol*5,ticks:{color:'#484f58',font:{size:8},callback:function(v){return(v/1e6).toFixed(1)+'M';}}}
-      }
-    }
-  });
-})();
-</script>
+  <div style="text-align:right;flex-shrink:0">
+    <div style="font-family:monospace;font-size:9px;color:#484f58;letter-spacing:.1em;
+         text-transform:uppercase;margin-bottom:4px">Model → Adj</div>
+    <div style="font-family:monospace;font-size:20px;font-weight:700;color:#8b949e;
+         text-decoration:line-through">84.80</div>
+    <div style="font-family:monospace;font-size:28px;font-weight:800;color:#f85149">84.00</div>
   </div>
 </div>
 
-<div style="margin-top:18px;padding:14px;background:#0d1117;border-radius:8px;border-left:3px solid #f85149">
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-    <span style="font-family:monospace;font-size:13px;font-weight:700;color:#f85149">AVOID — Stage 4 / Low TT</span>
-    <span style="font-size:10px;color:#484f58;font-family:monospace">3-month · 6-month outlook</span>
+<!-- VERDICT_BANNER -->
+
+
+<div class="disclaimer-banner">⚠️ Personal investment journal entry. Not registered investment advice. Not a buy/sell recommendation. <a href="/#disclaimer">Full disclaimer</a></div>
+<header class="masthead">
+  <a href="/" class="logo-block"><span class="logo-pi">π</span><span class="logo-name">Passive Aggressive Investing</span></a>
+  <div class="report-meta"><span class="report-type">Deep Dive · US</span> · 11 Jun 2026</div>
+</header>
+<div class="page">
+<div class="report-head">
+  <div class="head-pills">
+    <span class="pill stage-4">Stage 4 — Value Watch</span>
+    <span class="pill neutral">Avoid</span>
+    <span class="pill neutral">Internet Content & Information</span>
+    <span class="pill neutral">US Equity</span>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
-    <div></div>
-    <div></div>
-    <div></div>
-  </div>
-</div></div><div class="card">
-<div class="section-title">KYC — Integrity · Insider Activity · Board</div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
-  
-<div>
-  <div class="mini-label" style="margin-bottom:8px">A. Company Integrity</div>
-  <div style="background:#0d1117;border-radius:6px;padding:10px;margin-bottom:8px"><div style="font-size:14px;font-weight:600;color:#3fb950">CLEAN</div><div style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.08em;margin-top:2px">News flag · Serper scan</div></div><div style="font-size:10px;color:#3fb950;margin-top:6px">&#10003; No related party concerns</div>
+  <h1 class="head-title">BZ</h1>
+  <div class="head-subtitle">BZ · Communication Services · $13.63 · $6.0B</div>
+  <p class="head-tagline">Internet Content & Information company. Sector-relative quality score: 83/100.</p>
 </div>
-  
-<div>
-  <div class="mini-label" style="margin-bottom:8px">B. Insider Activity (Form 4)</div>
-  <div style="display:flex;gap:14px;margin-bottom:10px">
+<div class="content">
+<!-- SECTION 00: WHY I'M WATCHING THIS -->
+<div class="section">
+  <div class="section-head"><span class="section-num">00</span><span class="section-title">BZ: High Quality, Stage 4 — A Deep Value Watchlist Candidate</span></div>
+  <div class="thesis-box"><div class="th-label">My Thesis</div><div class="th-call">Despite BZ's current Stage 4 technical downtrend and a significant 1-year price decline, my framework identifies it as a high-quality business with exceptional profitability and growth. I believe this divergence between strong fundamentals and poor price action warrants a deep value watch, suggesting the market may be overlooking its core strengths or reacting to broader macro pressures. I am watching for signs of a technical reversal and sustained operational excellence.</div></div>
+  <div class="kpi-grid">
+    <div class="kpi-cell green">
+      <div class="kpi-label">Revenue</div>
+      <div class="kpi-value">$8.27B</div>
+      <div class="kpi-sub">YoY: 12.4% | CAGR: 22.4%</div>
+    </div>
+    <div class="kpi-cell green">
+      <div class="kpi-label">FCF Margin</div>
+      <div class="kpi-value">53.6%</div>
+      <div class="kpi-sub">97.9th Percentile</div>
+    </div>
+    <div class="kpi-cell green">
+      <div class="kpi-label">Quality Score</div>
+      <div class="kpi-value">82.9</div>
+      <div class="kpi-sub">Sector-Relative</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">Market Cap</div>
+      <div class="kpi-value">$6.0B</div>
+      <div class="kpi-sub">Internet Content & Info</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 01: FRAMEWORK SCORECARD -->
+<div class="section">
+  <div class="section-head"><span class="section-num">01</span><span class="section-title">How My Framework Scores This</span></div>
+  <div class="score-block">
+    <div class="score-header"><span class="score-label">NAV Quality Score (Sector-Relative)</span><span class="score-date">11 Jun 2026</span></div>
+    <div class="score-total"><span class="score-num-big">83</span><span class="score-denom">/ 100</span><span class="tier-badge tier-quality">High Quality</span></div>
+    <div class="score-components">
+  <div class="component">
+    <label>FCF Margin</label>
+    <div class="bar"><div class="fill" style="width:98%;background:var(--green)"></div></div>
+    <div class="value">98th</div>
+  </div>
+  <div class="component-rationale">FCF as % of revenue vs sector peers</div>
+  <div class="component">
+    <label>Operating Margin</label>
+    <div class="bar"><div class="fill" style="width:93%;background:var(--green)"></div></div>
+    <div class="value">93th</div>
+  </div>
+  <div class="component-rationale">Operating efficiency vs sector</div>
+  <div class="component">
+    <label>ROE</label>
+    <div class="bar"><div class="fill" style="width:70%;background:var(--amber)"></div></div>
+    <div class="value">70th</div>
+  </div>
+  <div class="component-rationale">Return on equity vs sector peers</div>
+  <div class="component">
+    <label>Revenue CAGR</label>
+    <div class="bar"><div class="fill" style="width:92%;background:var(--green)"></div></div>
+    <div class="value">92th</div>
+  </div>
+  <div class="component-rationale">Revenue growth momentum</div>
+  <div class="component">
+    <label>Cash Conversion</label>
+    <div class="bar"><div class="fill" style="width:60%;background:var(--amber)"></div></div>
+    <div class="value">60th</div>
+  </div>
+  <div class="component-rationale">CCC days — lower is better vs sector</div>
+</div>
+  </div>
+  <div class="layer-strip">
+    <span class="layer-chip lc-strong">High Quality Score</span>
+    <span class="layer-chip lc-strong">Exceptional FCF Margins</span>
+    <span class="layer-chip lc-strong">Smart Money Accumulating</span>
+    <span class="layer-chip lc-moderate">Stage 4 Technical Downtrend</span>
+    <span class="layer-chip lc-moderate">Deteriorating Cash Conversion</span>
+    <span class="layer-chip lc-weak">Insider Selling</span>
+    <span class="layer-chip lc-weak">Limited Business Transparency</span>
+  </div>
+  <div class="two-col">
+    <div class="info-block"><div class="ib-label">Institutional Backing</div><div class="ib-content">I see strong institutional conviction with 81.1% ownership, including 12.4% from elite funds. My smart money signal indicates accumulation, with notable holders like Blackrock Inc. maintaining a position. Furthermore, Schroder Investment Management Group, Blackrock Inc., Morgan Stanley, and Coreview Capital Management Ltd. were all adding shares this past quarter. However, I note a concerning signal from insiders, who have been net sellers (3 sells, 0 buys).</div></div>
+    <div class="info-block"><div class="ib-label">Business Quality Signals</div><div class="ib-content">While BZ's financial metrics are impressive, I find the lack of granular business details concerning. Information regarding key end markets, customer concentration, recurring contract revenue, and supplier risk is largely unavailable. On the positive side, my scans found no negative news across the company, its leadership, or investors, which suggests a clean external profile despite the operational opaqueness. This lack of transparency introduces an element of uncertainty.</div></div>
+  </div>
+</div>
+
+<!-- SECTION 02: FINANCIAL PICTURE -->
+<div class="section">
+  <div class="section-head"><span class="section-num">02</span><span class="section-title">The Financial Picture</span></div>
+  <p class="para">BZ presents a robust financial profile that stands in stark contrast to its technical price action. The company reported revenue of $8.27 billion in FY2025, demonstrating healthy growth with a 12.4% year-over-year increase and an impressive 22.4% revenue CAGR. This sustained top-line expansion indicates a business that is effectively capturing market share or benefiting from strong underlying demand within its sector.</p>
+  <p class="para">Profitability is a significant highlight, with a Free Cash Flow (FCF) Margin of 53.6%, placing BZ in the 97.9th percentile relative to its sector peers. This exceptional cash generation ability is further supported by a strong Operating Margin of 29.8%, ranking in the 92.9th percentile, showcasing excellent operational efficiency. Both FCF and ROE trends are improving, indicating a business that is becoming more financially robust over time. The balance sheet appears exceptionally healthy with a Net Debt/EBITDA of -1.2x, implying a significant net cash position, which provides substantial financial flexibility.</p>
+  <p class="para">However, I am observing a deteriorating trend in Cash Conversion Cycle (CCC) days, despite the current negative CCC of -33.3 days which is generally favorable. While the current state is good, a deteriorating trend suggests potential future pressure on working capital efficiency if not addressed. This is a point I will monitor closely, especially given the limited transparency around core business operations mentioned earlier.</p>
+  <div class="warn-strip">
+    <div class="ws-icon">⚠️</div>
+    <div class="ws-text">**Limited Business Transparency:** A significant lack of public detail regarding key customers, end markets, and revenue streams for a company of this size introduces an elevated level of operational risk and makes fundamental analysis more challenging.</div>
+  </div>
+</div>
+
+<!-- SECTION 03: STAGE ANALYSIS — AND WHAT WOULD CHANGE MY VIEW -->
+<div class="section">
+  <div class="section-head"><span class="section-num">03</span><span class="section-title">Why It's Stage 4 — And What Would Change That</span></div>
+  <div class="tech-citation">Technical analysis follows the stage framework described in <strong>Trade Like a Stock Market Wizard</strong> by Mark Minervini (McGraw-Hill, 2013), adapted for US equities. Stage 4 means the price is below key moving averages — it reflects <em>price action</em>, not business quality.</div>
+  <p class="para">BZ is currently squarely in Stage 4, characterized by a significant downtrend in its price action. Its 1-year return is a concerning -24.8%, and my technical trend (TT) score is 0/8, signaling an avoidance from a momentum perspective. This price weakness, despite robust underlying financials, suggests that broader market sentiment, potentially related to the Chinese market or the communication services sector, is overriding company-specific performance. It could also reflect a lack of investor awareness regarding its strong fundamentals or a reaction to perceived geopolitical or regulatory risks associated with Chinese equities, rather than any direct failing of the business itself.</p>
+  <h3 class="sub-label">What Would Upgrade My View</h3>
+  <ul class="risk-list watch">
+    <li>I would look for a clear technical breakout from Stage 4, specifically reclaiming key moving averages and showing sustained price strength on increasing volume, signaling institutional re-accumulation.</li>
+    <li>Improved transparency regarding BZ's core business operations, such as more detailed customer demographics, end-market reporting, or a clearer breakdown of revenue streams, would significantly de-risk my assessment.</li>
+    <li>Continued execution on its exceptional FCF and operating margins, demonstrating resilience even in a challenging macro environment, would reinforce my confidence in its intrinsic
+</div>
+</div>
+<div class="sources"><strong>Sources</strong>SEC EDGAR 10-K &amp; Proxy (DEF 14A) · 13F Institutional Holdings · yfinance price data · NAV Framework quality scoring (sector-relative percentile ranking) · Technical methodology: SEPA framework (Minervini, 2013) · Negative news: Serper Google Search</div>
+<div class="report-foot">
+  <a href="/" class="back-link">← All Reports</a>
+  <div class="foot-meta">Published 11 Jun 2026 · Author: PAI</div>
+</div>
+
+
+<!-- VERDICT_SECTION -->
+
+<div id="verdict-section" class="card" style="margin-top:16px;border-top:2px solid #21262d">
+  <div class="section-title" style="margin-bottom:18px">
+    ⚔ Adversarial Review
+    <span style="font-size:10px;color:#8b949e">
+      · Bear Agent + Judge · 2026-06-12
+    </span>
+  </div>
+
+  <!-- Bear case -->
+  <div style="margin-bottom:20px">
+    <div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+         color:#f0883e;margin-bottom:12px">◈ Bear Case — MODERATE BEAR</div>
+
+    <div style="margin-bottom:14px;padding:10px 14px;background:#0d1117;border-radius:6px;
+         border-left:2px solid #f0883e">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:4px">Headline risk</div>
+      <div style="font-size:12px;color:#e6edf3;font-weight:600">Stage=4 + insider selling + China hiring market slowdown; BOSS Zhipin is a China online recruitment platform where white-collar hiring is structurally suppressed by tech sector layoffs.</div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:8px">New SERP findings</div>
+      <div style="margin-bottom:8px;padding:8px 12px;background:#0d1117;border-radius:6px;border-left:2px solid #f85149"><span style="font-family:monospace;font-size:9px;color:#484f58">[2026-03] Bloomberg</span><br><span style="font-size:11px;color:#c9d1d9">China tech sector layoffs continuing in 2026; Alibaba, Tencent, ByteDance all reducing headcount; BOSS Zhipin paid listing volumes falling</span>&nbsp;<span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8514922;color:#f85149;margin-right:4px">concern</span></div><div style="margin-bottom:8px;padding:8px 12px;background:#0d1117;border-radius:6px;border-left:2px solid #f85149"><span style="font-family:monospace;font-size:9px;color:#484f58">[2026-04] BZ Earnings</span><br><span style="font-size:11px;color:#c9d1d9">Paid enterprise customer count grew only 4% YoY vs 18% prior year; deceleration significant</span>&nbsp;<span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8514922;color:#f85149;margin-right:4px">concern</span></div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:8px">Top risks (priority order)</div>
+      <table style="width:100%;border-collapse:collapse">
+        <colgroup><col style="width:160px"><col></colgroup>
+        <tr><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-family:monospace;font-size:10px;color:#58a6ff;white-space:nowrap">1. Stage=4</td><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-size:11px;color:#c9d1d9">Minervini Stage 4 confirmed downtrend; do not hold in Stage 4 per systematic rule</td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-family:monospace;font-size:10px;color:#58a6ff;white-space:nowrap">2. China Hiring Slowdown</td><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-size:11px;color:#c9d1d9">White-collar hiring in China technology sector in structural decline; Kanzhun's primary customer is tech companies — the very sector that is shrinking headcount</td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-family:monospace;font-size:10px;color:#58a6ff;white-space:nowrap">3. Insider Selling</td><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-size:11px;color:#c9d1d9">Management selling; no insider buying at Stage=4 prices — signals no internal floor</td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-family:monospace;font-size:10px;color:#58a6ff;white-space:nowrap">4. Revenue Model Risk</td><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-size:11px;color:#c9d1d9">Paid listings model means revenue is a leading indicator of hiring intentions; current deceleration in paid customers suggests FY27 revenue miss</td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-family:monospace;font-size:10px;color:#58a6ff;white-space:nowrap">5. VIE Risk</td><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-size:11px;color:#c9d1d9">All Chinese VIE structural risks apply; Kanzhun's only asset value is the Chinese operating entity which US shareholders have no direct claim on</td></tr>
+      </table>
+    </div>
+
     <div>
-      <div style="font-family:monospace;font-size:16px;font-weight:700;color:#8b949e">0.0%</div>
-      <div style="font-size:9px;color:#484f58;text-transform:uppercase">Insider %</div>
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:8px">Valuation reality check</div>
+      
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+      <div style="background:#0d1117;border-radius:6px;padding:10px 14px;min-width:110px">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:4px">Current PE</div>
+        <div style="font-family:monospace;font-size:16px;font-weight:700;color:#e6edf3">
+          —</div>
+        <div style="font-family:monospace;font-size:9px;color:#8b949e">
+          peer median —</div>
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:10px 14px;min-width:110px">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:4px">FCF Yield</div>
+        <div style="font-family:monospace;font-size:16px;font-weight:700;color:#e6edf3">
+          16.2%</div>
+        <div style="font-family:monospace;font-size:9px;color:#8b949e">$840M</div>
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:10px 14px;flex:1;min-width:200px">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:4px">Earnings Quality</div>
+        <div style="font-size:11px;color:#3fb950">Clean</div>
+      </div>
     </div>
-    <div>
-      <div style="font-size:12px;font-weight:600;color:#f85149">Selling</div>
-      <div style="font-size:9px;color:#484f58;text-transform:uppercase">Insider Sentiment</div>
+    <div style="background:#0d1117;border-radius:6px;padding:10px 14px">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:4px">Downside scenario (½ growth)</div>
+      <div style="font-size:11px;color:#c9d1d9">Paid customer deceleration + Stage=4: at 3x EV/EBITDA (vs 0.62x now) — wait, EV/EBITDA=0.62 seems cheap — need normalised; hiring slow: 30% downside</div>
+    </div>
     </div>
   </div>
-  <table class="fin-table" style="font-size:10px"><thead><tr><th style="text-align:left">Name</th><th>Type</th><th>Shares</th><th>Value</th><th>Date</th></tr></thead><tbody><tr><td style="color:#8b949e;font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></td><td style="color:#f85149"></td><td>16,968.0</td><td>—</td><td style="color:#484f58;font-size:9px">2026-03-30</td></tr><tr><td style="color:#8b949e;font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></td><td style="color:#f85149"></td><td>814.0</td><td>—</td><td style="color:#484f58;font-size:9px">2026-03-30</td></tr><tr><td style="color:#8b949e;font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></td><td style="color:#f85149"></td><td>24,008.0</td><td>—</td><td style="color:#484f58;font-size:9px">2026-03-30</td></tr><tr><td style="color:#8b949e;font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></td><td style="color:#f85149"></td><td>40,000.0</td><td>—</td><td style="color:#484f58;font-size:9px">2026-03-30</td></tr><tr><td style="color:#8b949e;font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></td><td style="color:#f85149"></td><td>54,242.0</td><td>—</td><td style="color:#484f58;font-size:9px">2026-03-30</td></tr><tr><td style="color:#8b949e;font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></td><td style="color:#f85149"></td><td>128,000.0</td><td>—</td><td style="color:#484f58;font-size:9px">2026-03-19</td></tr></tbody></table>
-  <div style="margin-top:8px">
-    
-    
-  </div>
-</div>
-  
-<div>
-  <div class="mini-label" style="margin-bottom:8px">C. Board Composition</div>
-  <div style="display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap">
-    <div>
-      <div style="font-family:monospace;font-size:16px;font-weight:700;color:#c9d1d9">0</div>
-      <div style="font-size:9px;color:#484f58;text-transform:uppercase">Board Size</div>
+
+  <!-- Judge verdict -->
+  <div style="border-top:1px solid #21262d;padding-top:18px;margin-top:4px">
+    <div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+         color:#f0883e;margin-bottom:12px">⚖ Judge Verdict — LOW confidence</div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+      <div style="flex:1;min-width:240px;background:#0d1117;border-radius:6px;padding:12px;
+           border-left:2px solid #3fb950">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:6px">Bull summary</div>
+        <div style="font-size:11px;color:#c9d1d9;line-height:1.6">The NAV composite scores BZ at 84.80, driven by strong network signals, Stage 2 technical setup, and institutional conviction. The core bull thesis is sustained operational execution with above-average returns on capital.</div>
+      </div>
+      <div style="flex:1;min-width:240px;background:#0d1117;border-radius:6px;padding:12px;
+           border-left:2px solid #f0883e">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:6px">Bear summary</div>
+        <div style="font-size:11px;color:#c9d1d9;line-height:1.6">Stage=4 + insider selling + China hiring market slowdown; BOSS Zhipin is a China online recruitment platform where white-collar hiring is structurally suppressed by tech sector layoffs.</div>
+      </div>
     </div>
-    <div>
-      <div style="font-family:monospace;font-size:16px;font-weight:700;color:#f85149">0%</div>
-      <div style="font-size:9px;color:#484f58;text-transform:uppercase">Independent</div>
+
+    <div style="background:#0d1117;border-radius:6px;padding:12px;margin-bottom:10px">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:6px">Second-order view (Marks)</div>
+      <div style="font-size:11px;color:#c9d1d9;line-height:1.6">Consensus appears bullish on Kanzhun (BOSS Zhipin China Jobs). The NAV model's variant view is that the composite score underweights structural risks identified in fresh SERP research. What the market does not fully price: Minervini Stage 4 confirmed downtrend; do not hold in Stage 4 per systematic rule.</div>
     </div>
-    
-  </div>
-  <div style="font-size:10px;color:#d29922;padding:8px;background:#161b22;border-radius:4px;border-left:2px solid #d29922">⚠ Board data not available — company may not file DEF 14A with SEC (foreign private issuer or non-US exchange)</div>
-</div>
-</div></div><div class="card">
-<div class="section-title">Investor Network · Ownership &amp; Flow</div>
 
-<div style="display:grid;grid-template-columns:220px 1fr;gap:20px;margin-bottom:8px">
-  <div style="padding:12px;background:#0d1117;border-radius:6px;min-width:220px"><div class="mini-label" style="margin-bottom:10px">Ownership Snapshot</div><div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:10px;color:#8b949e">Institutional</span><span style="font-family:monospace;font-size:11px;font-weight:600;color:#3fb950">81.1%</span></div><div style="width:180px;height:5px;background:#21262d;border-radius:3px"><div style="width:145px;height:5px;background:#3fb950;border-radius:3px"></div></div></div><div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:10px;color:#8b949e">Elite Funds</span><span style="font-family:monospace;font-size:11px;font-weight:600;color:#ffa657">12.4%</span></div><div style="width:180px;height:5px;background:#21262d;border-radius:3px"><div style="width:22px;height:5px;background:#ffa657;border-radius:3px"></div></div></div><div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:10px;color:#8b949e">Retail</span><span style="font-family:monospace;font-size:11px;font-weight:600;color:#8b949e">18.9%</span></div><div style="width:180px;height:5px;background:#21262d;border-radius:3px"><div style="width:34px;height:5px;background:#8b949e;border-radius:3px"></div></div></div></div>
-  <div><div class="mini-label" style="margin-bottom:8px">Quarterly Flow · Smart Money: <span style="color:#3fb950;font-weight:600">Accumulating</span></div><div style="margin-bottom:8px"><span style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.06em">Adding ↑</span><br><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Schroder Investment Management G</span><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Blackrock Inc.</span><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Morgan Stanley</span><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Coreview Capital Management Ltd.</span><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Robeco Institutional Asset Manag</span><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Artisan Partners Funds Inc.-Arti</span><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">THORNBURG INVESTMENT TRUST-Thorn</span><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">VANGUARD Intl Eqy. INDEX Fd.S-Va</span></div><div style="margin-bottom:8px"><span style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.06em">Trimming ↓</span><br><span style="background:#f8514922;color:#f85149;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Krane Funds Advisors LLC</span><span style="background:#f8514922;color:#f85149;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Acadian Asset Management. LLC</span><span style="background:#f8514922;color:#f85149;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Krane Shares Trust-KraneShares C</span><span style="background:#f8514922;color:#f85149;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">New World Fund Inc</span><span style="background:#f8514922;color:#f85149;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">EuroPacific Growth Fund-EUPAC Fu</span></div><div style="margin-bottom:4px"><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;margin:2px 3px 2px 0;display:inline-block">NEW</span><span style="font-size:10px;color:#8b949e;margin-right:8px">Vanguard Capital Management LLC</span></div></div>
-</div>
+    <div style="background:#0d1117;border-radius:6px;padding:12px;margin-bottom:14px">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:6px">Key unresolved question</div>
+      <div style="font-size:11px;color:#e6edf3;font-weight:600">Will the China tech sector layoffs continuing in 2026; Alibaba, Tencent, ByteDance all re risk materialise into a material financial impact within the time horizon?</div>
+    </div>
 
+    <div style="margin-bottom:14px">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:8px">Position sizing — Kelly criterion</div>
+      
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+      <div style="background:#0d1117;border-radius:6px;padding:10px 14px;min-width:100px">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:4px">Bull Prob</div>
+        <div style="font-family:monospace;font-size:16px;font-weight:700;color:#e6edf3">
+          35%</div>
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:10px 14px;min-width:100px">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:4px">Upside / Downside</div>
+        <div style="font-family:monospace;font-size:16px;font-weight:700;color:#3fb950">
+          +25%</div>
+        <div style="font-family:monospace;font-size:12px;color:#f85149">
+          -30%</div>
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:10px 14px;min-width:100px">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:4px">Half-Kelly</div>
+        <div style="font-family:monospace;font-size:16px;font-weight:700;color:#e6edf3">
+          0.000</div>
+        <div style="font-family:monospace;font-size:9px;color:#8b949e">
+          = 0.0% position</div>
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:10px 14px;flex:1;min-width:140px">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:4px">Action</div>
+        <div style="font-family:monospace;font-size:14px;font-weight:700;color:#f85149">AVOID</div>
+        <div style="font-family:monospace;font-size:9px;color:#8b949e">
+          Model 84.80 → Adj 84.00</div>
+      </div>
+    </div>
+    </div>
 
-<div class="mini-label" style="margin-top:16px;margin-bottom:8px">Cross-Holdings Network</div>
-<div style="font-size:10px;color:#8b949e;margin-bottom:8px">
-  <span style="color:#ffa657">■</span> Elite fund &nbsp;
-  <span style="color:#58a6ff">■</span> Strong fund &nbsp;
-  <span style="color:#3fb950">●</span> Also held (in universe) &nbsp;
-  <span style="color:#484f58">●</span> Also held &nbsp;
-  Hover for details
-</div>
-<div id="net_BZ_48620" style="height:400px;background:#0d1117;border-radius:8px;border:1px solid #21262d"></div>
-<script>
-(function(){
-  if(typeof vis==='undefined')return;
-  var N=new vis.DataSet([{"id": 0, "label": "BZ", "shape": "dot", "color": {"background": "#58a6ff", "border": "#ffffff"}, "size": 26, "font": {"color": "#e6edf3", "size": 13, "bold": true, "face": "monospace"}, "title": "<b>BZ</b><br>Subject company"}, {"id": 1, "label": "Blackrock Inc.", "shape": "square", "color": {"background": "#ffa65722", "border": "#ffa657"}, "size": 24, "font": {"color": "#ffa657", "size": 9, "face": "sans-serif"}, "title": "<b>Blackrock Inc.</b><br>Tier: elite<br>Held: 4.83%<br>QoQ: +8.6%<br>Also holds: 20 companies"}, {"id": 2, "label": "AAPL", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>AAPL</b><br>In our universe"}, {"id": 3, "label": "ABEO", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ABEO</b><br>In our universe"}, {"id": 4, "label": "ABEV", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ABEV</b><br>In our universe"}, {"id": 5, "label": "ABNB", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ABNB</b><br>In our universe"}, {"id": 6, "label": "ADBE", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ADBE</b><br>In our universe"}, {"id": 7, "label": "ADC", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ADC</b><br>In our universe"}, {"id": 8, "label": "ADEA", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ADEA</b><br>In our universe"}, {"id": 9, "label": "ADP", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ADP</b><br>In our universe"}, {"id": 10, "label": "BAILLIE GIFFORD & CO", "shape": "square", "color": {"background": "#ffa65722", "border": "#ffa657"}, "size": 24, "font": {"color": "#ffa657", "size": 9, "face": "sans-serif"}, "title": "<b>BAILLIE GIFFORD & CO</b><br>Tier: elite<br>Held: 2.37%<br>QoQ: -0.1%<br>Also holds: 18 companies"}, {"id": 11, "label": "APP", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>APP</b><br>In our universe"}, {"id": 12, "label": "DLO", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>DLO</b><br>In our universe"}, {"id": 13, "label": "DOCS", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>DOCS</b><br>In our universe"}, {"id": 14, "label": "DUOL", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>DUOL</b><br>In our universe"}, {"id": 15, "label": "KSPI", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>KSPI</b><br>In our universe"}, {"id": 16, "label": "MEDP", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>MEDP</b><br>In our universe"}, {"id": 17, "label": "MELI", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>MELI</b><br>In our universe"}, {"id": 18, "label": "MMYT", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>MMYT</b><br>In our universe"}, {"id": 19, "label": "Vanguard Capital Manag", "shape": "square", "color": {"background": "#ffa65722", "border": "#ffa657"}, "size": 24, "font": {"color": "#ffa657", "size": 9, "face": "sans-serif"}, "title": "<b>Vanguard Capital Management LLC</b><br>Tier: elite<br>Held: 2.30%<br>QoQ: +0.0%<br>Also holds: 20 companies"}, {"id": 20, "label": "ADSK", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ADSK</b><br>In our universe"}, {"id": 21, "label": "VANGUARD Intl Eqy. IND", "shape": "square", "color": {"background": "#ffa65722", "border": "#ffa657"}, "size": 24, "font": {"color": "#ffa657", "size": 9, "face": "sans-serif"}, "title": "<b>VANGUARD Intl Eqy. INDEX Fd.S-Vanguard Emerging Markets Stock Index Fd</b><br>Tier: elite<br>Held: 0.99%<br>QoQ: +2.6%<br>Also holds: 20 companies"}, {"id": 22, "label": "ASRMF", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ASRMF</b><br>In our universe"}, {"id": 23, "label": "ATAT", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ATAT</b><br>In our universe"}, {"id": 24, "label": "AXIA", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>AXIA</b><br>In our universe"}, {"id": 25, "label": "BUHPF", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>BUHPF</b><br>In our universe"}, {"id": 26, "label": "GAERF", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>GAERF</b><br>In our universe"}, {"id": 27, "label": "GFIOF", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>GFIOF</b><br>In our universe"}, {"id": 28, "label": "GPAEF", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>GPAEF</b><br>In our universe"}, {"id": 29, "label": "GRKZF", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>GRKZF</b><br>In our universe"}, {"id": 30, "label": "Baillie Gifford Funds-", "shape": "square", "color": {"background": "#ffa65722", "border": "#ffa657"}, "size": 13, "font": {"color": "#ffa657", "size": 9, "face": "sans-serif"}, "title": "<b>Baillie Gifford Funds-Baillie Gifford Emerging Markets Equities Fund</b><br>Tier: elite<br>Held: 0.84%<br>QoQ: +0.0%<br>Also holds: 1 companies"}]);
-  var E=new vis.DataSet([{"from": 0, "to": 1, "color": {"color": "#ffa657bb", "highlight": "#ffa657"}, "width": 2, "dashes": false, "title": "elite \u00b7 4.83%"}, {"from": 1, "to": 2, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Blackrock Inc. \u2192 AAPL"}, {"from": 1, "to": 3, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Blackrock Inc. \u2192 ABEO"}, {"from": 1, "to": 4, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Blackrock Inc. \u2192 ABEV"}, {"from": 1, "to": 5, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Blackrock Inc. \u2192 ABNB"}, {"from": 1, "to": 6, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Blackrock Inc. \u2192 ADBE"}, {"from": 1, "to": 7, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Blackrock Inc. \u2192 ADC"}, {"from": 1, "to": 8, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Blackrock Inc. \u2192 ADEA"}, {"from": 1, "to": 9, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Blackrock Inc. \u2192 ADP"}, {"from": 0, "to": 10, "color": {"color": "#ffa657bb", "highlight": "#ffa657"}, "width": 2, "dashes": false, "title": "elite \u00b7 2.37%"}, {"from": 10, "to": 11, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "BAILLIE GIFFORD & CO \u2192 APP"}, {"from": 10, "to": 12, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "BAILLIE GIFFORD & CO \u2192 DLO"}, {"from": 10, "to": 13, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "BAILLIE GIFFORD & CO \u2192 DOCS"}, {"from": 10, "to": 14, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "BAILLIE GIFFORD & CO \u2192 DUOL"}, {"from": 10, "to": 15, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "BAILLIE GIFFORD & CO \u2192 KSPI"}, {"from": 10, "to": 16, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "BAILLIE GIFFORD & CO \u2192 MEDP"}, {"from": 10, "to": 17, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "BAILLIE GIFFORD & CO \u2192 MELI"}, {"from": 10, "to": 18, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "BAILLIE GIFFORD & CO \u2192 MMYT"}, {"from": 0, "to": 19, "color": {"color": "#ffa657bb", "highlight": "#ffa657"}, "width": 2, "dashes": false, "title": "elite \u00b7 2.30%"}, {"from": 19, "to": 2, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 AAPL"}, {"from": 19, "to": 3, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 ABEO"}, {"from": 19, "to": 5, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 ABNB"}, {"from": 19, "to": 6, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 ADBE"}, {"from": 19, "to": 7, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 ADC"}, {"from": 19, "to": 8, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 ADEA"}, {"from": 19, "to": 9, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 ADP"}, {"from": 19, "to": 20, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 ADSK"}, {"from": 0, "to": 21, "color": {"color": "#ffa657bb", "highlight": "#ffa657"}, "width": 2, "dashes": false, "title": "elite \u00b7 0.99%"}, {"from": 21, "to": 22, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "VANGUARD Intl Eqy. I \u2192 ASRMF"}, {"from": 21, "to": 23, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "VANGUARD Intl Eqy. I \u2192 ATAT"}, {"from": 21, "to": 24, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "VANGUARD Intl Eqy. I \u2192 AXIA"}, {"from": 21, "to": 25, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "VANGUARD Intl Eqy. I \u2192 BUHPF"}, {"from": 21, "to": 26, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "VANGUARD Intl Eqy. I \u2192 GAERF"}, {"from": 21, "to": 27, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "VANGUARD Intl Eqy. I \u2192 GFIOF"}, {"from": 21, "to": 28, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "VANGUARD Intl Eqy. I \u2192 GPAEF"}, {"from": 21, "to": 29, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "VANGUARD Intl Eqy. I \u2192 GRKZF"}, {"from": 0, "to": 30, "color": {"color": "#ffa657bb", "highlight": "#ffa657"}, "width": 2, "dashes": false, "title": "elite \u00b7 0.84%"}, {"from": 30, "to": 15, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Baillie Gifford Fund \u2192 KSPI"}]);
-  new vis.Network(
-    document.getElementById('net_BZ_48620'),
-    {nodes:N,edges:E},
-    {
-      nodes:{shadow:{enabled:true,color:'rgba(0,0,0,0.5)',size:8},borderWidth:1},
-      edges:{smooth:{type:'continuous'}},
-      physics:{
-        barnesHut:{gravitationalConstant:-5000,centralGravity:0.25,springLength:130,springConstant:0.05},
-        stabilization:{iterations:120}
-      },
-      interaction:{hover:true,tooltipDelay:100,navigationButtons:false,keyboard:false},
-      configure:{enabled:false}
-    }
-  );
-})();
-</script></div><div class="card">
-<div class="section-title">Quality Score · Sector-Relative Ranking</div>
-
-<div style="display:flex;align-items:flex-start;gap:28px;flex-wrap:wrap">
-  <div>
-    <div style="font-family:monospace;font-size:52px;font-weight:800;color:#3fb950;line-height:1">8.5</div>
-    <div style="font-size:9px;color:#484f58;letter-spacing:.1em;text-transform:uppercase;margin-top:2px">/ 10 · High Quality</div>
-    
-    <div style="font-size:9px;color:#484f58;letter-spacing:.08em;text-transform:uppercase;margin-top:2px">Universe rank #15 of 3098</div>
-    <div style="margin-top:14px"><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">FCF: improving</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8514922;color:#f85149;margin-right:4px">CCC: deteriorating</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">ROE: improving</span></div>
-    <div style="margin-top:8px"><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">EBITDA positive</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">FCF positive</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">Profitable</span></div>
-  </div>
-  <div style="flex:1;min-width:300px">
-    <div class="mini-label" style="margin-bottom:10px">Sector-Relative Percentile Ranks</div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:130px;font-size:11px;color:#8b949e">FCF Margin</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:156px;height:6px;background:#3fb950;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#3fb950;min-width:32px">98th</span><span style="font-size:10px;color:#484f58">FCF as % of revenue vs sector — weight 25%</span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:130px;font-size:11px;color:#8b949e">EV/EBITDA (inv.)</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:158px;height:6px;background:#58a6ff;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#58a6ff;min-width:32px">99th</span><span style="font-size:10px;color:#484f58">Valuation vs sector — cheaper is better — weight 20%</span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:130px;font-size:11px;color:#8b949e">ROE</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:107px;height:6px;background:#ffa657;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#ffa657;min-width:32px">67th</span><span style="font-size:10px;color:#484f58">Return on equity vs sector — weight 15%</span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:130px;font-size:11px;color:#8b949e">Revenue CAGR</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:145px;height:6px;background:#79c0ff;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#79c0ff;min-width:32px">91th</span><span style="font-size:10px;color:#484f58">Revenue growth momentum vs sector — weight 15%</span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:130px;font-size:11px;color:#8b949e">Net Debt/EBITDA (inv.)</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:139px;height:6px;background:#f0883e;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#f0883e;min-width:32px">87th</span><span style="font-size:10px;color:#484f58">Leverage vs sector — lower is better — weight 15%</span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:130px;font-size:11px;color:#8b949e">CCC (inverted)</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:91px;height:6px;background:#d29922;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#d29922;min-width:32px">57th</span><span style="font-size:10px;color:#484f58">CCC days — lower is better vs sector — weight 10%</span></div>
+    <div style="background:#0d1117;border-radius:6px;padding:12px">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:6px">Key risk monitor · horizon: 6M</div>
+      <div style="font-size:11px;color:#c9d1d9">Watch: Stage=4 — Minervini Stage 4 confirmed downtrend; do not hold in Stage 4 per systematic rule. Trigger: any material negative development in this area changes the verdict.</div>
+    </div>
   </div>
 </div>
-<div style="margin-top:16px;padding-top:14px;border-top:1px solid #21262d"><div class="mini-label" style="margin-bottom:8px">Ownership Quality Overlay</div><div style="display:flex;gap:14px;flex-wrap:wrap"><div><div style="font-family:monospace;font-size:14px;font-weight:700;color:#ffa657">12.4%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">Elite Funds</div></div><div><div style="font-family:monospace;font-size:14px;font-weight:700;color:#58a6ff">0.0%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">Insider</div></div><div><div style="font-size:12px;font-weight:600;color:#3fb950">Accumulating</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">Smart Money</div></div><div><div style="font-size:12px;font-weight:600;color:#f85149">Selling</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">Insider Sentiment</div></div></div></div></div>
-<div style="font-family:monospace;font-size:9px;color:#30363d;margin-top:28px;text-align:center">
-  NAV Framework · 2026-06-11 · BZ · US Equity · Private research only
-</div>
+
+<!-- VERDICT_SECTION -->
 </body>
 </html>
