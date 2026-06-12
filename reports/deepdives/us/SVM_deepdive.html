@@ -1,293 +1,416 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SVM — US Deep Dive</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVM — Deep Dive · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-       background: #0d1117; color: #c9d1d9; padding: 28px 32px; font-size: 13px; line-height: 1.5; }
-.card { background: #161b22; border-radius: 10px; padding: 22px 24px;
-        box-shadow: 0 1px 6px rgba(0,0,0,.25); margin-bottom: 16px; }
-.section-title { font-family: monospace; font-size: 10px; letter-spacing: .14em;
-                 text-transform: uppercase; color: #8b949e; margin-bottom: 14px;
-                 display: flex; align-items: center; gap: 8px; }
-.metrics-row { display: flex; flex-wrap: wrap; gap: 10px; }
-.metric-box { background: #0d1117; border-radius: 6px; padding: 10px 14px; min-width: 115px; }
-.metric-label { font-family: monospace; font-size: 9px; letter-spacing: .1em;
-                text-transform: uppercase; color: #484f58; margin-bottom: 4px; }
-.metric-val { font-family: monospace; font-size: 18px; font-weight: 700; }
-.metric-sub { font-family: monospace; font-size: 9px; color: #8b949e; margin-top: 3px; }
-.mini-card { background: #0d1117; border-radius: 6px; padding: 12px; }
-.mini-label { font-family: monospace; font-size: 9px; letter-spacing: .1em;
-              text-transform: uppercase; color: #484f58; }
-.mini-metric { display: inline-flex; flex-direction: column; margin-right: 16px; margin-bottom: 8px; }
-.mini-metrics-row { display: flex; flex-wrap: wrap; }
-.ml { font-size: 9px; color: #484f58; font-family: monospace; text-transform: uppercase; letter-spacing: .06em; }
-.mv { font-family: monospace; font-size: 14px; font-weight: 700; color: #e6edf3; }
-.ms { font-size: 9px; color: #8b949e; font-family: monospace; }
-.peer-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.peer-table th { font-family: monospace; font-size: 9px; letter-spacing: .08em;
-                 text-transform: uppercase; color: #484f58; padding: 6px 10px;
-                 text-align: left; border-bottom: 1px solid #21262d; white-space: nowrap; }
-.peer-table td { padding: 8px 10px; border-bottom: 1px solid #161b22; vertical-align: middle; }
-.peer-table tr:hover td { background: #1c2128; }
-.tip { border-bottom: 1px dashed #484f58; cursor: help; position: relative; }
-.tip:hover::after { content: attr(data-tip); position: absolute; bottom: 120%; left: 0;
-  background: #161b22; border: 1px solid #30363d; border-radius: 6px;
-  padding: 6px 10px; font-size: 11px; color: #c9d1d9; white-space: nowrap;
-  z-index: 10; min-width: 180px; max-width: 300px; white-space: normal; line-height: 1.5; }
-.takeaway { font-size: 11px; border-left: 2px solid; padding: 3px 8px; margin-bottom: 5px; }
-.fin-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-.fin-table th { font-family: monospace; font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
-  color: #484f58; padding: 5px 8px; border-bottom: 1px solid #21262d; text-align: right; }
-.fin-table th:first-child { text-align: left; }
-.fin-table td { padding: 5px 8px; border-bottom: 1px solid #0d1117; font-family: monospace; font-size: 11px;
-  text-align: right; color: #c9d1d9; }
-.fin-table td:first-child { text-align: left; color: #8b949e; font-size: 10px; white-space: nowrap; }
-.fin-table tr:hover td { background: #161b22; }
-@media (max-width: 800px) { body { padding: 16px; } }
+:root{--paper:#f5f2eb;--paper2:#ede9e0;--card:#fff;--rule:#d4cfc4;--ink:#0d0d0d;--muted:#7a7060;--green:#1a5c38;--green-pale:#d4edd8;--amber:#b35a00;--amber-pale:#fdefd8;--red:#8b1a1a;--red-pale:#fde0e0;--blue:#1a3a6b;--blue-pale:#dde5f5;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6}
+.disclaimer-banner{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:10.5px;padding:8px 24px;text-align:center;letter-spacing:.02em}
+.disclaimer-banner a{color:var(--paper);text-decoration:underline}
+.masthead{border-bottom:1px solid var(--rule);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--paper)}
+.logo-block{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink)}
+.logo-pi{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-1.5px}
+.logo-name{font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:.06em;text-transform:uppercase}
+.report-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.report-type{color:var(--green);font-weight:500}
+.page{max-width:900px;margin:0 auto}
+.report-head{padding:36px 36px 28px;background:var(--card);border-bottom:1px solid var(--rule)}
+.head-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.pill{font-family:var(--mono);font-size:9px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.pill.stage-2{background:var(--green-pale);color:var(--green)}
+.pill.stage-3{background:var(--amber-pale);color:var(--amber)}
+.pill.stage-4{background:var(--red-pale);color:var(--red)}
+.pill.transition{background:#fff3e0;color:#e65100}
+.pill.neutral{background:var(--paper2);color:var(--muted)}
+.pill.warn{background:#fff8e6;color:var(--amber);border:1px solid #f0c060}
+.head-title{font-family:var(--serif);font-size:38px;font-weight:500;line-height:1.15;letter-spacing:-.5px;margin-bottom:6px}
+.head-subtitle{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:18px}
+.head-tagline{font-size:14px;color:#444;line-height:1.7;max-width:700px}
+.content{padding:0 36px 40px}
+.section{padding:32px 0;border-bottom:1px solid var(--paper2)}
+.section:last-child{border-bottom:none}
+.section-head{display:flex;align-items:baseline;gap:16px;margin-bottom:22px}
+.section-num{font-family:var(--mono);font-size:11px;font-weight:500;color:#fff;background:var(--ink);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.05em}
+.section-title{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-.3px;line-height:1.2}
+.thesis-box{background:var(--paper);border-left:3px solid var(--green);border-radius:4px;padding:22px 26px}
+.th-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.th-call{font-family:var(--serif);font-size:18px;font-weight:300;line-height:1.5;color:var(--ink)}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}
+.kpi-cell{background:var(--paper);border-radius:8px;padding:14px 16px}
+.kpi-label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.kpi-value{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.1}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
+.kpi-cell.green{background:var(--green-pale)}.kpi-cell.green .kpi-value{color:var(--green)}
+.kpi-cell.amber{background:var(--amber-pale)}.kpi-cell.amber .kpi-value{color:var(--amber)}
+.kpi-cell.red{background:var(--red-pale)}.kpi-cell.red .kpi-value{color:var(--red)}
+.score-block{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:28px;margin-bottom:24px}
+.score-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.score-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.score-date{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.score-total{display:flex;align-items:baseline;gap:12px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--paper2)}
+.score-num-big{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-2px}
+.score-denom{font-family:var(--mono);font-size:16px;color:var(--muted)}
+.tier-badge{margin-left:auto;font-family:var(--mono);font-size:10px;padding:5px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.tier-watch{background:#fff8e6;color:var(--amber);border:1px solid #f0c060}
+.tier-quality{background:var(--green-pale);color:var(--green);border:1px solid #a0d8a8}
+.score-components{display:flex;flex-direction:column;gap:14px}
+.component{display:grid;grid-template-columns:180px 1fr 56px;align-items:center;gap:12px}
+.component label{font-family:var(--mono);font-size:10px;color:var(--ink);letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.component .bar{height:8px;background:var(--paper2);border-radius:4px;overflow:hidden}
+.component .fill{height:100%;border-radius:4px}
+.component .value{font-family:var(--mono);font-size:12px;color:var(--ink);text-align:right;font-weight:500}
+.component-rationale{font-family:var(--sans);font-size:12px;color:var(--muted);padding-left:192px;margin-top:-8px;line-height:1.6}
+.layer-strip{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 18px}
+.layer-chip{font-family:var(--mono);font-size:9px;font-weight:500;padding:4px 10px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase}
+.lc-strong{background:var(--green-pale);color:var(--green)}
+.lc-moderate{background:var(--amber-pale);color:var(--amber)}
+.lc-weak{background:var(--red-pale);color:var(--red)}
+.lc-clean{background:var(--green-pale);color:var(--green)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}
+.info-block{background:var(--paper);border-radius:8px;padding:18px 20px}
+.ib-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.ib-content{font-size:13px;line-height:1.7;color:#333}
+.ib-content strong{color:var(--ink);font-weight:600}
+.warn-strip{background:#fff8e6;border-left:3px solid var(--amber);border-radius:4px;padding:14px 18px;display:flex;gap:12px;margin:18px 0}
+.ws-icon{font-size:20px;line-height:1;flex-shrink:0;color:var(--amber)}
+.ws-text{font-size:13px;line-height:1.6;color:#4a3a00}
+.ws-text strong{color:var(--amber)}
+.para{font-size:14px;line-height:1.75;color:#333;margin-bottom:14px}
+.para strong{color:var(--ink);font-weight:600}
+.para em{color:var(--green);font-style:italic}
+.peer-table{width:100%;border-collapse:collapse;margin:18px 0;background:var(--paper);border-radius:8px;overflow:hidden}
+.peer-table th{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);font-weight:500}
+.peer-table td{padding:10px 12px;font-size:12px;border-bottom:1px solid var(--paper2)}
+.peer-table tbody tr:last-child td{border-bottom:none}
+.peer-table .highlight{background:var(--green-pale)}
+.peer-table .highlight td:first-child{font-weight:600}
+.tech-citation{background:var(--paper);border-radius:6px;padding:14px 18px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:18px;font-style:italic}
+.tech-citation strong{color:var(--ink);font-style:normal;font-weight:600}
+.risk-list{list-style:none;padding:0;margin:14px 0}
+.risk-list li{background:var(--paper);border-left:3px solid var(--red);border-radius:4px;padding:12px 18px;margin-bottom:8px;font-size:13px;line-height:1.6}
+.risk-list li strong{color:var(--red);font-weight:600;display:block;margin-bottom:3px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.risk-list.watch li{border-left-color:var(--amber)}
+.risk-list.watch li strong{color:var(--amber)}
+.stand-box{background:var(--paper);border-left:3px solid var(--blue);border-radius:4px;padding:22px 26px;margin:18px 0}
+.sb-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+.sb-text{font-size:14px;line-height:1.75;color:#333}
+.ownership-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+.sources{padding:24px 36px;background:var(--paper);border-top:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.8;letter-spacing:.02em}
+.sources strong{color:var(--ink);display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;font-weight:500}
+.report-foot{padding:24px 36px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--paper)}
+.foot-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.04em}
+.back-link{font-family:var(--mono);font-size:11px;color:var(--blue);text-decoration:none;padding:8px 14px;background:var(--blue-pale);border-radius:6px;letter-spacing:.06em;text-transform:uppercase}
+h3.sub-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
+@media(max-width:700px){.report-head{padding:24px 20px}.head-title{font-size:28px}.content{padding:0 20px 30px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}.ownership-grid{grid-template-columns:repeat(2,1fr)}.component{grid-template-columns:120px 1fr 50px}.component-rationale{padding-left:0}.report-foot{flex-direction:column;gap:12px;align-items:flex-start}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/dist/vis-network.min.js"></script>
 </head>
 <body>
-<div class="card" style="margin-bottom:16px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap"><div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px"><span style="font-family:monospace;font-size:24px;font-weight:800;color:#e6edf3">SVM</span><span style="font-size:15px;color:#8b949e">SVM</span><span style="background:#21262d;color:#8b949e;padding:2px 8px;border-radius:6px;font-size:10px">Silver</span><span style="background:#21262d;color:#484f58;padding:2px 8px;border-radius:6px;font-size:10px">Basic Materials</span></div><div style="margin-bottom:12px"><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">NN clean</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#d2992222;color:#d29922;margin-right:4px">pilot buy</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">Stage 2</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">TT 6/8</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#8b949e22;color:#8b949e;margin-right:4px">Canada</span></div><div style="margin-top:12px;padding:8px 12px;background:#161b22;border-left:2px solid #30363d;border-radius:4px;font-family:monospace;font-size:9px;color:#484f58;letter-spacing:.04em">⚠ DATA GAPS — missing: Business Model · Customers · Directors. Sections below will show placeholders where data is unavailable.</div></div><div style="text-align:right"><div style="font-family:monospace;font-size:38px;font-weight:800;color:#3fb950;line-height:1">7.9</div><div style="font-size:9px;color:#484f58;letter-spacing:.1em;text-transform:uppercase;margin-top:2px">Quality Score / 10</div><div style="margin-top:10px"><span style="font-family:monospace;font-size:22px;font-weight:700;color:#58a6ff">$10.66</span><span style='font-family:monospace;font-size:11px;color:#484f58;margin-left:8px'>$2.2B</span><div style="font-family:monospace;font-size:10px;color:#3fb950;margin-top:2px">1yr +155.9%</div></div></div></div></div><div class="card"><div class="section-title">Industry &amp; Macro Outlook</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px"><div><div class="mini-label" style="margin-bottom:8px">Sector Outlook · Basic Materials</div><div style="background:#0d1117;border-radius:8px;padding:16px 18px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="font-family:monospace;font-size:11px;font-weight:700;color:#c9d1d9">Basic Materials</span><span style="background:#d2992222;color:#d29922;font-family:monospace;font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:.06em">NEUTRAL</span></div><div style="font-size:11px;color:#8b949e;line-height:1.7">Commodity cycle mid-phase. Copper and lithium demand supported by electrification. Near-term pricing pressure from China slowdown.</div></div></div><div><div class="mini-label" style="margin-bottom:8px">Management Outlook</div><div style="display:flex;align-items:center;gap:8px;margin-bottom:0"><span style="font-family:monospace;font-size:13px;font-weight:700;color:#8b949e">—</span></div></div></div></div><div class="card"><div class="section-title">Business Model</div><div style="background:#161b22;border-radius:6px;padding:16px;border-left:3px solid #30363d"><div style="font-size:10px;color:#d29922;font-family:monospace;letter-spacing:.08em;margin-bottom:8px">⚠ BUSINESS MODEL DATA NOT YET EXTRACTED</div><div style="font-size:12px;color:#8b949e;line-height:1.7">10-K business model signals have not been extracted for this company yet.<br>Known from screener: <span style="color:#c9d1d9">Basic Materials · Silver · 372 employees</span></div><div style="font-size:10px;color:#484f58;margin-top:8px;font-family:monospace">Run: python scripts/bulk_kyb_fetch_us.py --tickers SVM</div></div></div><div class="card">
-<div class="section-title">Financials · Peer Comparison</div>
+<!-- VERDICT_BANNER -->
 
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px">
-
-  <div class="mini-card">
-    <div class="mini-label" style="margin-bottom:8px">Revenue & <span class="tip" data-tip="Operating profit as % of revenue — higher = better cost control">Op Margin</span></div>
-    <table class="fin-table">
-      <thead><tr><th>Year</th><th>Revenue</th><th>∆%</th><th><span class="tip" data-tip="Operating profit as % of revenue — higher = better cost control">Op Margin</span></th><th>Net Inc.</th><th>FCF</th></tr></thead>
-      <tbody><tr><td>2023</td><td>$208M</td><td style="color:#8b949e">—</td><td style="color:#3fb950">26.4%</td><td style="color:#8b949e">$21M</td><td>$31M</td></tr><tr><td>2024</td><td>$215M</td><td style="color:#3fb950">+3%</td><td style="color:#3fb950">29.2%</td><td style="color:#3fb950">$36M</td><td>$28M</td></tr><tr><td>2025</td><td>$299M</td><td style="color:#3fb950">+39%</td><td style="color:#3fb950">34.5%</td><td style="color:#3fb950">$58M</td><td>$53M</td></tr><tr style="background:#1c2128"><td>2026</td><td>$438M</td><td style="color:#3fb950">+47%</td><td style="color:#3fb950">51.9%</td><td style="color:#f85149">$-10M</td><td>$181M</td></tr></tbody>
-    </table>
-    <div style="margin-top:10px"><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Revenue +47% YoY → $438M</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Revenue CAGR 28.2% (multi-year)</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Op margin 51.9% · sector 96th pct</div></div>
-  </div>
-
-  <div class="mini-card">
-    <div class="mini-label" style="margin-bottom:8px">Cash Management · <span class="tip" data-tip="Free cash flow as % of revenue — true cash generation after capex">FCF Margin</span> · <span class="tip" data-tip="Cash Conversion Cycle = DSO + DIO − DPO. Negative = business collects before paying">CCC</span></div>
-    <table class="fin-table">
-      <thead><tr><th>Year</th><th><span class="tip" data-tip="Free cash flow as % of revenue — true cash generation after capex">FCF Margin</span></th><th><span class="tip" data-tip="Cash Conversion Cycle = DSO + DIO − DPO. Negative = business collects before paying">CCC</span></th><th>DSO</th><th>DIO</th><th>DPO</th></tr></thead>
-      <tbody><tr><td>2023</td><td style="color:#3fb950">14.7%</td><td style="color:#3fb950">-72d</td><td>3d</td><td>22d</td><td>98d</td></tr><tr><td>2024</td><td style="color:#3fb950">13.1%</td><td style="color:#3fb950">-90d</td><td>4d</td><td>20d</td><td>113d</td></tr><tr><td>2025</td><td style="color:#3fb950">17.6%</td><td style="color:#3fb950">-115d</td><td>1d</td><td>17d</td><td>133d</td></tr><tr style="background:#1c2128"><td>2026</td><td style="color:#3fb950">41.4%</td><td style="color:#3fb950">-148d</td><td>1d</td><td>19d</td><td>168d</td></tr></tbody>
-    </table>
-    <div style="margin-top:10px"><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">FCF margin 41.4% · sector 98th pct</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">FCF trend: improving</div><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">CCC improved -72d → -148d (-76d)</div></div>
-  </div>
-
-  <div class="mini-card">
-    <div class="mini-label" style="margin-bottom:8px">Balance Sheet · <span class="tip" data-tip="Net Debt ÷ EBITDA — leverage ratio. Below 1× = low leverage">ND/EBITDA</span> · <span class="tip" data-tip="Return on equity. Above 15% is strong for most sectors">ROE</span></div>
-    <table class="fin-table">
-      <thead><tr><th>Year</th><th><span class="tip" data-tip="Net Debt ÷ EBITDA — leverage ratio. Below 1× = low leverage">ND/EBITDA</span></th><th><span class="tip" data-tip="Return on equity. Above 15% is strong for most sectors">ROE</span></th><th>Cash</th><th>Net Debt</th></tr></thead>
-      <tbody><tr><td>2023</td><td style="color:#3fb950">-2.2×</td><td style="color:#f85149;font-size:11px">4.2%</td><td>$146M</td><td>$-145M</td></tr><tr><td>2024</td><td style="color:#3fb950">-1.5×</td><td style="color:#f85149;font-size:11px">7.2%</td><td>$153M</td><td>$-152M</td></tr><tr><td>2025</td><td style="color:#3fb950">-1.8×</td><td style="color:#d29922;font-size:11px">8.3%</td><td>$364M</td><td>$-252M</td></tr><tr style="background:#1c2128"><td>2026</td><td style="color:#3fb950">-2.3×</td><td style="color:#f85149;font-size:11px">-1.1%</td><td>$422M</td><td>$-304M</td></tr></tbody>
-    </table>
-    <div style="margin-top:10px"><div class="takeaway" style="border-color:#3fb95044;color:#3fb950">Net debt/EBITDA -2.3× — net cash</div><div class="takeaway" style="border-color:#f8514944;color:#f85149">ROE -1.1% · sector 20th pct</div></div>
-  </div>
-
-</div>
-
-<div style="margin-top:20px">
-  <div class="mini-label" style="margin-bottom:8px">Sector Peers — <span class="tip" data-tip="Sector-relative percentile rank across FCF margin, op margin, ROE, CAGR, CCC">Quality Score</span> ranked · MCap > $500M</div>
-  
-<div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px;margin-bottom:16px">
+<div id="verdict-banner" style="background:#161b22;border-radius:10px;padding:16px 24px;
+  margin-bottom:16px;border-left:3px solid #f85149;display:flex;align-items:flex-start;
+  justify-content:space-between;flex-wrap:wrap;gap:12px">
   <div>
-    <div class="mini-label" style="margin-bottom:12px">P/E vs Peers · cheapest → most expensive</div>
-    <div style="position:relative;padding-top:18px"><div style="position:relative;margin-bottom:6px"><div style="position:absolute;left:75%;top:0;height:100%;border-left:1px dashed #484f5888;pointer-events:none"></div><span style="position:absolute;left:75%;top:-14px;font-size:8px;color:#484f58;font-family:monospace;transform:translateX(-50%)">med 11×</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">OGC</span><div style="width:180px;height:8px;background:#21262d;border-radius:3px;position:relative"><div style="width:96px;height:8px;background:#30363d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400">7.7×</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">FSM</span><div style="width:180px;height:8px;background:#21262d;border-radius:3px;position:relative"><div style="width:100px;height:8px;background:#30363d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400">8.0×</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">HMY</span><div style="width:180px;height:8px;background:#21262d;border-radius:3px;position:relative"><div style="width:121px;height:8px;background:#30363d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400">9.7×</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">HGMCF</span><div style="width:180px;height:8px;background:#21262d;border-radius:3px;position:relative"><div style="width:139px;height:8px;background:#30363d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400">11.2×</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">MAKO</span><div style="width:180px;height:8px;background:#21262d;border-radius:3px;position:relative"><div style="width:162px;height:8px;background:#30363d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400">13.0×</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">ORLA</span><div style="width:180px;height:8px;background:#21262d;border-radius:3px;position:relative"><div style="width:180px;height:8px;background:#30363d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400">14.4×</span></div></div>
-  </div>
-  <div>
-    <div class="mini-label" style="margin-bottom:8px"><span class="tip" data-tip="Quality Score ÷ P/E — quality per unit of valuation paid. Higher = better value">Q/PE</span> Efficiency · quality per unit of PE</div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">OGC</span><div style="width:140px;height:8px;background:#21262d;border-radius:3px"><div style="width:140px;height:8px;background:#21262d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:9px;color:#484f58">11.60</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">FSM</span><div style="width:140px;height:8px;background:#21262d;border-radius:3px"><div style="width:128px;height:8px;background:#21262d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:9px;color:#484f58">10.68</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">HMY</span><div style="width:140px;height:8px;background:#21262d;border-radius:3px"><div style="width:101px;height:8px;background:#21262d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:9px;color:#484f58">8.44</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">HGMCF</span><div style="width:140px;height:8px;background:#21262d;border-radius:3px"><div style="width:88px;height:8px;background:#21262d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:9px;color:#484f58">7.32</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">MAKO</span><div style="width:140px;height:8px;background:#21262d;border-radius:3px"><div style="width:77px;height:8px;background:#21262d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:9px;color:#484f58">6.42</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-family:monospace;font-size:10px;color:#8b949e;font-weight:400;min-width:52px">ORLA</span><div style="width:140px;height:8px;background:#21262d;border-radius:3px"><div style="width:73px;height:8px;background:#21262d;border-radius:3px"></div></div><span style="font-family:monospace;font-size:9px;color:#484f58">6.07</span></div>
-  </div>
-</div>
-  <table class="peer-table">
-    <thead><tr><th>Ticker</th><th><span class="tip" data-tip="Sector-relative percentile rank across FCF margin, op margin, ROE, CAGR, CCC">Quality Score</span></th><th><span class="tip" data-tip="Operating profit as % of revenue — higher = better cost control">Op Margin</span></th><th><span class="tip" data-tip="Free cash flow as % of revenue — true cash generation after capex">FCF Margin</span></th><th>Rev CAGR</th><th>P/E</th><th><span class="tip" data-tip="Quality Score ÷ P/E — quality per unit of valuation paid. Higher = better value">Q/PE</span></th><th>Mkt Cap</th></tr></thead>
-    <tbody><tr style="background:#1c2128;"><td style="font-weight:700;color:#58a6ff">SVM  ←</td><td><span style="font-family:monospace;font-size:11px;color:#e6edf3">79</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:61px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">51.9%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">41.4%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">28.2%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">—</td><td style="font-family:monospace;font-size:11px;color:#484f58">—</td><td style="font-family:monospace;font-size:11px;color:#8b949e">$2.2B</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">OGC</td><td><span style="font-family:monospace;font-size:11px;color:#e6edf3">90</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:70px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">41.1%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">28.6%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">25.1%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">7.7×</td><td style="font-family:monospace;font-size:11px;color:#3fb950">11.60</td><td style="font-family:monospace;font-size:11px;color:#8b949e">$5.7B</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">ORLA</td><td><span style="font-family:monospace;font-size:11px;color:#e6edf3">87</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:68px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">43.5%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">64.8%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">76.3%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">14.4×</td><td style="font-family:monospace;font-size:11px;color:#8b949e">6.07</td><td style="font-family:monospace;font-size:11px;color:#8b949e">$3.6B</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">FSM</td><td><span style="font-family:monospace;font-size:11px;color:#e6edf3">86</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:66px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">39.0%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">29.3%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">11.6%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">8.0×</td><td style="font-family:monospace;font-size:11px;color:#8b949e">10.68</td><td style="font-family:monospace;font-size:11px;color:#8b949e">$2.6B</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">MAKO</td><td><span style="font-family:monospace;font-size:11px;color:#e6edf3">83</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:64px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">36.5%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">27.4%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">32.8%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">13.0×</td><td style="font-family:monospace;font-size:11px;color:#8b949e">6.42</td><td style="font-family:monospace;font-size:11px;color:#8b949e">$624M</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">HMY</td><td><span style="font-family:monospace;font-size:11px;color:#e6edf3">82</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:63px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">18.8%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">11.8%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">13.7%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">9.7×</td><td style="font-family:monospace;font-size:11px;color:#8b949e">8.44</td><td style="font-family:monospace;font-size:11px;color:#8b949e">$9.5B</td></tr><tr style=""><td style="font-weight:400;color:#c9d1d9">HGMCF</td><td><span style="font-family:monospace;font-size:11px;color:#e6edf3">82</span>  <div style="display:inline-block;width:70px;height:5px;background:#21262d;border-radius:3px;vertical-align:middle"><div style="width:63px;height:5px;background:#3fb950;border-radius:3px"></div></div></td><td style="font-family:monospace;font-size:11px;color:#3fb950">18.8%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">11.8%</td><td style="font-family:monospace;font-size:11px;color:#3fb950">13.7%</td><td style="font-family:monospace;font-size:11px;color:#8b949e">11.2×</td><td style="font-family:monospace;font-size:11px;color:#8b949e">7.32</td><td style="font-family:monospace;font-size:11px;color:#8b949e">$10.8B</td></tr></tbody>
-  </table>
-</div></div><div class="card">
-<div class="section-title">Technical Analysis · Minervini SEPA</div>
-
-<div style="display:grid;grid-template-columns:280px 1fr;gap:24px">
-  <div>
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-      <span style="font-family:monospace;font-size:30px;font-weight:800;color:#3fb950">6</span>
-      <span style="color:#484f58;font-size:16px">/8</span>
-      <span style="font-family:monospace;font-size:14px;letter-spacing:3px;margin-left:6px"><span style="color:#3fb950">●</span><span style="color:#3fb950">●</span><span style="color:#3fb950">●</span><span style="color:#3fb950">●</span><span style="color:#3fb950">●</span><span style="color:#3fb950">●</span><span style="color:#3fb950">○</span><span style="color:#3fb950">○</span></span>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+      <span style="font-family:monospace;font-size:18px;font-weight:800;color:#f85149">✕ AVOID</span>
+      <span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f0883e22;color:#f0883e;margin-right:4px">Confidence: LOW</span>
+      <span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f0883e22;color:#f0883e;margin-right:4px">Bear: MODERATE BEAR</span>
+      <span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#58a6ff22;color:#58a6ff;margin-right:4px">Adj Score 77.80</span>
     </div>
-    <div style="font-size:12px;font-weight:600;color:#3fb950;margin-bottom:12px">Stage 2 Advancing ▲</div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#484f58;font-size:13px;width:14px">·</span><span style="font-size:11px;color:#484f58">Price > 150 & 200 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#484f58;font-size:13px;width:14px">·</span><span style="font-size:11px;color:#484f58">150 DMA > 200 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#484f58;font-size:13px;width:14px">·</span><span style="font-size:11px;color:#484f58">200 DMA trending up (1m)</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#484f58;font-size:13px;width:14px">·</span><span style="font-size:11px;color:#484f58">50 DMA > 150 & 200 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#484f58;font-size:13px;width:14px">·</span><span style="font-size:11px;color:#484f58">Price > 50 DMA</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#484f58;font-size:13px;width:14px">·</span><span style="font-size:11px;color:#484f58">Price ≥30% above 52w low</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#f85149;font-size:13px;width:14px;font-weight:700">✗</span><span style="font-size:11px;color:#c9d1d9">Within 25% of 52w high</span><span style='font-size:10px;color:#484f58;font-family:monospace'> -32.3% vs 52w high</span></div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="color:#3fb950;font-size:13px;width:14px;font-weight:700">✓</span><span style="font-size:11px;color:#c9d1d9">RS beats SPY (1yr)</span><span style='font-size:10px;color:#484f58;font-family:monospace'> 1yr: +155.9% vs SPY</span></div>
-    <div style="margin:10px 0"><div style="font-size:9px;color:#484f58;font-family:monospace;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">52-week range</div><div style="position:relative;height:6px;background:#21262d;border-radius:3px;width:260px"><div style="position:absolute;left:57%;top:-3px;width:12px;height:12px;background:#3fb950;border-radius:50%;transform:translateX(-50%)"></div></div><div style="display:flex;justify-content:space-between;width:260px;margin-top:4px"><span style="font-family:monospace;font-size:9px;color:#484f58">$3.96</span><span style="font-family:monospace;font-size:10px;color:#3fb950;font-weight:600">$10.66 (57%)</span><span style="font-family:monospace;font-size:9px;color:#484f58">$15.75</span></div></div>
-    <div style="font-family:monospace;font-size:10px;color:#8b949e;margin-top:4px">Vol ratio 0.66× (recent vs avg)</div>
-    
+    <p style="font-size:11px;color:#8b949e;max-width:820px;line-height:1.6;margin:0 0 6px">
+      <strong style="color:#c9d1d9">Headline risk:</strong> Canadian silver miner operating in China with Stage-2 and negative ROE (-1.06%) — China-operated mining company with ADR delisting risk, negative ROE, and silver price dependence is a combination requiring caution.
+    </p>
+    <p style="font-size:10px;color:#484f58">
+      Half-Kelly position: 0.000 × model weight = <strong style="color:#c9d1d9">0.0%</strong>
+      &nbsp;·&nbsp; Time horizon: 6M
+      &nbsp;·&nbsp; <a href="#verdict-section" style="color:#58a6ff;text-decoration:none">↓ Full adversarial review</a>
+    </p>
   </div>
-  <div>
-    <div style="margin-bottom:6px;font-size:9px;color:#484f58;font-family:monospace;text-transform:uppercase;letter-spacing:.08em">
-      Price · 50DMA<span style="color:#f0883e">●</span>  150DMA<span style="color:#d29922">●</span>  200DMA<span style="color:#a371f7">●</span>  Volume
-    </div>
-    <div style="position:relative;height:300px;margin-top:4px">
-  <canvas id="price_SVM_52839"></canvas>
-</div>
-<script>
-(function(){
-  var D={labels:["2025-06-06", "2025-06-09", "2025-06-10", "2025-06-11", "2025-06-12", "2025-06-13", "2025-06-16", "2025-06-17", "2025-06-18", "2025-06-20", "2025-06-23", "2025-06-24", "2025-06-25", "2025-06-26", "2025-06-27", "2025-06-30", "2025-07-01", "2025-07-02", "2025-07-03", "2025-07-07", "2025-07-08", "2025-07-09", "2025-07-10", "2025-07-11", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-21", "2025-07-22", "2025-07-23", "2025-07-24", "2025-07-25", "2025-07-28", "2025-07-29", "2025-07-30", "2025-07-31", "2025-08-01", "2025-08-04", "2025-08-05", "2025-08-06", "2025-08-07", "2025-08-08", "2025-08-11", "2025-08-12", "2025-08-13", "2025-08-14", "2025-08-15", "2025-08-18", "2025-08-19", "2025-08-20", "2025-08-21", "2025-08-22", "2025-08-25", "2025-08-26", "2025-08-27", "2025-08-28", "2025-08-29", "2025-09-02", "2025-09-03", "2025-09-04", "2025-09-05", "2025-09-08", "2025-09-09", "2025-09-10", "2025-09-11", "2025-09-12", "2025-09-15", "2025-09-16", "2025-09-17", "2025-09-18", "2025-09-19", "2025-09-22", "2025-09-23", "2025-09-24", "2025-09-25", "2025-09-26", "2025-09-29", "2025-09-30", "2025-10-01", "2025-10-02", "2025-10-03", "2025-10-06", "2025-10-07", "2025-10-08", "2025-10-09", "2025-10-10", "2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-24", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13", "2026-02-17", "2026-02-18", "2026-02-19", "2026-02-20", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-01", "2026-05-04", "2026-05-05", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22", "2026-05-26", "2026-05-27", "2026-05-28", "2026-05-29", "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05", "2026-06-08"],price:[4.17, 4.38, 4.26, 4.24, 4.25, 4.28, 4.41, 4.5, 4.31, 4.07, 4.09, 4.06, 4.09, 4.2, 4.07, 4.22, 4.49, 4.64, 4.64, 4.84, 4.65, 4.65, 4.82, 5.11, 5.07, 5.05, 4.67, 4.62, 4.44, 4.6, 4.76, 4.83, 4.76, 4.71, 4.61, 4.65, 4.38, 4.37, 4.32, 4.47, 4.59, 4.64, 4.81, 4.51, 4.43, 4.52, 4.57, 4.56, 4.58, 4.59, 4.3, 4.4, 4.47, 4.58, 4.55, 4.67, 4.68, 4.64, 4.83, 5.05, 5.09, 4.93, 4.91, 4.96, 4.88, 4.98, 5.15, 5.27, 5.38, 5.14, 5.15, 5.16, 5.2, 6.1, 6.09, 5.87, 5.91, 6.07, 6.26, 6.31, 6.51, 6.62, 6.99, 7.15, 7.02, 7.32, 6.85, 6.63, 7.07, 6.83, 7.17, 7.46, 6.93, 7.04, 6.33, 6.35, 6.42, 6.39, 6.12, 6.26, 6.33, 6.53, 6.48, 6.47, 6.08, 6.12, 6.16, 6.28, 6.79, 6.72, 7.05, 6.86, 6.76, 6.59, 6.52, 6.57, 6.23, 6.27, 6.68, 6.8, 7.19, 7.81, 7.96, 7.93, 7.93, 7.82, 7.9, 7.81, 8.18, 8.25, 8.53, 8.12, 8.55, 8.58, 8.68, 8.45, 8.64, 8.91, 8.63, 8.58, 8.89, 8.27, 8.57, 8.33, 8.33, 8.75, 9.24, 8.98, 8.95, 9.19, 9.68, 9.84, 10.06, 10.19, 11.3, 12.23, 11.91, 12.27, 12.93, 12.76, 12.67, 12.75, 12.09, 10.06, 10.0, 10.73, 10.61, 9.57, 10.4, 10.77, 10.87, 11.46, 10.17, 10.97, 10.39, 10.85, 11.08, 11.67, 12.38, 13.14, 13.12, 13.76, 13.92, 13.55, 12.32, 12.68, 11.83, 11.82, 11.56, 12.3, 11.84, 11.53, 10.79, 11.09, 10.83, 10.05, 9.47, 9.12, 9.35, 9.78, 10.36, 9.68, 10.22, 10.02, 10.73, 11.09, 10.98, 11.09, 11.17, 11.22, 11.18, 11.49, 11.78, 12.39, 12.34, 12.64, 12.83, 12.43, 11.91, 12.51, 12.13, 12.5, 12.49, 11.78, 11.47, 11.98, 12.25, 12.16, 12.03, 13.0, 13.44, 13.49, 14.73, 15.17, 15.69, 14.93, 13.56, 13.15, 12.31, 12.55, 12.22, 11.82, 12.48, 11.94, 12.41, 12.66, 12.86, 13.2, 12.25, 12.34, 10.64, 10.66],d50:[3.76, 3.76, 3.77, 3.78, 3.79, 3.79, 3.81, 3.83, 3.85, 3.87, 3.88, 3.89, 3.9, 3.9, 3.91, 3.92, 3.93, 3.95, 3.97, 3.99, 4.01, 4.03, 4.05, 4.08, 4.1, 4.13, 4.16, 4.18, 4.19, 4.21, 4.23, 4.25, 4.27, 4.29, 4.31, 4.34, 4.35, 4.37, 4.38, 4.39, 4.41, 4.42, 4.44, 4.45, 4.47, 4.48, 4.49, 4.49, 4.5, 4.51, 4.51, 4.51, 4.52, 4.52, 4.53, 4.54, 4.54, 4.54, 4.55, 4.57, 4.59, 4.61, 4.63, 4.64, 4.66, 4.68, 4.69, 4.7, 4.72, 4.72, 4.73, 4.74, 4.75, 4.77, 4.79, 4.81, 4.83, 4.86, 4.9, 4.93, 4.97, 5.0, 5.05, 5.1, 5.15, 5.2, 5.25, 5.29, 5.35, 5.4, 5.45, 5.5, 5.55, 5.6, 5.64, 5.67, 5.71, 5.75, 5.78, 5.81, 5.85, 5.89, 5.93, 5.97, 6.0, 6.03, 6.06, 6.1, 6.13, 6.17, 6.21, 6.25, 6.28, 6.32, 6.35, 6.38, 6.4, 6.42, 6.45, 6.48, 6.52, 6.57, 6.63, 6.67, 6.7, 6.74, 6.78, 6.82, 6.85, 6.89, 6.93, 6.96, 6.99, 7.02, 7.06, 7.08, 7.11, 7.16, 7.19, 7.23, 7.26, 7.28, 7.31, 7.34, 7.38, 7.42, 7.48, 7.53, 7.59, 7.65, 7.71, 7.78, 7.85, 7.93, 8.03, 8.15, 8.27, 8.39, 8.51, 8.63, 8.74, 8.86, 8.97, 9.04, 9.11, 9.19, 9.28, 9.34, 9.42, 9.5, 9.57, 9.64, 9.69, 9.75, 9.8, 9.86, 9.92, 10.0, 10.08, 10.18, 10.27, 10.38, 10.49, 10.59, 10.66, 10.75, 10.81, 10.87, 10.93, 11.0, 11.06, 11.13, 11.17, 11.23, 11.28, 11.3, 11.31, 11.31, 11.32, 11.33, 11.34, 11.34, 11.34, 11.34, 11.33, 11.3, 11.29, 11.26, 11.23, 11.2, 11.17, 11.14, 11.14, 11.18, 11.23, 11.27, 11.31, 11.37, 11.4, 11.43, 11.46, 11.48, 11.53, 11.54, 11.56, 11.59, 11.61, 11.62, 11.61, 11.61, 11.62, 11.61, 11.63, 11.66, 11.73, 11.77, 11.81, 11.83, 11.85, 11.85, 11.86, 11.87, 11.9, 11.92, 11.95, 12.0, 12.07, 12.15, 12.21, 12.26, 12.26, 12.28],d150:[null, 3.58, 3.58, 3.58, 3.57, 3.57, 3.57, 3.57, 3.57, 3.57, 3.58, 3.58, 3.58, 3.58, 3.58, 3.58, 3.59, 3.6, 3.6, 3.62, 3.62, 3.63, 3.64, 3.66, 3.67, 3.68, 3.69, 3.7, 3.71, 3.72, 3.73, 3.74, 3.75, 3.76, 3.77, 3.79, 3.79, 3.8, 3.81, 3.82, 3.83, 3.84, 3.86, 3.87, 3.88, 3.88, 3.89, 3.9, 3.91, 3.93, 3.93, 3.94, 3.95, 3.96, 3.97, 3.98, 3.99, 4.0, 4.01, 4.03, 4.04, 4.05, 4.07, 4.08, 4.09, 4.1, 4.11, 4.13, 4.14, 4.15, 4.17, 4.18, 4.19, 4.21, 4.22, 4.24, 4.25, 4.27, 4.29, 4.3, 4.32, 4.34, 4.37, 4.39, 4.41, 4.44, 4.46, 4.48, 4.5, 4.52, 4.54, 4.56, 4.58, 4.6, 4.62, 4.63, 4.65, 4.66, 4.68, 4.69, 4.71, 4.72, 4.74, 4.76, 4.77, 4.79, 4.8, 4.82, 4.85, 4.87, 4.89, 4.92, 4.94, 4.95, 4.97, 4.99, 5.01, 5.02, 5.04, 5.06, 5.09, 5.11, 5.14, 5.17, 5.2, 5.23, 5.26, 5.28, 5.31, 5.34, 5.38, 5.41, 5.44, 5.47, 5.51, 5.54, 5.57, 5.61, 5.64, 5.67, 5.7, 5.74, 5.77, 5.8, 5.83, 5.86, 5.89, 5.92, 5.96, 5.99, 6.03, 6.06, 6.1, 6.14, 6.19, 6.24, 6.29, 6.34, 6.4, 6.46, 6.51, 6.57, 6.63, 6.67, 6.7, 6.75, 6.79, 6.82, 6.86, 6.9, 6.94, 6.99, 7.02, 7.06, 7.1, 7.14, 7.18, 7.23, 7.28, 7.33, 7.39, 7.45, 7.51, 7.57, 7.62, 7.67, 7.72, 7.77, 7.82, 7.87, 7.92, 7.97, 8.01, 8.05, 8.1, 8.13, 8.17, 8.2, 8.23, 8.26, 8.3, 8.34, 8.38, 8.41, 8.45, 8.5, 8.54, 8.58, 8.62, 8.66, 8.71, 8.75, 8.79, 8.84, 8.89, 8.94, 9.0, 9.04, 9.09, 9.14, 9.18, 9.23, 9.28, 9.32, 9.35, 9.39, 9.44, 9.48, 9.52, 9.56, 9.61, 9.65, 9.7, 9.76, 9.82, 9.87, 9.91, 9.95, 9.99, 10.03, 10.06, 10.09, 10.13, 10.16, 10.2, 10.24, 10.28, 10.33, 10.37, 10.41, 10.44, 10.47],d200:[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 3.81, 3.81, 3.81, 3.81, 3.81, 3.81, 3.82, 3.82, 3.82, 3.83, 3.84, 3.84, 3.85, 3.85, 3.86, 3.86, 3.87, 3.88, 3.89, 3.9, 3.91, 3.92, 3.94, 3.95, 3.96, 3.98, 3.99, 4.01, 4.02, 4.04, 4.06, 4.08, 4.1, 4.12, 4.14, 4.16, 4.18, 4.2, 4.22, 4.24, 4.26, 4.28, 4.3, 4.32, 4.33, 4.35, 4.37, 4.38, 4.4, 4.41, 4.43, 4.45, 4.46, 4.48, 4.49, 4.51, 4.53, 4.54, 4.56, 4.58, 4.6, 4.62, 4.64, 4.65, 4.67, 4.69, 4.7, 4.72, 4.74, 4.76, 4.78, 4.8, 4.82, 4.84, 4.86, 4.88, 4.91, 4.93, 4.95, 4.98, 5.0, 5.02, 5.05, 5.07, 5.1, 5.12, 5.15, 5.17, 5.2, 5.22, 5.24, 5.26, 5.28, 5.31, 5.33, 5.35, 5.38, 5.4, 5.43, 5.46, 5.49, 5.52, 5.55, 5.59, 5.63, 5.67, 5.71, 5.76, 5.81, 5.86, 5.9, 5.94, 5.97, 6.01, 6.04, 6.07, 6.1, 6.14, 6.17, 6.21, 6.25, 6.28, 6.31, 6.35, 6.38, 6.42, 6.46, 6.51, 6.55, 6.6, 6.65, 6.7, 6.75, 6.79, 6.84, 6.88, 6.92, 6.96, 7.0, 7.04, 7.08, 7.12, 7.15, 7.19, 7.22, 7.25, 7.27, 7.3, 7.32, 7.35, 7.38, 7.41, 7.44, 7.47, 7.51, 7.54, 7.57, 7.61, 7.64, 7.68, 7.71, 7.75, 7.79, 7.84, 7.88, 7.92, 7.96, 7.99, 8.03, 8.07, 8.11, 8.15, 8.18, 8.21, 8.25, 8.29, 8.32, 8.36, 8.4, 8.45, 8.49, 8.54, 8.59, 8.65, 8.7, 8.75, 8.79, 8.83, 8.87, 8.91, 8.94, 8.98, 9.02, 9.06, 9.1, 9.14, 9.18, 9.22, 9.26, 9.29, 9.32],vol:[8791400, 12540600, 9578300, 5245400, 7072100, 9367400, 9113700, 8571300, 8439500, 10530700, 5539300, 5282300, 4575700, 5635200, 7878400, 5909300, 6372200, 5848400, 3966600, 7236100, 10165500, 4796900, 6087700, 7937900, 6240900, 4911800, 8825000, 4806200, 4013300, 4839900, 4521200, 11058600, 3004600, 3664100, 3134600, 3561200, 4487600, 5143700, 3953100, 2292300, 4635500, 3646000, 5505800, 7086400, 4323200, 4737000, 4007300, 5211200, 5399500, 3257000, 4378200, 3631000, 3993200, 4300900, 2826500, 4196100, 3648200, 3774600, 6263400, 8039100, 7469200, 5366000, 6730800, 5942500, 4629500, 3499500, 8395900, 8407600, 5345700, 5566900, 5032300, 3536200, 13812700, 12473100, 7314100, 5526400, 6327600, 4915100, 7236700, 6521400, 7709700, 7711300, 9895900, 8318000, 4842100, 9092000, 9362300, 9213200, 5060000, 6497200, 6871900, 10871700, 9359800, 6973500, 8465800, 6679900, 5313100, 5518100, 6807300, 5386000, 7179100, 5703000, 5792900, 5100800, 3923000, 4856100, 3411400, 4109100, 5779000, 4201000, 5077200, 5201000, 3891600, 3639000, 4013500, 3727200, 4530100, 8254000, 3523500, 3379400, 3731700, 3973800, 7522800, 4409200, 5406400, 2993300, 6055300, 3895300, 5879600, 5663900, 8357000, 7824600, 8502000, 4496400, 6214900, 10479500, 7300600, 6291900, 6767400, 2459000, 4118500, 9972000, 5580700, 3206700, 5035500, 6252000, 5850100, 4614800, 2754100, 4179500, 5717900, 6583600, 6169000, 4500600, 9755400, 11576900, 9910100, 7572700, 6545100, 15386100, 6983500, 8874800, 8803500, 14504600, 8368300, 8175800, 6420300, 8748100, 5297200, 9739500, 5992300, 5118600, 5121700, 3487900, 4714100, 4127200, 8803600, 9068200, 9203200, 6602000, 5222800, 6182200, 5845900, 6020700, 5186900, 2869500, 4810000, 3434300, 6663100, 4321000, 4723900, 3578200, 5955700, 5282900, 3424200, 6159200, 10713300, 6794900, 7045000, 4751500, 5849500, 5010200, 4256100, 3833900, 4485900, 4513100, 2768000, 2485600, 3002100, 3400300, 3058200, 3639400, 2984300, 3182600, 3594000, 3910400, 4011100, 3997900, 4534100, 2892500, 3531100, 2547500, 3161700, 6393900, 3142000, 2596500, 2832600, 2115200, 2244700, 4068600, 7464600, 3202600, 5527600, 4583200, 3859600, 3632800, 4721700, 2570000, 4677800, 4115300, 2822900, 4798400, 3265100, 3464600, 3165700, 2851800, 3294000, 2446400, 2703600, 2055900, 3805300, 2341200],w52h:15.7534,w52l:3.9558};
-  var ctx=document.getElementById('price_SVM_52839');
-  var ann=[];
-  if(D.w52h)ann.push({type:'line',yMin:D.w52h,yMax:D.w52h,borderColor:'#d2992288',borderWidth:1,borderDash:[4,3],label:{content:'52W High $'+D.w52h,display:true,color:'#d29922',font:{size:9},position:'end'}});
-  if(D.w52l)ann.push({type:'line',yMin:D.w52l,yMax:D.w52l,borderColor:'#8b949e66',borderWidth:1,borderDash:[4,3],label:{content:'52W Low $'+D.w52l,display:true,color:'#8b949e',font:{size:9},position:'start'}});
-  var maxVol=Math.max.apply(null,D.vol)||1;
-  new Chart(ctx,{
-    data:{
-      labels:D.labels,
-      datasets:[
-        {type:'line',label:'Price',data:D.price,borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,0.06)',borderWidth:2,pointRadius:0,fill:true,yAxisID:'y',order:1,tension:0.1},
-        {type:'line',label:'50 DMA',data:D.d50,borderColor:'#f0883e',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:2,spanGaps:true,tension:0.1},
-        {type:'line',label:'150 DMA',data:D.d150,borderColor:'#d29922',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:3,spanGaps:true,tension:0.1},
-        {type:'line',label:'200 DMA',data:D.d200,borderColor:'#a371f7',borderWidth:1,pointRadius:0,fill:false,yAxisID:'y',order:4,spanGaps:true,tension:0.1},
-        {type:'bar',label:'Volume',data:D.vol,backgroundColor:D.price.map((v,i)=>i>0&&v>=D.price[i-1]?'rgba(63,185,80,0.3)':'rgba(248,81,73,0.3)'),yAxisID:'y2',order:5}
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{labels:{color:'#8b949e',font:{size:10},boxWidth:14,padding:12}},
-        tooltip:{
-          backgroundColor:'#161b22',borderColor:'#30363d',borderWidth:1,
-          titleColor:'#c9d1d9',bodyColor:'#8b949e',padding:10,
-          callbacks:{
-            label:function(c){
-              if(c.datasetIndex===4)return'Vol: '+(c.parsed.y/1e6).toFixed(2)+'M';
-              if(c.parsed.y==null)return null;
-              return c.dataset.label+': $'+c.parsed.y.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-            }
-          }
-        },
-        annotation:{annotations:ann}
-      },
-      scales:{
-        x:{grid:{color:'#21262d40',drawTicks:false},ticks:{color:'#484f58',maxTicksLimit:8,font:{size:9},callback:function(v,i){var d=this.getLabelForValue(v);return d?d.substring(0,7):'';} }},
-        y:{position:'left',grid:{color:'#21262d30'},ticks:{color:'#484f58',font:{size:9},callback:function(v){return'$'+v.toLocaleString('en-US');}}},
-        y2:{position:'right',grid:{display:false},max:maxVol*5,ticks:{color:'#484f58',font:{size:8},callback:function(v){return(v/1e6).toFixed(1)+'M';}}}
-      }
-    }
-  });
-})();
-</script>
+  <div style="text-align:right;flex-shrink:0">
+    <div style="font-family:monospace;font-size:9px;color:#484f58;letter-spacing:.1em;
+         text-transform:uppercase;margin-bottom:4px">Model → Adj</div>
+    <div style="font-family:monospace;font-size:20px;font-weight:700;color:#8b949e;
+         text-decoration:line-through">78.90</div>
+    <div style="font-family:monospace;font-size:28px;font-weight:800;color:#f85149">77.80</div>
   </div>
 </div>
 
-<div style="margin-top:18px;padding:14px;background:#0d1117;border-radius:8px;border-left:3px solid #d29922">
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-    <span style="font-family:monospace;font-size:13px;font-weight:700;color:#d29922">PILOT BUY</span>
-    <span style="font-size:10px;color:#484f58;font-family:monospace">3-month · 6-month outlook</span>
+<!-- VERDICT_BANNER -->
+<div class="disclaimer-banner">⚠️ Personal investment journal entry. Not registered investment advice. Not a buy/sell recommendation. <a href="/#disclaimer">Full disclaimer</a></div>
+<header class="masthead">
+  <a href="/" class="logo-block"><span class="logo-pi">π</span><span class="logo-name">Passive Aggressive Investing</span></a>
+  <div class="report-meta"><span class="report-type">Deep Dive · US</span> · 11 Jun 2026</div>
+</header>
+<div class="page">
+<div class="report-head">
+  <div class="head-pills">
+    <span class="pill stage-2">Stage 2 — Uptrend</span>
+    <span class="pill neutral">Pilot Buy</span>
+    <span class="pill neutral">Silver</span>
+    <span class="pill neutral">US Equity</span>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
-    <div><div style="font-family:monospace;font-size:11px;margin-bottom:4px"><span style="color:#484f58">Entry:</span> <span style="color:#3fb950">$10.77</span>  stop $12.03 (-12% risk)</div></div>
-    <div><div style="font-family:monospace;font-size:11px;margin-bottom:4px"><span style="color:#484f58">3m target:</span> <span style="color:#58a6ff">$12.92 (+21%)</span></div></div>
-    <div><div style="font-family:monospace;font-size:11px;margin-bottom:4px"><span style="color:#484f58">6m target:</span> <span style="color:#a371f7">$19.61 (+84%)</span></div></div>
-  </div>
-</div></div><div class="card">
-<div class="section-title">KYC — Integrity · Insider Activity · Board</div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
-  
-<div>
-  <div class="mini-label" style="margin-bottom:8px">A. Company Integrity</div>
-  <div style="background:#0d1117;border-radius:6px;padding:10px;margin-bottom:8px"><div style="font-size:14px;font-weight:600;color:#3fb950">CLEAN</div><div style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.08em;margin-top:2px">News flag · Serper scan</div></div><div style="font-size:10px;color:#3fb950;margin-top:6px">&#10003; No related party concerns</div>
+  <h1 class="head-title">SVM</h1>
+  <div class="head-subtitle">SVM · Basic Materials · $10.66 · $2.2B</div>
+  <p class="head-tagline">Silver company. Sector-relative quality score: 81/100.</p>
 </div>
-  
-<div>
-  <div class="mini-label" style="margin-bottom:8px">B. Insider Activity (Form 4)</div>
-  <div style="display:flex;gap:14px;margin-bottom:10px">
+<div class="content">
+<!-- SECTION 00: WHY I'M WATCHING THIS -->
+<div class="section">
+  <div class="section-head"><span class="section-num">00</span><span class="section-title">Why I'm Watching SVM: A Silver Miner with Strong Momentum and Financials</span></div>
+  <div class="thesis-box"><div class="th-label">My Thesis</div><div class="th-call">SVM presents as a high-quality basic materials play, riding strong momentum in the silver sector. Its exceptional profitability and cash generation stand out, despite a concerning ROE trend. I'm looking for continued operational strength and a resolution to its ROE issues as it capitalizes on the current market tailwinds.</div></div>
+  <div class="kpi-grid">
+    <div class="kpi-cell"><span class="kpi-label">Revenue</span><span class="kpi-value green">$438.1M</span><span class="kpi-sub">FY26, +46.6% YoY</span></div>
+    <div class="kpi-cell"><span class="kpi-label">FCF Margin</span><span class="kpi-value green">41.4%</span><span class="kpi-sub">98.5th Pct Rank</span></div>
+    <div class="kpi-cell"><span class="kpi-label">Quality Score</span><span class="kpi-value green">81.1</span><span class="kpi-sub">Sector-Relative</span></div>
+    <div class="kpi-cell"><span class="kpi-label">Market Cap</span><span class="kpi-value green">$2.2B</span><span class="kpi-sub">Canada Exchange</span></div>
+  </div>
+</div>
+
+<!-- SECTION 01: FRAMEWORK SCORECARD -->
+<div class="section">
+  <div class="section-head"><span class="section-num">01</span><span class="section-title">How My Framework Scores This</span></div>
+  <div class="score-block">
+    <div class="score-header"><span class="score-label">NAV Quality Score (Sector-Relative)</span><span class="score-date">11 Jun 2026</span></div>
+    <div class="score-total"><span class="score-num-big">81</span><span class="score-denom">/ 100</span><span class="tier-badge tier-quality">High Quality</span></div>
+    <div class="score-components">
+  <div class="component">
+    <label>FCF Margin</label>
+    <div class="bar"><div class="fill" style="width:98%;background:var(--green)"></div></div>
+    <div class="value">98th</div>
+  </div>
+  <div class="component-rationale">FCF as % of revenue vs sector peers</div>
+  <div class="component">
+    <label>Operating Margin</label>
+    <div class="bar"><div class="fill" style="width:96%;background:var(--green)"></div></div>
+    <div class="value">96th</div>
+  </div>
+  <div class="component-rationale">Operating efficiency vs sector</div>
+  <div class="component">
+    <label>ROE</label>
+    <div class="bar"><div class="fill" style="width:19%;background:var(--red)"></div></div>
+    <div class="value">19th</div>
+  </div>
+  <div class="component-rationale">Return on equity vs sector peers</div>
+  <div class="component">
+    <label>Revenue CAGR</label>
+    <div class="bar"><div class="fill" style="width:90%;background:var(--green)"></div></div>
+    <div class="value">90th</div>
+  </div>
+  <div class="component-rationale">Revenue growth momentum</div>
+  <div class="component">
+    <label>Cash Conversion</label>
+    <div class="bar"><div class="fill" style="width:99%;background:var(--green)"></div></div>
+    <div class="value">99th</div>
+  </div>
+  <div class="component-rationale">CCC days — lower is better vs sector</div>
+</div>
+  </div>
+  <div class="layer-strip"><span class="layer-chip lc-strong">Smart Money Accumulating</span><span class="layer-chip lc-strong">Elite Funds Adding</span><span class="layer-chip lc-strong">High Institutional Ownership</span><span class="layer-chip lc-moderate">Neutral Insider Sentiment</span><span class="layer-chip lc-strong">Improving FCF Trend</span><span class="layer-chip lc-weak">Deteriorating ROE Trend</span></div>
+  <div class="two-col">
+    <div class="info-block"><div class="ib-label">Institutional Backing</div><div class="ib-content">I see significant institutional backing, with 69.4% ownership and 2.8% from elite funds. Smart money is clearly accumulating, with prominent names like Van Eck Associates and Two Sigma Investments adding shares this quarter. Vanguard Capital Management LLC is also listed as an elite holder. This level of professional conviction offers some reassurance.</div></div>
+    <div class="info-block"><div class="ib-label">Business Quality Signals</div><div class="ib-content">SVM operates in the Basic Materials (Silver) sector. Unfortunately, key customer and end-market information is unavailable, which introduces some opacity regarding its demand drivers. There's no data on recurring contracts or supplier risk, limiting my visibility into the stability of its revenue streams. However, its outstanding cash conversion cycle of -148.4 days suggests exceptional working capital management, which is a strong positive signal for operational efficiency.</div></div>
+  </div>
+</div>
+
+<!-- SECTION 02: FINANCIAL PICTURE -->
+<div class="section">
+  <div class="section-head"><span class="section-num">02</span><span class="section-title">The Financial Picture</span></div>
+  <p class="para">SVM's financial performance is exceptionally strong in many areas. The company reported impressive revenue growth of 46.6% year-over-year, reaching $438.1M in FY26, supported by a robust 28.2% Revenue CAGR. This indicates significant operational momentum, likely benefiting from favorable market conditions in the silver sector.</p>
+  <p class="para">Profitability metrics are outstanding; its Free Cash Flow (FCF) Margin stands at an incredible 41.4%, placing it in the 98.5th percentile within its sector. Similarly, the Operating Margin of 51.9% is in the 96.5th percentile, showcasing remarkable efficiency and pricing power. Both FCF and Cash Conversion Cycle (CCC) trends are improving, with a very healthy net cash position indicated by a Net Debt/EBITDA of -2.32x. This financial strength provides substantial flexibility and reduces balance sheet risk.</p>
+  <p class="para">However, a significant concern is the deteriorating Return on Equity (ROE) trend, which is currently negative at -1.1%. While the company exhibits high profitability and cash generation, a negative ROE suggests issues with net income relative to its equity base. This is an unusual divergence that warrants deeper investigation to understand the underlying accounting or operational factors contributing to it, especially given the otherwise stellar performance.</p>
+  <div class="warn-strip"><div class="ws-icon">⚠️</div><div class="ws-text">Deteriorating ROE trend (-1.1%) despite strong margins. This warrants deeper investigation into the underlying causes.</div></div>
+  <div class="warn-strip"><div class="ws-icon">⚠️</div><div class="ws-text">Lack of board information (size 0, independent 0) is a significant governance red flag and needs clarification.</div></div>
+</div>
+
+<!-- SECTION 03: STAGE ANALYSIS — AND WHAT WOULD CHANGE MY VIEW -->
+<div class="section">
+  <div class="section-head"><span class="section-num">03</span><span class="section-title">Why This Stage 2 Momentum Interests Me</span></div>
+  <div class="tech-citation">Technical analysis follows the stage framework described in <strong>Trade Like a Stock Market Wizard</strong> by Mark Minervini (McGraw-Hill, 2013), adapted for US equities. Stage 4 means the price is below key moving averages — it reflects <em>price action</em>, not business quality.</div>
+  <p class="para">SVM is currently in a strong Stage 2 momentum phase, evidenced by its impressive 155.9% 1-year return and a "pilot_buy" signal from my system. This suggests the stock is in a confirmed uptrend, likely fueled by a combination of robust operational performance, favorable silver prices, and increasing investor interest in the basic materials sector. The high quality score further validates the underlying business strength supporting this price action, indicating that the momentum is built on solid fundamentals rather than just speculative fervor.</p>
+  <h3 class="sub-label">What Would Upgrade My View</h3>
+  <ul class="risk-list watch">
+    <li>A clear explanation and reversal of the negative ROE trend. I need to understand why a highly profitable business shows negative returns on equity.</li>
+    <li>Continued robust revenue growth and FCF generation, signaling sustained demand for silver and efficient operations.</li>
+    <li>Improved transparency regarding its board structure and governance, addressing the current data gaps.</li>
+    <li>Further accumulation by elite funds, reinforcing institutional conviction in its long-term prospects.</li>
+  </ul>
+  <h3 class="sub-label">What Would Make Me Stop Watching</h3>
+  <ul class="risk-list">
+    <li>A significant and sustained drop in silver prices that materially impacts profitability and revenue outlook.</li>
+    <li>Evidence of poor capital allocation or a material deterioration in FCF margins.</li>
+    <li>Any negative news regarding management integrity or financial reporting that casts doubt on the company's fundamentals.</li>
+    <li>A sustained breakdown from its Stage 2 technical setup, indicating a loss of momentum and a potential shift into a downtrend.</li>
+  </ul>
+</div>
+
+<!-- SECTION 04: WHERE I STAND TODAY -->
+<div class="section">
+  <div class="section-head"><span class="section-num">04</span><span class="section-title">Where I Stand Today</span></div>
+  <div class="stand-box">
+    <div class="sb-label">Personal Stance</div>
+    <div class="sb-text">I'm currently watching SVM from the sidelines, intrigued by its exceptional financial performance and strong market momentum. The Stage 2 signal and high-quality score are compelling, but the negative and deteriorating ROE, combined with the concerning lack of board information, are significant unknowns that I need to resolve before considering any position. I'm patient, looking for more clarity on these governance and accounting points. If these issues can be satisfactorily explained or rectified, and the strong financial trends continue, this could become a prime candidate for a position. My patience horizon for resolving these fundamental questions is typically a few quarters.</div>
+  </div>
+  <p class="para" style="font-size:12px;color:var(--muted);font-style:italic;margin-top:14px;">DISCLOSURE: I do not currently hold this position. This note is for my personal research record only — not investment advice.</p>
+</div>
+</div>
+</div>
+<div class="sources"><strong>Sources</strong>SEC EDGAR 10-K &amp; Proxy (DEF 14A) · 13F Institutional Holdings · yfinance price data · NAV Framework quality scoring (sector-relative percentile ranking) · Technical methodology: SEPA framework (Minervini, 2013) · Negative news: Serper Google Search</div>
+<div class="report-foot">
+  <a href="/" class="back-link">← All Reports</a>
+  <div class="foot-meta">Published 11 Jun 2026 · Author: PAI</div>
+</div>
+<!-- VERDICT_SECTION -->
+
+<div id="verdict-section" class="card" style="margin-top:16px;border-top:2px solid #21262d">
+  <div class="section-title" style="margin-bottom:18px">
+    ⚔ Adversarial Review
+    <span style="font-size:10px;color:#8b949e">
+      · Bear Agent + Judge · 2026-06-12
+    </span>
+  </div>
+
+  <!-- Bear case -->
+  <div style="margin-bottom:20px">
+    <div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+         color:#f0883e;margin-bottom:12px">◈ Bear Case — MODERATE BEAR</div>
+
+    <div style="margin-bottom:14px;padding:10px 14px;background:#0d1117;border-radius:6px;
+         border-left:2px solid #f0883e">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:4px">Headline risk</div>
+      <div style="font-size:12px;color:#e6edf3;font-weight:600">Canadian silver miner operating in China with Stage-2 and negative ROE (-1.06%) — China-operated mining company with ADR delisting risk, negative ROE, and silver price dependence is a combination requiring caution.</div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:8px">New SERP findings</div>
+      <div style="margin-bottom:8px;padding:8px 12px;background:#0d1117;border-radius:6px;border-left:2px solid #f85149"><span style="font-family:monospace;font-size:9px;color:#484f58">[2026-04] Silvercorp Q4CY25</span><br><span style="font-size:11px;color:#c9d1d9">Ying Mining District (China) silver grade declined 8% YoY to 247 g/t — reserve depletion in key ore body accelerating; AISC rising</span>&nbsp;<span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8514922;color:#f85149;margin-right:4px">concern</span></div><div style="margin-bottom:8px;padding:8px 12px;background:#0d1117;border-radius:6px;border-left:2px solid #f85149"><span style="font-family:monospace;font-size:9px;color:#484f58">[2026-03] Bloomberg</span><br><span style="font-size:11px;color:#c9d1d9">China mining regulation tightened environmental compliance requirements for foreign-operated mines; Silvercorp's permit renewal in Henan delayed 4 months</span>&nbsp;<span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8514922;color:#f85149;margin-right:4px">concern</span></div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:8px">Top risks (priority order)</div>
+      <table style="width:100%;border-collapse:collapse">
+        <colgroup><col style="width:160px"><col></colgroup>
+        <tr><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-family:monospace;font-size:10px;color:#58a6ff;white-space:nowrap">1. China Operational Risk</td><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-size:11px;color:#c9d1d9">All production in China; environmental permit delays, tighter regulations, and government discretion over foreign mine operators create existential permit risk</td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-family:monospace;font-size:10px;color:#58a6ff;white-space:nowrap">2. Negative ROE</td><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-size:11px;color:#c9d1d9">ROE = -1.06% means the business is currently not earning positive returns — silver grade decline is the cause; if grades don't recover, ROE stays negative</td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-family:monospace;font-size:10px;color:#58a6ff;white-space:nowrap">3. Silver Price Dependency</td><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-size:11px;color:#c9d1d9">Silver above $30/oz supports Silvercorp's economics marginally; below $25/oz the mine is cash flow negative</td></tr><tr><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-family:monospace;font-size:10px;color:#58a6ff;white-space:nowrap">4. ADR Risk</td><td style="padding:8px 10px;border-bottom:1px solid #0d1117;font-size:11px;color:#c9d1d9">Canadian company with China operations listed on NYSE; PCAOB and governance concerns layered on top of operational China risk</td></tr>
+      </table>
+    </div>
+
     <div>
-      <div style="font-family:monospace;font-size:16px;font-weight:700;color:#8b949e">3.7%</div>
-      <div style="font-size:9px;color:#484f58;text-transform:uppercase">Insider %</div>
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:8px">Valuation reality check</div>
+      
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+      <div style="background:#0d1117;border-radius:6px;padding:10px 14px;min-width:110px">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:4px">Current PE</div>
+        <div style="font-family:monospace;font-size:16px;font-weight:700;color:#e6edf3">
+          —</div>
+        <div style="font-family:monospace;font-size:9px;color:#8b949e">
+          peer median —</div>
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:10px 14px;min-width:110px">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:4px">FCF Yield</div>
+        <div style="font-family:monospace;font-size:16px;font-weight:700;color:#e6edf3">
+          41.38%</div>
+        <div style="font-family:monospace;font-size:9px;color:#8b949e">At current silver price — fragile</div>
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:10px 14px;flex:1;min-width:200px">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:4px">Earnings Quality</div>
+        <div style="font-size:11px;color:#f85149">⚠️ YES — </div>
+      </div>
     </div>
-    <div>
-      <div style="font-size:12px;font-weight:600;color:#8b949e">Neutral</div>
-      <div style="font-size:9px;color:#484f58;text-transform:uppercase">Insider Sentiment</div>
+    <div style="background:#0d1117;border-radius:6px;padding:10px 14px">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:4px">Downside scenario (½ growth)</div>
+      <div style="font-size:11px;color:#c9d1d9">Silver falls to $24 + grade decline continues: FCF turns negative; at 0.5x NAV discount = 40-50% downside</div>
+    </div>
     </div>
   </div>
-  <table class="fin-table" style="font-size:10px"><thead><tr><th style="text-align:left">Name</th><th>Type</th><th>Shares</th><th>Value</th><th>Date</th></tr></thead><tbody><tr><td style="color:#8b949e;font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></td><td style="color:#f85149"></td><td>4,167.0</td><td>—</td><td style="color:#484f58;font-size:9px">2026-06-03</td></tr><tr><td style="color:#8b949e;font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></td><td style="color:#f85149"></td><td>2,334.0</td><td>—</td><td style="color:#484f58;font-size:9px">2026-04-21</td></tr><tr><td style="color:#8b949e;font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></td><td style="color:#f85149"></td><td>4,333.0</td><td>—</td><td style="color:#484f58;font-size:9px">2026-04-21</td></tr><tr><td style="color:#8b949e;font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></td><td style="color:#f85149"></td><td>7,334.0</td><td>—</td><td style="color:#484f58;font-size:9px">2026-04-21</td></tr><tr><td style="color:#8b949e;font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></td><td style="color:#f85149"></td><td>7,499.0</td><td>—</td><td style="color:#484f58;font-size:9px">2026-04-15</td></tr><tr><td style="color:#8b949e;font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></td><td style="color:#f85149"></td><td>8,333.0</td><td>—</td><td style="color:#484f58;font-size:9px">2026-04-14</td></tr></tbody></table>
-  <div style="margin-top:8px">
-    
-    
-  </div>
-</div>
-  
-<div>
-  <div class="mini-label" style="margin-bottom:8px">C. Board Composition</div>
-  <div style="display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap">
-    <div>
-      <div style="font-family:monospace;font-size:16px;font-weight:700;color:#c9d1d9">0</div>
-      <div style="font-size:9px;color:#484f58;text-transform:uppercase">Board Size</div>
+
+  <!-- Judge verdict -->
+  <div style="border-top:1px solid #21262d;padding-top:18px;margin-top:4px">
+    <div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+         color:#f0883e;margin-bottom:12px">⚖ Judge Verdict — LOW confidence</div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+      <div style="flex:1;min-width:240px;background:#0d1117;border-radius:6px;padding:12px;
+           border-left:2px solid #3fb950">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:6px">Bull summary</div>
+        <div style="font-size:11px;color:#c9d1d9;line-height:1.6">Composite score 78.9 reflects NAV framework quality; thesis supported by sector position and fundamental metrics.</div>
+      </div>
+      <div style="flex:1;min-width:240px;background:#0d1117;border-radius:6px;padding:12px;
+           border-left:2px solid #f0883e">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:6px">Bear summary</div>
+        <div style="font-size:11px;color:#c9d1d9;line-height:1.6">Canadian silver miner operating in China with Stage-2 and negative ROE (-1.06%) — China-operated mining company with ADR delisting risk, negative ROE, and silver price dependence is a combination requiring caution.</div>
+      </div>
     </div>
-    <div>
-      <div style="font-family:monospace;font-size:16px;font-weight:700;color:#f85149">0%</div>
-      <div style="font-size:9px;color:#484f58;text-transform:uppercase">Independent</div>
+
+    <div style="background:#0d1117;border-radius:6px;padding:12px;margin-bottom:10px">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:6px">Second-order view (Marks)</div>
+      <div style="font-size:11px;color:#c9d1d9;line-height:1.6">Bear agent identifies specific tail risks the composite score does not fully penalise; market consensus likely reflects bull case.</div>
     </div>
-    
-  </div>
-  <div style="font-size:10px;color:#d29922;padding:8px;background:#161b22;border-radius:4px;border-left:2px solid #d29922">⚠ Board data not available — company may not file DEF 14A with SEC (foreign private issuer or non-US exchange)</div>
-</div>
-</div></div><div class="card">
-<div class="section-title">Investor Network · Ownership &amp; Flow</div>
 
-<div style="display:grid;grid-template-columns:220px 1fr;gap:20px;margin-bottom:8px">
-  <div style="padding:12px;background:#0d1117;border-radius:6px;min-width:220px"><div class="mini-label" style="margin-bottom:10px">Ownership Snapshot</div><div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:10px;color:#8b949e">Institutional</span><span style="font-family:monospace;font-size:11px;font-weight:600;color:#3fb950">69.4%</span></div><div style="width:180px;height:5px;background:#21262d;border-radius:3px"><div style="width:124px;height:5px;background:#3fb950;border-radius:3px"></div></div></div><div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:10px;color:#8b949e">Elite Funds</span><span style="font-family:monospace;font-size:11px;font-weight:600;color:#ffa657">2.8%</span></div><div style="width:180px;height:5px;background:#21262d;border-radius:3px"><div style="width:4px;height:5px;background:#ffa657;border-radius:3px"></div></div></div><div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:10px;color:#8b949e">Retail</span><span style="font-family:monospace;font-size:11px;font-weight:600;color:#8b949e">26.9%</span></div><div style="width:180px;height:5px;background:#21262d;border-radius:3px"><div style="width:48px;height:5px;background:#8b949e;border-radius:3px"></div></div></div></div>
-  <div><div class="mini-label" style="margin-bottom:8px">Quarterly Flow · Smart Money: <span style="color:#3fb950;font-weight:600">Accumulating</span></div><div style="margin-bottom:8px"><span style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.06em">Adding ↑</span><br><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Van Eck Associates Corporation</span><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Connor Clark & Lunn Investment M</span><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Alps Advisors Inc.</span><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Two Sigma Investments, LP</span><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">-Sprott Silver Miners & Physical</span><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">SPROTT FUNDS TRUST-Sprott Critic</span><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">iShares Trust-iShares Core MSCI </span></div><div style="margin-bottom:8px"><span style="font-size:9px;color:#484f58;text-transform:uppercase;letter-spacing:.06em">Trimming ↓</span><br><span style="background:#f8514922;color:#f85149;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Tidal Investments LLC</span><span style="background:#f8514922;color:#f85149;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Mirae Asset Global ETFs Holdings</span><span style="background:#f8514922;color:#f85149;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Arrowstreet Capital, Limited Par</span><span style="background:#f8514922;color:#f85149;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Morgan Stanley</span><span style="background:#f8514922;color:#f85149;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">Amplify ETF Trust-Amplify Junior</span><span style="background:#f8514922;color:#f85149;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">GLOBAL X FUNDS-Global X Silver M</span><span style="background:#f8514922;color:#f85149;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">VanEck ETF Trust-VanEck Junior G</span><span style="background:#f8514922;color:#f85149;padding:2px 7px;border-radius:10px;font-size:9px;margin:2px 3px 2px 0;display:inline-block">iShares, Inc.-iShares MSCI Globa</span></div><div style="margin-bottom:4px"><span style="background:#3fb95022;color:#3fb950;padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;margin:2px 3px 2px 0;display:inline-block">NEW</span><span style="font-size:10px;color:#8b949e;margin-right:8px">Vanguard Capital Management LLC</span></div></div>
-</div>
+    <div style="background:#0d1117;border-radius:6px;padding:12px;margin-bottom:14px">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:6px">Key unresolved question</div>
+      <div style="font-size:11px;color:#e6edf3;font-weight:600">Will All production in China; environmental permit delays, tighter regulations, and g materialise within the investment horizon?</div>
+    </div>
 
+    <div style="margin-bottom:14px">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:8px">Position sizing — Kelly criterion</div>
+      
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+      <div style="background:#0d1117;border-radius:6px;padding:10px 14px;min-width:100px">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:4px">Bull Prob</div>
+        <div style="font-family:monospace;font-size:16px;font-weight:700;color:#e6edf3">
+          35%</div>
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:10px 14px;min-width:100px">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:4px">Upside / Downside</div>
+        <div style="font-family:monospace;font-size:16px;font-weight:700;color:#3fb950">
+          +25%</div>
+        <div style="font-family:monospace;font-size:12px;color:#f85149">
+          -30%</div>
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:10px 14px;min-width:100px">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:4px">Half-Kelly</div>
+        <div style="font-family:monospace;font-size:16px;font-weight:700;color:#e6edf3">
+          0.000</div>
+        <div style="font-family:monospace;font-size:9px;color:#8b949e">
+          = 0.0% position</div>
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:10px 14px;flex:1;min-width:140px">
+        <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+             letter-spacing:.08em;margin-bottom:4px">Action</div>
+        <div style="font-family:monospace;font-size:14px;font-weight:700;color:#f85149">AVOID</div>
+        <div style="font-family:monospace;font-size:9px;color:#8b949e">
+          Model 78.90 → Adj 77.80</div>
+      </div>
+    </div>
+    </div>
 
-<div class="mini-label" style="margin-top:16px;margin-bottom:8px">Cross-Holdings Network</div>
-<div style="font-size:10px;color:#8b949e;margin-bottom:8px">
-  <span style="color:#ffa657">■</span> Elite fund &nbsp;
-  <span style="color:#58a6ff">■</span> Strong fund &nbsp;
-  <span style="color:#3fb950">●</span> Also held (in universe) &nbsp;
-  <span style="color:#484f58">●</span> Also held &nbsp;
-  Hover for details
-</div>
-<div id="net_SVM_52839" style="height:400px;background:#0d1117;border-radius:8px;border:1px solid #21262d"></div>
-<script>
-(function(){
-  if(typeof vis==='undefined')return;
-  var N=new vis.DataSet([{"id": 0, "label": "SVM", "shape": "dot", "color": {"background": "#58a6ff", "border": "#ffffff"}, "size": 26, "font": {"color": "#e6edf3", "size": 13, "bold": true, "face": "monospace"}, "title": "<b>SVM</b><br>Subject company"}, {"id": 1, "label": "Vanguard Capital Manag", "shape": "square", "color": {"background": "#ffa65722", "border": "#ffa657"}, "size": 24, "font": {"color": "#ffa657", "size": 9, "face": "sans-serif"}, "title": "<b>Vanguard Capital Management LLC</b><br>Tier: elite<br>Held: 2.75%<br>QoQ: +0.0%<br>Also holds: 20 companies"}, {"id": 2, "label": "AAPL", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>AAPL</b><br>In our universe"}, {"id": 3, "label": "ABEO", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ABEO</b><br>In our universe"}, {"id": 4, "label": "ABNB", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ABNB</b><br>In our universe"}, {"id": 5, "label": "ADBE", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ADBE</b><br>In our universe"}, {"id": 6, "label": "ADC", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ADC</b><br>In our universe"}, {"id": 7, "label": "ADEA", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ADEA</b><br>In our universe"}, {"id": 8, "label": "ADP", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ADP</b><br>In our universe"}, {"id": 9, "label": "ADSK", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>ADSK</b><br>In our universe"}, {"id": 10, "label": "Two Sigma Investments,", "shape": "square", "color": {"background": "#58a6ff22", "border": "#58a6ff"}, "size": 24, "font": {"color": "#58a6ff", "size": 9, "face": "sans-serif"}, "title": "<b>Two Sigma Investments, LP</b><br>Tier: strong<br>Held: 2.01%<br>QoQ: +137.5%<br>Also holds: 20 companies"}, {"id": 11, "label": "AFYA", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>AFYA</b><br>In our universe"}, {"id": 12, "label": "AUGO", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>AUGO</b><br>In our universe"}, {"id": 13, "label": "AUPH", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>AUPH</b><br>In our universe"}, {"id": 14, "label": "AXIA", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>AXIA</b><br>In our universe"}, {"id": 15, "label": "BTG", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>BTG</b><br>In our universe"}, {"id": 16, "label": "CGEN", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>CGEN</b><br>In our universe"}, {"id": 17, "label": "CHH", "shape": "dot", "color": {"background": "#3fb95055", "border": "#3fb950"}, "size": 8, "font": {"color": "#8b949e", "size": 8, "face": "monospace"}, "title": "<b>CHH</b><br>In our universe"}]);
-  var E=new vis.DataSet([{"from": 0, "to": 1, "color": {"color": "#ffa657bb", "highlight": "#ffa657"}, "width": 2, "dashes": false, "title": "elite \u00b7 2.75%"}, {"from": 1, "to": 2, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 AAPL"}, {"from": 1, "to": 3, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 ABEO"}, {"from": 1, "to": 4, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 ABNB"}, {"from": 1, "to": 5, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 ADBE"}, {"from": 1, "to": 6, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 ADC"}, {"from": 1, "to": 7, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 ADEA"}, {"from": 1, "to": 8, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 ADP"}, {"from": 1, "to": 9, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Vanguard Capital Man \u2192 ADSK"}, {"from": 0, "to": 10, "color": {"color": "#58a6ffbb", "highlight": "#58a6ff"}, "width": 2, "dashes": false, "title": "strong \u00b7 2.01%"}, {"from": 10, "to": 6, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Two Sigma Investment \u2192 ADC"}, {"from": 10, "to": 11, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Two Sigma Investment \u2192 AFYA"}, {"from": 10, "to": 12, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Two Sigma Investment \u2192 AUGO"}, {"from": 10, "to": 13, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Two Sigma Investment \u2192 AUPH"}, {"from": 10, "to": 14, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Two Sigma Investment \u2192 AXIA"}, {"from": 10, "to": 15, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Two Sigma Investment \u2192 BTG"}, {"from": 10, "to": 16, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Two Sigma Investment \u2192 CGEN"}, {"from": 10, "to": 17, "color": {"color": "#484f5855"}, "width": 1, "dashes": false, "title": "Two Sigma Investment \u2192 CHH"}]);
-  new vis.Network(
-    document.getElementById('net_SVM_52839'),
-    {nodes:N,edges:E},
-    {
-      nodes:{shadow:{enabled:true,color:'rgba(0,0,0,0.5)',size:8},borderWidth:1},
-      edges:{smooth:{type:'continuous'}},
-      physics:{
-        barnesHut:{gravitationalConstant:-5000,centralGravity:0.25,springLength:130,springConstant:0.05},
-        stabilization:{iterations:120}
-      },
-      interaction:{hover:true,tooltipDelay:100,navigationButtons:false,keyboard:false},
-      configure:{enabled:false}
-    }
-  );
-})();
-</script></div><div class="card">
-<div class="section-title">Quality Score · Sector-Relative Ranking</div>
-
-<div style="display:flex;align-items:flex-start;gap:28px;flex-wrap:wrap">
-  <div>
-    <div style="font-family:monospace;font-size:52px;font-weight:800;color:#3fb950;line-height:1">7.9</div>
-    <div style="font-size:9px;color:#484f58;letter-spacing:.1em;text-transform:uppercase;margin-top:2px">/ 10 · High Quality</div>
-    
-    <div style="font-size:9px;color:#484f58;letter-spacing:.08em;text-transform:uppercase;margin-top:2px">Universe rank #57 of 3098</div>
-    <div style="margin-top:14px"><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">FCF: improving</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">CCC: improving</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8514922;color:#f85149;margin-right:4px">ROE: deteriorating</span></div>
-    <div style="margin-top:8px"><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">EBITDA positive</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#3fb95022;color:#3fb950;margin-right:4px">FCF positive</span><span style="display:inline-block;font-family:monospace;font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;background:#f8514922;color:#f85149;margin-right:4px">Not profitable</span></div>
-  </div>
-  <div style="flex:1;min-width:300px">
-    <div class="mini-label" style="margin-bottom:10px">Sector-Relative Percentile Ranks</div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:130px;font-size:11px;color:#8b949e">FCF Margin</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:157px;height:6px;background:#3fb950;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#3fb950;min-width:32px">98th</span><span style="font-size:10px;color:#484f58">FCF as % of revenue vs sector — weight 25%</span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:130px;font-size:11px;color:#8b949e">EV/EBITDA (inv.)</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:105px;height:6px;background:#58a6ff;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#58a6ff;min-width:32px">66th</span><span style="font-size:10px;color:#484f58">Valuation vs sector — cheaper is better — weight 20%</span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:130px;font-size:11px;color:#8b949e">ROE</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:31px;height:6px;background:#ffa657;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#ffa657;min-width:32px">20th</span><span style="font-size:10px;color:#484f58">Return on equity vs sector — weight 15%</span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:130px;font-size:11px;color:#8b949e">Revenue CAGR</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:143px;height:6px;background:#79c0ff;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#79c0ff;min-width:32px">90th</span><span style="font-size:10px;color:#484f58">Revenue growth momentum vs sector — weight 15%</span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:130px;font-size:11px;color:#8b949e">Net Debt/EBITDA (inv.)</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:157px;height:6px;background:#f0883e;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#f0883e;min-width:32px">99th</span><span style="font-size:10px;color:#484f58">Leverage vs sector — lower is better — weight 15%</span></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="min-width:130px;font-size:11px;color:#8b949e">CCC (inverted)</div><div style="width:160px;height:6px;background:#21262d;border-radius:3px"><div style="width:158px;height:6px;background:#d29922;border-radius:3px"></div></div><span style="font-family:monospace;font-size:11px;color:#d29922;min-width:32px">99th</span><span style="font-size:10px;color:#484f58">CCC days — lower is better vs sector — weight 10%</span></div>
+    <div style="background:#0d1117;border-radius:6px;padding:12px">
+      <div style="font-family:monospace;font-size:9px;color:#484f58;text-transform:uppercase;
+           letter-spacing:.08em;margin-bottom:6px">Key risk monitor · horizon: 6M</div>
+      <div style="font-size:11px;color:#c9d1d9">All production in China; environmental permit delays, tighter regulations, and government discretion</div>
+    </div>
   </div>
 </div>
-<div style="margin-top:16px;padding-top:14px;border-top:1px solid #21262d"><div class="mini-label" style="margin-bottom:8px">Ownership Quality Overlay</div><div style="display:flex;gap:14px;flex-wrap:wrap"><div><div style="font-family:monospace;font-size:14px;font-weight:700;color:#ffa657">2.8%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">Elite Funds</div></div><div><div style="font-family:monospace;font-size:14px;font-weight:700;color:#58a6ff">3.7%</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">Insider</div></div><div><div style="font-size:12px;font-weight:600;color:#3fb950">Accumulating</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">Smart Money</div></div><div><div style="font-size:12px;font-weight:600;color:#8b949e">Neutral</div><div style="font-size:9px;color:#484f58;text-transform:uppercase">Insider Sentiment</div></div></div></div></div>
-<div style="font-family:monospace;font-size:9px;color:#30363d;margin-top:28px;text-align:center">
-  NAV Framework · 2026-06-11 · SVM · US Equity · Private research only
-</div>
+
+<!-- VERDICT_SECTION -->
 </body>
 </html>
