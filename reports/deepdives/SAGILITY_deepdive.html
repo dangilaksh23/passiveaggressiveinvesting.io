@@ -48,7 +48,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 .fin-table td:first-child { text-align: left; color: #8b949e; font-size: 10px; white-space: nowrap; }
 .fin-table tr:hover td { background: #161b22; }
 .fin-table .hl td { font-weight: 700; color: #e6edf3; }
-@media (max-width: 800px) { body { padding: 16px; } }
+@media (max-width: 768px) {
+  body { padding: 14px 14px; font-size: 12px; }
+  .card { padding: 16px 16px; }
+  [style*="display:grid"] { grid-template-columns: 1fr !important; }
+  .metrics-row { gap: 8px; }
+  .metric-box { min-width: 90px; }
+  .metric-val { font-size: 16px; }
+  .peer-table, .fin-table { display: block; overflow-x: auto; max-width: 100%; }
+  .peer-table th, .fin-table th, .peer-table td, .fin-table td { white-space: nowrap; }
+}
+@media (max-width: 480px) {
+  body { padding: 10px 10px; font-size: 11px; }
+  .card { padding: 12px 12px; border-radius: 8px; }
+  .metric-val { font-size: 14px; }
+  .mv { font-size: 13px; }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
