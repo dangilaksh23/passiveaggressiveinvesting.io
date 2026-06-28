@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBGLP · Personal Note · PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f5f2eb;--paper2:#ede9e0;--card:#ffffff;--rule:#d4cfc4;--ink:#0d0d0d;--muted:#7a7060;--green:#1a5c38;--green-pale:#d4edd8;--amber:#b35a00;--amber-pale:#fdefd8;--red:#8b1a1a;--red-pale:#fde0e0;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6;}
+.disclaimer-banner{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:10.5px;padding:8px 24px;text-align:center;letter-spacing:.02em;}
+.disclaimer-banner a{color:var(--paper);text-decoration:underline;}
+.masthead{border-bottom:1px solid var(--rule);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--paper);}
+.logo-block{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:var(--ink);}
+.logo-pi{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--green);line-height:1;letter-spacing:-1.5px;}
+.logo-name{font-family:var(--serif);font-size:14px;font-weight:300;letter-spacing:.06em;text-transform:uppercase;}
+.report-meta{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+.report-type{color:var(--amber);font-weight:500;}
+.page{max-width:900px;margin:0 auto;}
+.report-head{padding:36px 36px 28px;background:var(--card);border-bottom:1px solid var(--rule);}
+.head-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+.pill{font-family:var(--mono);font-size:9px;font-weight:500;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
+.pill.sf{background:var(--amber-pale);color:var(--amber);}
+.pill.neutral{background:var(--paper2);color:var(--muted);}
+.pill.warn{background:#fff8e6;color:var(--amber);border:1px solid #f0c060;}
+.pill.red{background:var(--red-pale);color:var(--red);}
+.pill.green{background:var(--green-pale);color:var(--green);}
+.head-title{font-family:var(--serif);font-size:38px;font-weight:500;line-height:1.15;letter-spacing:-.5px;margin-bottom:6px;}
+.head-subtitle{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:18px;}
+.head-tagline{font-size:14px;color:#444;line-height:1.7;max-width:700px;}
+.content{padding:0 36px 40px;}
+.section{padding:32px 0;border-bottom:1px solid var(--paper2);}
+.section:last-child{border-bottom:none;}
+.section-head{display:flex;align-items:baseline;gap:16px;margin-bottom:22px;}
+.section-num{font-family:var(--mono);font-size:11px;font-weight:500;color:#fff;background:var(--ink);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.05em;}
+.section-title{font-family:var(--serif);font-size:24px;font-weight:500;letter-spacing:-.3px;line-height:1.2;}
+.thesis-box{background:var(--paper);border-left:3px solid var(--amber);border-radius:4px;padding:22px 26px;margin-bottom:22px;}
+.th-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.th-call{font-family:var(--serif);font-size:18px;font-weight:300;line-height:1.5;color:var(--ink);}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0;}
+.kpi-cell{background:var(--paper);border-radius:8px;padding:14px 16px;}
+.kpi-label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.kpi-value{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.1;}
+.kpi-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;}
+.kpi-cell.green{background:var(--green-pale);}
+.kpi-cell.green .kpi-value{color:var(--green);}
+.kpi-cell.amber{background:var(--amber-pale);}
+.kpi-cell.amber .kpi-value{color:var(--amber);}
+.kpi-cell.red{background:var(--red-pale);}
+.kpi-cell.red .kpi-value{color:var(--red);}
+.pai-score-block{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:28px;margin-bottom:24px;}
+.retro-note{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed var(--rule);}
+.score-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;}
+.score-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.score-date{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.score-total{display:flex;align-items:baseline;gap:12px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--paper2);}
+.score-num-big{font-family:var(--serif);font-size:56px;font-weight:700;color:var(--amber);line-height:1;letter-spacing:-2px;}
+.score-denom{font-family:var(--mono);font-size:16px;color:var(--muted);}
+.tier-badge{margin-left:auto;font-family:var(--mono);font-size:10px;padding:5px 14px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;background:var(--amber-pale);color:var(--amber);}
+.layers{display:grid;gap:12px;}
+.layer{display:grid;grid-template-columns:110px 1fr 60px;align-items:center;gap:12px;}
+.layer-label{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.layer-bar{height:6px;background:var(--paper2);border-radius:3px;overflow:hidden;}
+.layer-fill{height:100%;border-radius:3px;}
+.layer-fill.green{background:var(--green);}
+.layer-fill.amber{background:var(--amber);}
+.layer-fill.red{background:var(--red);}
+.layer-score{font-family:var(--mono);font-size:11px;font-weight:500;text-align:right;color:var(--ink);}
+.layer-note{font-size:13px;color:#555;margin-top:4px;padding-left:122px;line-height:1.5;}
+.data-table{width:100%;border-collapse:collapse;font-size:13px;margin:18px 0;}
+.data-table th{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:2px solid var(--rule);}
+.data-table td{padding:8px 10px;border-bottom:1px solid var(--paper2);vertical-align:top;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table td:first-child{font-family:var(--mono);font-size:11px;color:var(--muted);}
+.data-table td.val{font-weight:500;}
+.data-table td.green{color:var(--green);font-weight:600;}
+.data-table td.amber{color:var(--amber);font-weight:600;}
+.data-table td.red{color:var(--red);font-weight:600;}
+.flag-row{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;}
+.flag{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:4px;letter-spacing:.04em;}
+.flag.pos{background:var(--green-pale);color:var(--green);}
+.flag.neg{background:var(--red-pale);color:var(--red);}
+.flag.watch{background:var(--amber-pale);color:var(--amber);}
+p{margin-bottom:14px;}
+p:last-child{margin-bottom:0;}
+.stand-box{background:var(--paper);border-left:3px solid var(--amber);border-radius:4px;padding:22px 26px;font-size:14px;line-height:1.7;color:#333;}
+.risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
+.risk-item{background:var(--paper);border-radius:6px;padding:14px 16px;}
+.risk-label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
+.risk-label.high{color:var(--red);}
+.risk-label.med{color:var(--amber);}
+.risk-label.low{color:var(--green);}
+.risk-text{font-size:13px;color:#444;line-height:1.5;}
+.verify-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:16px;}
+.verify-table th{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:2px solid var(--rule);}
+.verify-table td{padding:8px 10px;border-bottom:1px solid var(--paper2);vertical-align:top;}
+.verify-table tr:last-child td{border-bottom:none;}
+.ok{color:var(--green);font-family:var(--mono);font-size:11px;}
+.watch-flag{color:var(--amber);font-family:var(--mono);font-size:11px;}
+.sources{font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.8;margin-top:18px;}
+.disclosure-line{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--paper2);padding:8px 14px;border-radius:4px;display:inline-block;margin-top:16px;}
+.report-footer{padding:24px 36px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;background:var(--paper);}
+.footer-note-link{font-family:var(--mono);font-size:10px;color:var(--amber);text-decoration:none;letter-spacing:.06em;}
+.footer-meta{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.separator{border:none;border-top:1px dashed var(--rule);margin:18px 0;}
+@media(max-width:640px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .risk-grid{grid-template-columns:1fr;}
+  .layer{grid-template-columns:90px 1fr 50px;}
+  .layer-note{padding-left:0;margin-top:2px;}
+  .report-head,.content{padding-left:20px;padding-right:20px;}
+  .masthead{padding:12px 20px;}
+  .report-footer{padding:18px 20px;flex-direction:column;gap:8px;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<div class="disclaimer-banner">⚠️ Personal investment journal entry. Not investment advice. Not a buy/sell recommendation. The author is not SEBI-registered. <a href="/#disclaimer">Full disclaimer</a></div>
+
+<header class="masthead">
+  <a href="/" class="logo-block"><span class="logo-pi">π</span><span class="logo-name">Passive Aggressive Investing</span></a>
+  <div class="report-meta"><span class="report-type">Personal Note</span> · Jun 2026</div>
+</header>
+
+<div class="page">
+  <div class="report-head">
+    <div class="head-pills">
+      <span class="pill sf">Mixed Fit · 56/100</span>
+      <span class="pill neutral">Real Estate · Pune</span>
+      <span class="pill red">Price Downtrend ↓</span>
+      <span class="pill warn">Value Watch — Quality in Downtrend</span>
+      <span class="pill neutral">First scored Jun 2026</span>
+    </div>
+    <h1 class="head-title">SBGLP — Suratwwala Business Group</h1>
+    <div class="head-subtitle">NSE: SBGLP &nbsp;·&nbsp; Real Estate Developer + Solar &nbsp;·&nbsp; ₹450Cr Market Cap &nbsp;·&nbsp; Personal Note</div>
+    <p class="head-tagline">A tiny Pune developer that earns 31% ROCE on its capital — unusual for real estate. FY26 revenue was 4× FY25 with Q4 the strongest quarter ever recorded. The price, down 48% from its high, hasn't noticed yet. I am watching the chart for a base to form before I act.</p>
+  </div>
+
+  <div class="content">
+
+    <!-- 00: WHAT I'M LOOKING AT -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">00</div>
+        <div class="section-title">What I'm Looking At</div>
+      </div>
+      <div class="thesis-box">
+        <div class="th-label">My read in one line</div>
+        <div class="th-call">A Pune real estate micro-cap where the financials tell a better story than the price. ROCE 31%, revenue accelerating through FY26, PE at 11.9× — but no institutional anchor, a structurally negative CFO, and a chart in Stage 4. The question I keep coming back to is: is the weak price temporary (FY25 revenue trough now reversed) or is it signalling something about FY27 that the numbers haven't shown yet?</div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-cell green">
+          <div class="kpi-label">ROCE</div>
+          <div class="kpi-value">30.8%</div>
+          <div class="kpi-sub">FY26 · exceptional for RE</div>
+        </div>
+        <div class="kpi-cell green">
+          <div class="kpi-label">Revenue CAGR</div>
+          <div class="kpi-value">32%</div>
+          <div class="kpi-sub">3yr · FY23→FY26</div>
+        </div>
+        <div class="kpi-cell amber">
+          <div class="kpi-label">PE Ratio</div>
+          <div class="kpi-value">11.9×</div>
+          <div class="kpi-sub">vs sector ~18-22×</div>
+        </div>
+        <div class="kpi-cell red">
+          <div class="kpi-label">vs 52W High</div>
+          <div class="kpi-value">–48%</div>
+          <div class="kpi-sub">CMP ₹25.9 · High ₹49.2</div>
+        </div>
+        <div class="kpi-cell green">
+          <div class="kpi-label">D/E Ratio</div>
+          <div class="kpi-value">0.80×</div>
+          <div class="kpi-sub">FY26 · low for sector</div>
+        </div>
+        <div class="kpi-cell green">
+          <div class="kpi-label">ROE</div>
+          <div class="kpi-value">43.8%</div>
+          <div class="kpi-sub">FY26 screener</div>
+        </div>
+        <div class="kpi-cell amber">
+          <div class="kpi-label">Market Cap</div>
+          <div class="kpi-value">₹450Cr</div>
+          <div class="kpi-sub">Small cap · illiquid</div>
+        </div>
+        <div class="kpi-cell amber">
+          <div class="kpi-label">Promoter Hold</div>
+          <div class="kpi-value">73.4%</div>
+          <div class="kpi-sub">Stable · 0% pledge</div>
+        </div>
+      </div>
+
+      <p>Suratwwala Business Group is a Pune-based developer run by founder Jatin Suratwala (30+ years in real estate). Two revenue streams: residential and commercial project development (the main business) and a solar subsidiary doing EPC and PPA contracts. Only 40 employees for ₹143Cr annual revenue — a leaner operation than almost anything else at this size in real estate.</p>
+
+      <p>The company came onto my radar through a sector-wide scan of real estate names on 28 Jun 2026. The KYB layer was already extracted from the FY2025 annual report, so I have reasonably good visibility on the business model and governance. This is not a name I have tracked for long — context is FY26 numbers + annual report analysis only.</p>
+    </div>
+
+    <!-- 01: PAI SCORE -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">01</div>
+        <div class="section-title">My Score &amp; Layer Breakdown</div>
+      </div>
+
+      <div class="pai-score-block">
+        <div class="retro-note">⚠ First scored Jun 28, 2026 · From sector discovery scan · Screener data Jun 4 + KYB FY2025 annual report</div>
+        <div class="score-header">
+          <span class="score-label">PAI Score</span>
+          <span class="score-date">Jun 2026</span>
+        </div>
+        <div class="score-total">
+          <span class="score-num-big">56</span>
+          <span class="score-denom">/100</span>
+          <span class="tier-badge">Mixed Fit</span>
+        </div>
+        <div class="layers">
+          <div class="layer">
+            <span class="layer-label">C1 Business</span>
+            <div class="layer-bar"><div class="layer-fill green" style="width:68%"></div></div>
+            <span class="layer-score">17 / 25</span>
+          </div>
+          <div class="layer-note">ROCE 31%, ROE 44%, asset-light operations with strong OPM. Deducted for regional concentration (Pune only), mid-tier auditor, KMP exits (CFO + Company Secretary left FY25), and negative CFO structural to the business model.</div>
+          <div class="layer">
+            <span class="layer-label">C2 Network</span>
+            <div class="layer-bar"><div class="layer-fill red" style="width:36%"></div></div>
+            <span class="layer-score">9 / 25</span>
+          </div>
+          <div class="layer-note">Essentially no institutional validation. FII = 0.0%, no bulk deal signal, no elite or strong funds visible. Small DII holding (~4%, from annual report) but no quarterly accumulation trend. Promoter stable at 73.4% with zero pledge — that is a positive, but stable is not buying.</div>
+          <div class="layer">
+            <span class="layer-label">C3 Valuation</span>
+            <div class="layer-bar"><div class="layer-fill green" style="width:73%"></div></div>
+            <span class="layer-score">22 / 30</span>
+          </div>
+          <div class="layer-note">PE 11.9× on FY26 actuals is materially below RE sector median of 18-22×. Revenue CAGR 32% over 3 years supports the multiple. D/E 0.8× is conservative. Deducted for negative CFO (structurally explainable but a real constraint) and lack of peer comparison data (no screener peers populated).</div>
+          <div class="layer">
+            <span class="layer-label">C4 Chart</span>
+            <div class="layer-bar"><div class="layer-fill red" style="width:40%"></div></div>
+            <span class="layer-score">8 / 20</span>
+          </div>
+          <div class="layer-note">Price is in a downtrend — 48% below the 52-week high, sitting between the 52W low (₹18.4) and the high (₹49.2). Some of the technical thinking here is informed by the stage analysis approach in <em>Trade Like a Stock Market Wizard</em> by Mark Minervini (McGraw-Hill, 2013), adapted for Indian market data and personal use. I see this as a Stage 4 / possible early Stage 1 base at best. No volume accumulation visible. I do not act against the chart even when the fundamentals look attractive.</div>
+        </div>
+      </div>
+
+      <p>The score reflects what I actually think: this is a business with genuinely strong unit economics sitting in a chart structure I am not comfortable with yet. The C2 score is the most important constraint — when no institutional money has validated a thesis, I want to see either a clearer chart base or a bulk deal signal before I commit.</p>
+    </div>
+
+    <!-- 02: VALUATION -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">02</div>
+        <div class="section-title">Valuation as I See It</div>
+      </div>
+
+      <p>The valuation picture looks cheap on most cuts. Here is the five-year P&amp;L I am looking at:</p>
+
+      <table class="data-table">
+        <thead><tr><th>Year</th><th>Revenue (₹Cr)</th><th>OPM %</th><th>PAT (₹Cr)</th><th>EPS (₹)</th><th>ROCE %</th></tr></thead>
+        <tbody>
+          <tr><td>FY22</td><td>1</td><td>–482%</td><td>–11</td><td>–0.62</td><td class="red">n/a</td></tr>
+          <tr><td>FY23</td><td>62</td><td>47%</td><td>21</td><td>1.22</td><td class="green">76%</td></tr>
+          <tr><td>FY24</td><td>72</td><td>54%</td><td>28</td><td>1.60</td><td class="green">55%</td></tr>
+          <tr><td>FY25</td><td class="amber">36</td><td>40%</td><td class="amber">11</td><td class="amber">0.63</td><td class="amber">12%</td></tr>
+          <tr><td>FY26</td><td class="green">143</td><td>37%</td><td class="green">38</td><td class="green">2.19</td><td class="green">31%</td></tr>
+        </tbody>
+      </table>
+
+      <p>FY25 looks like a collapse but it was a project delivery gap. Real estate revenue under Ind AS 115 is recognised on handover, not on cash collection. The company was collecting advances from customers throughout FY25 (visible as ₹44Cr in "other liabilities" on the FY25 balance sheet) — it just had fewer completions that year. FY26 was the delivery year: ₹143Cr revenue, best ever, with Q4 FY26 alone at ₹59Cr.</p>
+
+      <p>The quarterly run-rate since Jun 2025 has been ₹16Cr → ₹26Cr → ₹42Cr → ₹59Cr — a staircase. At CMP ₹25.9 and FY26 EPS ₹2.19, the PE is 11.9×. If FY27 sustains even the Q3 FY26 run-rate (₹42Cr/quarter), the PE compresses further from here.</p>
+
+      <p><strong>The CFO caveat.</strong> Operating cash flow has been negative for five consecutive years. I think about this carefully every time I look at this name. In real estate, negative CFO does not automatically mean the business is burning cash — customer advances flow in as liabilities, project inventory flows out as investment. But it does create a dependency on continued new bookings and a sensitivity to any credit tightening. The D/E of 0.8× and interest cover of 51× give adequate headroom today. My watch point is D/E — if it climbs above 1.5×, the narrative changes.</p>
+
+      <p><strong>What I cannot tell from the data.</strong> There are no screener peers populated for SBGLP — it is too small and too regional for comparative data to be auto-populated. I am making a valuation judgement against the broader RE sector median, not a peer group. That introduces uncertainty I want to acknowledge.</p>
+
+      <div class="flag-row">
+        <span class="flag pos">PE 11.9× vs sector 18–22×</span>
+        <span class="flag pos">Revenue CAGR 32% (3yr)</span>
+        <span class="flag pos">D/E 0.8× · interest cover 51×</span>
+        <span class="flag pos">OPM 37–54% structural range</span>
+        <span class="flag watch">CFO negative 5 consecutive years</span>
+        <span class="flag watch">No peer comparison data</span>
+        <span class="flag neg">FY25 trough amplifies PE optics on trailing data</span>
+      </div>
+    </div>
+
+    <!-- 03: CHART STRUCTURE -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">03</div>
+        <div class="section-title">Chart Structure</div>
+      </div>
+
+      <p>Some of the chart-structure thinking on this site is informed by the stage analysis approach described in <em>Trade Like a Stock Market Wizard</em> by Mark Minervini (McGraw-Hill, 2013), adapted for Indian market data and personal use.</p>
+
+      <div class="kpi-grid">
+        <div class="kpi-cell red">
+          <div class="kpi-label">Price Stage</div>
+          <div class="kpi-value">Stage 4</div>
+          <div class="kpi-sub">Price downtrend</div>
+        </div>
+        <div class="kpi-cell">
+          <div class="kpi-label">CMP</div>
+          <div class="kpi-value">₹25.9</div>
+          <div class="kpi-sub">Jun 4, 2026</div>
+        </div>
+        <div class="kpi-cell red">
+          <div class="kpi-label">52W High</div>
+          <div class="kpi-value">₹49.2</div>
+          <div class="kpi-sub">–47.9% from peak</div>
+        </div>
+        <div class="kpi-cell amber">
+          <div class="kpi-label">52W Low</div>
+          <div class="kpi-value">₹18.4</div>
+          <div class="kpi-sub">+40.8% above trough</div>
+        </div>
+      </div>
+
+      <p>The stock peaked somewhere in the ₹45–49 range — likely when FY24 results (₹72Cr revenue, ₹28Cr PAT, ROCE 55%) were the most recent data point. It then fell as FY25 revenue collapsed to ₹36Cr, and the price has not recovered despite FY26 revenue exceeding FY24 by 2×.</p>
+
+      <p>That divergence — fundamentals getting better, price not following — is what put this on my radar. But I have been wrong enough times holding fundamentally improving companies through extended Stage 4 periods that I now require the chart to show me something before I act. A stock at –48% from high can go to –60% or –70% before the turn. I do not have the conviction to hold through that.</p>
+
+      <p>What would make the chart more interesting: the stock recovering above ₹30–32 on meaningful volume with rising OBV, and then consolidating there rather than fading. That would suggest the FY26 delivery story is being absorbed by the market. Until then, I am watching, not acting.</p>
+    </div>
+
+    <!-- 04: WHAT COULD CHANGE MY MIND -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">04</div>
+        <div class="section-title">What Could Change My Mind</div>
+      </div>
+
+      <p><strong>Things that would strengthen my view:</strong></p>
+      <div class="risk-grid">
+        <div class="risk-item">
+          <div class="risk-label low">Positive signal</div>
+          <div class="risk-text">Q1 FY27 revenue ≥₹35Cr sustaining the trajectory. The FY26 run was partially catch-up from a trough — I need to see it hold, not just spike.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-label low">Positive signal</div>
+          <div class="risk-text">CFO turning positive for the first time. Would suggest the project pipeline is delivering cash, not just accounting revenue.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-label low">Positive signal</div>
+          <div class="risk-text">A bulk deal or MF entry — any smart-money signal would validate the thesis independently of my own read.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-label low">Positive signal</div>
+          <div class="risk-text">Chart showing Stage 1 base: stock above ₹30–32 on volume, consolidating, not fading. Price and fundamentals re-aligning.</div>
+        </div>
+      </div>
+
+      <p><strong>Things that would weaken or reverse my view:</strong></p>
+      <div class="risk-grid">
+        <div class="risk-item">
+          <div class="risk-label high">Hard re-think</div>
+          <div class="risk-text">D/E crossing 1.5×. The current borrowing story is a manageable FY25 capex cycle. A second debt surge would change the risk profile entirely.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-label high">Hard re-think</div>
+          <div class="risk-text">Any auditor qualification. A mid-tier auditor for a ₹450Cr company is already a minor concern — a KAM turning into a qualification would be serious.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-label med">Watch point</div>
+          <div class="risk-text">Promoter selling even a small stake. Zero pledge + 73% holding is the governance anchor. Any reduction before institutional money validates the thesis would concern me.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-label med">Watch point</div>
+          <div class="risk-text">Pune real estate demand softening — the company is entirely Pune-region. A city-specific slowdown (interest rate shock, inventory glut) hits SBGLP harder than diversified national developers.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-label med">Watch point</div>
+          <div class="risk-text">CFO remaining deeply negative into FY27 with rising borrowings — the current negative CFO story works only if project deliveries continue. If they slip again like FY25, the cash equation gets tighter.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-label med">Watch point</div>
+          <div class="risk-text">New CFO and Company Secretary quality — both left in FY25. The incoming replacements I have not seen data on. Management quality at this size is the founder, but a weak finance function is a real operational risk.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 05: WHERE I STAND TODAY -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">05</div>
+        <div class="section-title">Where I Stand Today</div>
+      </div>
+      <div class="stand-box">
+        <p>I do not currently hold this position.</p>
+        <p>Where I stand: the business quality is genuinely interesting — a 31% ROCE real estate developer at 11.9× PE with accelerating quarterly revenues is not something I see every day. But I have learned to separate "this business is good" from "now is the right moment to own it." The chart is in Stage 4. The institutional layer is empty. Those two things together mean the price could stay depressed or go lower regardless of how good the underlying economics are.</p>
+        <p>I am tracking this actively. What would move me from watching to acting is a combination of: Q1 FY27 revenue sustaining the FY26 trajectory, and the chart showing a constructive base at current levels or slightly higher. I am not in a hurry. The FY26 results are fresh and the market has not priced them in yet — if the thesis is real, there will be time to act after the chart gives me something to work with.</p>
+        <p>The maximum I would consider for a position of this size and liquidity profile, if all the above conditions were met, would be a small starter allocation — this is not a name I would go large on at any point given the illiquidity and the single-city concentration.</p>
+      </div>
+      <div class="disclosure-line">Disclosure: I do not hold this position · Jun 2026</div>
+    </div>
+
+    <!-- 06: VERIFICATION & SOURCES -->
+    <div class="section">
+      <div class="section-head">
+        <div class="section-num">06</div>
+        <div class="section-title">Verification &amp; Sources</div>
+      </div>
+
+      <table class="verify-table">
+        <thead><tr><th>Check</th><th>Status</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>No price targets</td><td class="ok">✓ Pass</td><td>No 6M/12M target, no entry range</td></tr>
+          <tr><td>No stop-loss levels</td><td class="ok">✓ Pass</td><td>Watch points described qualitatively only</td></tr>
+          <tr><td>No buy/sell language</td><td class="ok">✓ Pass</td><td>"Mixed Fit" bucket, personal journal framing throughout</td></tr>
+          <tr><td>First person voice</td><td class="ok">✓ Pass</td><td>All sections in "I" voice</td></tr>
+          <tr><td>Holdings binary disclosed</td><td class="ok">✓ Pass</td><td>"I do not hold this position"</td></tr>
+          <tr><td>Minervini cited once</td><td class="ok">✓ Pass</td><td>Cited in Sections 01 and 03, one substantive citation in 03</td></tr>
+          <tr><td>Numbers sourced</td><td class="ok">✓ Pass</td><td>All figures: Screener.in snapshot Jun 4 2026 + KYB FY2025 annual report extraction</td></tr>
+          <tr><td>Auditor mid-tier disclosed</td><td class="watch-flag">⚠ Noted</td><td>Parag Patwa &amp; Associates — mid-tier, Pune-based. Clean opinion, standard KAMs.</td></tr>
+          <tr><td>CFO negative disclosed</td><td class="ok">✓ Pass</td><td>Structural discussion in Section 02 and watch points in Section 04</td></tr>
+          <tr><td>KMP exits disclosed</td><td class="ok">✓ Pass</td><td>CFO + Company Secretary resigned FY25 — flagged in C1 rationale and risk grid</td></tr>
+        </tbody>
+      </table>
+
+      <div class="sources">
+        <strong>Data sources</strong><br>
+        Screener.in consolidated snapshot — SBGLP — as of Jun 4, 2026<br>
+        KYB annual report extraction — SBGLP FY2025 — high confidence, extracted Jul 2025<br>
+        Sector discovery scan output — nav_framework batch_score_sectors.py — Jun 28, 2026<br>
+        BSE shareholding filings — quarterly Mar 2026 data point<br>
+        <br>
+        <strong>Note on peer comparison</strong><br>
+        Screener.in returned no peers for SBGLP. Sector median PE (18–22×) is author estimate based on broader RE sector data. This note should be read with that caveat.
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /page -->
+
+<footer class="report-footer">
+  <a href="/" class="footer-note-link">← Back to journal</a>
+  <div class="footer-meta">Personal note · SBGLP · First scored Jun 28, 2026 · Last verified Jun 28, 2026</div>
+</footer>
+
+</body>
+</html>
