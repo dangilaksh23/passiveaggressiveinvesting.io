@@ -29,7 +29,7 @@ body { font-family: var(--sans); background: var(--paper); color: var(--ink); fo
 .slide { padding: 80px 40px; border-bottom: 1px solid var(--paper2); }
 .slide-dark { background: var(--ink); color: var(--paper); border-bottom: none; }
 
-.slide-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; display: block; }
+.slide-tag { font-family: var(--mono); font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; display: block; }
 .slide-dark .slide-tag { color: #bbb; }
 
 .slide-head { font-family: var(--serif); font-size: 46px; font-weight: 500; line-height: 1.1; letter-spacing: -1.2px; margin-bottom: 44px; max-width: 760px; }
@@ -420,6 +420,20 @@ body { font-family: var(--sans); background: var(--paper); color: var(--ink); fo
         <span class="b-sub">AML screen, counterparty cross-check, supplier identity verification: done differently by every analyst, logged inconsistently, often not logged at all. When a file turns bad, the audit trail on what was checked is thin. Your regulator and your board deserve a cleaner answer than "the underwriter reviewed it".</span>
       </div>
     </li>
+    <li>
+      <span class="b-num">05</span>
+      <div class="b-body">
+        <strong>Leads get declined outright when they don't fit the product they applied for, even if they'd fit a different one.</strong>
+        <span class="b-sub">Every product on your shelf carries a different risk appetite: secured versus unsecured, consumer versus business. A lead too risky for the product it came in through often still clears a different product you already offer, but without a check for that at intake, it just gets declined and lost instead of redirected.</span>
+      </div>
+    </li>
+    <li>
+      <span class="b-num">06</span>
+      <div class="b-body">
+        <strong>Every application pulls every vendor, in parallel, regardless of whether it's needed.</strong>
+        <span class="b-sub">Bureau checks, bank statement pulls, litigation screens: each carries its own cost. When an early, cheap signal is enough to decline a lead, running the full vendor stack anyway on every file adds cost without adding a better decision.</span>
+      </div>
+    </li>
   </ul>
 
   <div class="stat-box dark">
@@ -452,17 +466,31 @@ body { font-family: var(--sans); background: var(--paper); color: var(--ink); fo
           <span class="b-sub">A model built to identify the strength of the whole supply chain network around a borrower: related parties, counterparty concentration, cyclic transactions, not just the borrower in isolation. This is the layer most underwriting stacks skip because it's slow to do by hand.</span>
         </div>
       </li>
+      <li>
+        <span class="b-num">03</span>
+        <div class="b-body">
+          <strong>Product matching, not just approve or decline.</strong>
+          <span class="b-sub">The same scoring layer checks a lead against every product's risk appetite, not only the one it applied for. A lead too risky for unsecured can still be a clean approval for a secured facility. Instead of one gate per application, you get a product-fit recommendation, so fewer good leads get declined outright for simply arriving through the wrong door.</span>
+        </div>
+      </li>
     </ul>
     <ul class="bullets">
       <li>
-        <span class="b-num">03</span>
+        <span class="b-num">04</span>
         <div class="b-body">
           <strong>Lead-stage pre-scoring.</strong>
           <span class="b-sub">The same data layer runs at intake, before a file ever reaches an underwriter, so your pipeline is prioritised by likely approval and indicative limit, not first-in-first-out. Weak leads get triaged early instead of consuming full underwriting attention.</span>
         </div>
       </li>
       <li>
-        <span class="b-num">04</span>
+        <span class="b-num">05</span>
+        <div class="b-body">
+          <strong>Sequential data pulls, not a flat parallel run every time.</strong>
+          <span class="b-sub">Vendor checks are ordered by cost and signal strength. If a cheap, early check is enough to decline a lead, the pipeline stops there instead of running the full vendor stack anyway. Full depth is reserved for leads that clear the cheap filters first.</span>
+        </div>
+      </li>
+      <li>
+        <span class="b-num">06</span>
         <div class="b-body">
           <strong>Underwriters review findings, not raw data.</strong>
           <span class="b-sub">The structured, pre-analyzed output lands on their desk. They exercise judgment on flagged items and sign off. The depth is consistent regardless of who's reviewing, because the depth was done before they opened the file.</span>
