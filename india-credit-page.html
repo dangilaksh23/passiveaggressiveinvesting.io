@@ -532,30 +532,30 @@ body { font-family: var(--sans); background: var(--paper); color: var(--ink); fo
   <span class="slide-tag">03 · One Framework, Any Geography</span>
   <h2 class="slide-head">Same dimensions everywhere.<br><em>The data plug changes. The model doesn't.</em></h2>
 
-  <div class="b-sub" style="max-width:760px;margin-bottom:28px;font-size:14px;">This is our core product, built and proven in India, our primary market. The model is geography agnostic: different data dimensions can be incorporated depending on the geography. The table below shows the dimensions and the specific source we plug in for each market.</div>
+  <div class="b-sub" style="max-width:760px;margin-bottom:28px;font-size:14px;">This is our core product, built and proven in India, our primary market. The model is geography agnostic: only the data plug changes. The table below shows the dimensions and the specific source we wire in, with the US as a second worked example. The same wiring maps to any market with company registries, a bureau, and tax filings, so it is <strong>globally applicable</strong>.</div>
 
-  <div style="overflow-x:auto;margin-bottom:28px;">
-    <table style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px;">
+  <div style="overflow-x:auto;margin-bottom:16px;">
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px;min-width:520px;">
       <thead>
         <tr style="border-bottom:2px solid var(--ink);">
           <th style="text-align:left;padding:8px 10px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);">Dimension</th>
           <th style="text-align:left;padding:8px 10px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--green);">India, primary market</th>
           <th style="text-align:left;padding:8px 10px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);">US</th>
-          <th style="text-align:left;padding:8px 10px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);">Indonesia</th>
         </tr>
       </thead>
       <tbody>
-        <tr style="border-bottom:1px solid var(--rule);"><td style="padding:8px 10px;font-weight:600;">KYB, entity identity</td><td style="padding:8px 10px;">MCA21, Tofler, ZaubaCorp</td><td style="padding:8px 10px;color:var(--muted);">SEC EDGAR, Secretary of State</td><td style="padding:8px 10px;color:var(--muted);">OSS (NIB) + AHU Online</td></tr>
-        <tr style="border-bottom:1px solid var(--rule);"><td style="padding:8px 10px;font-weight:600;">Related-party / director network</td><td style="padding:8px 10px;">DIN cross-ref via MCA</td><td style="padding:8px 10px;color:var(--muted);">State filings</td><td style="padding:8px 10px;color:var(--muted);">AHU Online listings</td></tr>
-        <tr style="border-bottom:1px solid var(--rule);"><td style="padding:8px 10px;font-weight:600;">Bureau data</td><td style="padding:8px 10px;">CIBIL, CRIF, commercial bureau</td><td style="padding:8px 10px;color:var(--muted);">Experian, Equifax, TransUnion</td><td style="padding:8px 10px;color:var(--muted);">SLIK OJK</td></tr>
-        <tr style="border-bottom:1px solid var(--rule);"><td style="padding:8px 10px;font-weight:600;">Bank statement / cash flow</td><td style="padding:8px 10px;">Account Aggregator, statement parsing</td><td style="padding:8px 10px;color:var(--muted);">Plaid, bank APIs</td><td style="padding:8px 10px;color:var(--muted);">SNAP (BI Open API) + aggregators</td></tr>
-        <tr style="border-bottom:1px solid var(--rule);"><td style="padding:8px 10px;font-weight:600;">Transaction / invoice network</td><td style="padding:8px 10px;">GST (GSTR-1/3B), e-invoice</td><td style="padding:8px 10px;color:var(--muted);">AP/AR, 1099 data</td><td style="padding:8px 10px;color:var(--muted);">e-Faktur / Coretax</td></tr>
-        <tr style="border-bottom:1px solid var(--rule);"><td style="padding:8px 10px;font-weight:600;">Behavioral / alternative data</td><td style="padding:8px 10px;">UPI trail, e-commerce footprint</td><td style="padding:8px 10px;color:var(--muted);">Bureau trended data</td><td style="padding:8px 10px;color:var(--muted);">Telco, e-commerce, e-wallet</td></tr>
-        <tr style="border-bottom:1px solid var(--rule);"><td style="padding:8px 10px;font-weight:600;">Litigation / crime check</td><td style="padding:8px 10px;">Courts, SEBI, SARFAESI/DRT, FIU-IND</td><td style="padding:8px 10px;color:var(--muted);">PACER, OFAC</td><td style="padding:8px 10px;color:var(--muted);">OJK sanctions + PPATK watchlists</td></tr>
-        <tr><td style="padding:8px 10px;font-weight:600;">Regulator</td><td style="padding:8px 10px;">RBI</td><td style="padding:8px 10px;color:var(--muted);">OCC / Fed / state</td><td style="padding:8px 10px;color:var(--muted);">OJK</td></tr>
+        <tr style="border-bottom:1px solid var(--rule);"><td style="padding:8px 10px;font-weight:600;">KYB, entity identity</td><td style="padding:8px 10px;">MCA21, Tofler, ZaubaCorp</td><td style="padding:8px 10px;color:var(--muted);">SEC EDGAR, Secretary of State</td></tr>
+        <tr style="border-bottom:1px solid var(--rule);"><td style="padding:8px 10px;font-weight:600;">Related-party / director network</td><td style="padding:8px 10px;">DIN cross-ref via MCA</td><td style="padding:8px 10px;color:var(--muted);">State filings</td></tr>
+        <tr style="border-bottom:1px solid var(--rule);"><td style="padding:8px 10px;font-weight:600;">Bureau data</td><td style="padding:8px 10px;">CIBIL, CRIF, commercial bureau</td><td style="padding:8px 10px;color:var(--muted);">Experian, Equifax, TransUnion</td></tr>
+        <tr style="border-bottom:1px solid var(--rule);"><td style="padding:8px 10px;font-weight:600;">Bank statement / cash flow</td><td style="padding:8px 10px;">Account Aggregator, statement parsing</td><td style="padding:8px 10px;color:var(--muted);">Plaid, bank APIs</td></tr>
+        <tr style="border-bottom:1px solid var(--rule);"><td style="padding:8px 10px;font-weight:600;">Transaction / invoice network</td><td style="padding:8px 10px;">GST (GSTR-1/3B), e-invoice</td><td style="padding:8px 10px;color:var(--muted);">AP/AR, 1099 data</td></tr>
+        <tr style="border-bottom:1px solid var(--rule);"><td style="padding:8px 10px;font-weight:600;">Behavioral / alternative data</td><td style="padding:8px 10px;">UPI trail, e-commerce footprint</td><td style="padding:8px 10px;color:var(--muted);">Bureau trended data</td></tr>
+        <tr style="border-bottom:1px solid var(--rule);"><td style="padding:8px 10px;font-weight:600;">Litigation / crime check</td><td style="padding:8px 10px;">Courts, SEBI, SARFAESI/DRT, FIU-IND</td><td style="padding:8px 10px;color:var(--muted);">PACER, OFAC</td></tr>
+        <tr><td style="padding:8px 10px;font-weight:600;">Regulator</td><td style="padding:8px 10px;">RBI</td><td style="padding:8px 10px;color:var(--muted);">OCC / Fed / state</td></tr>
       </tbody>
     </table>
   </div>
+  <div class="b-sub" style="max-width:760px;margin-bottom:28px;font-size:12.5px;color:var(--muted);">Already mapped elsewhere: Indonesia (OSS/NIB, SLIK OJK, SNAP, e-Faktur/Coretax, PPATK) and other Southeast Asian markets slot into the same seven rows without touching the model.</div>
 </section>
 
 
